@@ -1177,7 +1177,9 @@ function CatalogoContent() {
         href={`https://wa.me/${STORE_INFO.whatsapp}?text=Ol%C3%A1%20Leidy!%20Estou%20vendo%20as%20pe%C3%A7as%20no%20cat%C3%A1logo%20e%20gostaria%20de%20ajuda.`}
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-40 bg-[#25D366] hover:bg-[#20BA5C] text-white p-3.5 sm:px-4 sm:py-3 rounded-full shadow-2xl flex items-center gap-2 hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+        className={`fixed right-6 z-40 bg-[#25D366] hover:bg-[#20BA5C] text-white p-3.5 sm:px-4 sm:py-3 rounded-full shadow-2xl flex items-center gap-2 hover:scale-105 active:scale-95 transition-all cursor-pointer group ${
+          cartCount > 0 ? 'bottom-20 sm:bottom-22' : 'bottom-6'
+        }`}
         title="Falar com a Leidy no WhatsApp"
       >
         <MessageCircle className="w-5 h-5 fill-white text-[#25D366]" />

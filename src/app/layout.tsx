@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { StoreProvider } from '@/context/StoreContext';
+import { BottomCartBar } from '@/components/BottomCartBar';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://leidyboutique.pages.dev';
 
@@ -71,6 +72,7 @@ export default function RootLayout({
       <body className="antialiased bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] selection:bg-[#C5A059]/20 selection:text-[#1A1918] dark:selection:text-[#FAF8F5] transition-colors duration-300">
         <StoreProvider>
           {children}
+          <BottomCartBar />
         </StoreProvider>
       </body>
     </html>

@@ -22,6 +22,7 @@ interface StoreContextType {
     size: string;
     color: string;
     quantity: number;
+    openDrawer?: boolean;
   }) => void;
   updateCartQuantity: (id: string, delta: number) => void;
   removeFromCart: (id: string) => void;
@@ -114,12 +115,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     product,
     size,
     color,
-    quantity
+    quantity,
+    openDrawer = false
   }: {
     product: Product;
     size: string;
     color: string;
     quantity: number;
+    openDrawer?: boolean;
   }) => {
     const itemKey = `${product.id}-${size}-${color}`;
     setCartItems((prev) => {
@@ -143,7 +146,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
       ];
     });
-    setIsCartOpen(true);
+    if (openDrawer) {
+      setIsCartOpen(true);
+    }
   };
 
   const updateCartQuantity = (id: string, delta: number) => {

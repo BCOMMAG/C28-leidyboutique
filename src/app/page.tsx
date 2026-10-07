@@ -287,7 +287,9 @@ export default function HomePage() {
         href={`https://wa.me/${STORE_INFO.whatsapp}?text=Ol%C3%A1%20Leidy!%20Estou%20visitando%20a%20sua%20loja%20online%20e%20gostaria%20de%20tirar%20uma%20d%C3%BAvida.`}
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-30 p-3.5 bg-[#25D366] text-white rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center group"
+        className={`fixed right-6 z-30 p-3.5 bg-[#25D366] text-white rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center group ${
+          cartCount > 0 ? 'bottom-20 sm:bottom-22' : 'bottom-6'
+        }`}
         aria-label="Falar com a Leidy no WhatsApp"
       >
         <MessageCircle className="w-6 h-6 fill-white text-[#25D366]" />
