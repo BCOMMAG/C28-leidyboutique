@@ -15,6 +15,8 @@ interface StoreContextType {
   wishlistCount: number;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
+  searchQuery: string;
+  setSearchQuery: (q: string) => void;
   addToCart: (params: {
     product: Product;
     size: string;
@@ -43,6 +45,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Carregar dados e tema do localStorage na montagem
   useEffect(() => {
@@ -64,7 +67,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           document.documentElement.classList.remove('dark');
         }
       } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        // Se o sistema do usuário estiver em dark mode e não houver preferência salva
         setTheme('dark');
         document.documentElement.classList.add('dark');
       }
@@ -203,6 +205,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         wishlistCount,
         theme,
         toggleTheme,
+        searchQuery,
+        setSearchQuery,
         addToCart,
         updateCartQuantity,
         removeFromCart,

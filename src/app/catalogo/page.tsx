@@ -9,6 +9,7 @@ import { ProductModal } from '@/components/ProductModal';
 import { CartDrawer } from '@/components/CartDrawer';
 import { SizeGuideModal } from '@/components/SizeGuideModal';
 import { Footer } from '@/components/Footer';
+import { ConversionSidebar } from '@/components/ConversionSidebar';
 import {
   PRODUCTS,
   ALL_CATEGORIES,
@@ -27,11 +28,7 @@ import {
   ArrowLeft,
   RotateCcw,
   X,
-  Check,
-  ChevronDown,
-  LayoutGrid,
-  Grid2X2,
-  Grid3X3
+  Check
 } from 'lucide-react';
 import { Product } from '@/types';
 
@@ -39,14 +36,38 @@ function CatalogoContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Contexto Global
+  const {
+    wishlistIds,
+    toggleWishlist,
+    addToCart,
+    cartCount,
+    wishlistCount,
+    openCart,
+    closeCart,
+    cartItems,
+    updateCartQuantity,
+    removeFromCart,
+    selectedProduct,
+    isProductModalOpen,
+    openProduct,
+    closeProduct,
+    isSizeGuideOpen,
+    openSizeGuide,
+    closeSizeGuide,
+    isCartOpen,
+    searchQuery,
+    setSearchQuery
+  } = useStore();
+
   // Parâmetros de URL iniciais
   const urlCategory = searchParams.get('categoria') || 'Todas as Peças';
   const urlStatus = searchParams.get('status') || '';
   const urlMinPrice = searchParams.get('precoMin') ? Number(searchParams.get('precoMin')) : null;
   const urlMaxPrice = searchParams.get('precoMax') ? Number(searchParams.get('precoMax')) : null;
+  const urlSearch = searchParams.get('q') || '';
 
   // Estados dos Filtros da Barra Lateral Esquerda
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(urlCategory);
   const [selectedSize, setSelectedSize] = useState('Todos');
   const [selectedColor, setSelectedColor] = useState('Todas');
@@ -71,6 +92,9 @@ function CatalogoContent() {
 
   // Sincronizar parâmetros de URL quando mudarem
   useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) setSearchQuery(q);
+
     const cat = searchParams.get('categoria');
     if (cat) setSelectedCategory(cat);
 
@@ -87,28 +111,7 @@ function CatalogoContent() {
       setCustomMinPrice(min || '');
       setCustomMaxPrice(max || '');
     }
-  }, [searchParams]);
-
-  const {
-    wishlistIds,
-    toggleWishlist,
-    addToCart,
-    cartCount,
-    wishlistCount,
-    openCart,
-    closeCart,
-    cartItems,
-    updateCartQuantity,
-    removeFromCart,
-    selectedProduct,
-    isProductModalOpen,
-    openProduct,
-    closeProduct,
-    isSizeGuideOpen,
-    openSizeGuide,
-    closeSizeGuide,
-    isCartOpen
-  } = useStore();
+  }, [searchParams, setSearchQuery]);
 
   const allSizes = ['Todos', 'PP', 'P', 'M', 'G', 'GG', 'Tamanho Único'];
   const allColors = [
@@ -126,7 +129,7 @@ function CatalogoContent() {
   const filteredProducts = useMemo(() => {
     let result = [...PRODUCTS];
 
-    // 1. Busca textual
+    // 1. Busca textual (sincronizada com o header)
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -254,20 +257,20 @@ function CatalogoContent() {
     setSortBy('relevance');
   };
 
-  // Componente Reutilizável dos Filtros da Barra Lateral
+  // Componente Reutilizável da Barra Lateral de Filtros (Esquerda)
   const FiltersSidebarContent = () => (
     <div className="space-y-6 text-[#1A1918] dark:text-[#FAF8F5]">
       
       {/* 1. Categorias */}
       <div>
-        <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76]">
             Categorias
           </h3>
           {selectedCategory !== 'Todas as Peças' && (
             <button
               onClick={() => setSelectedCategory('Todas as Peças')}
-              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline"
+              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer"
             >
               Limpar
             </button>
@@ -276,7 +279,7 @@ function CatalogoContent() {
         <div className="max-h-56 overflow-y-auto pr-1 space-y-1 text-xs">
           <button
             onClick={() => setSelectedCategory('Todas as Peças')}
-            className={`w-full text-left py-1.5 px-2 rounded-lg transition-colors flex items-center justify-between cursor-pointer ${
+            className={`w-full text-left py-1.5 px-2.5 rounded-lg transition-colors flex items-center justify-between cursor-pointer ${
               selectedCategory === 'Todas as Peças'
                 ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-semibold'
                 : 'hover:bg-[#FAF8F5] dark:hover:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1]'
@@ -296,7 +299,7 @@ function CatalogoContent() {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`w-full text-left py-1.5 px-2 rounded-lg transition-colors flex items-center justify-between cursor-pointer ${
+                className={`w-full text-left py-1.5 px-2.5 rounded-lg transition-colors flex items-center justify-between cursor-pointer ${
                   isSelected
                     ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-semibold'
                     : 'hover:bg-[#FAF8F5] dark:hover:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1]'
@@ -318,7 +321,7 @@ function CatalogoContent() {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`w-full text-left py-1.5 px-2 rounded-lg transition-colors flex items-center justify-between cursor-pointer ${
+                className={`w-full text-left py-1.5 px-2.5 rounded-lg transition-colors flex items-center justify-between cursor-pointer ${
                   isSelected
                     ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-semibold'
                     : 'hover:bg-[#FAF8F5] dark:hover:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1]'
@@ -334,7 +337,7 @@ function CatalogoContent() {
 
       {/* 2. Faixa de Preço */}
       <div className="pt-4 border-t border-[#C5A059]/20">
-        <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76]">
             Faixa de Preço
           </h3>
@@ -345,13 +348,13 @@ function CatalogoContent() {
                 setCustomMinPrice('');
                 setCustomMaxPrice('');
               }}
-              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline"
+              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer"
             >
               Limpar
             </button>
           )}
         </div>
-        <div className="space-y-1.5 text-xs">
+        <div className="space-y-1 text-xs">
           {FAIXAS_PRECO.map((faixa, idx) => {
             const isSelected = selectedPriceRangeIndex === idx;
             return (
@@ -380,9 +383,9 @@ function CatalogoContent() {
         </div>
 
         {/* Inputs de Preço Manual */}
-        <div className="mt-3 pt-2 flex items-center gap-2">
+        <div className="mt-2.5 flex items-center gap-2">
           <div className="flex-1">
-            <span className="text-[10px] text-[#78716C] block mb-0.5">Mínimo (R$)</span>
+            <span className="text-[10px] text-[#78716C] block mb-0.5">Mín (R$)</span>
             <input
               type="number"
               placeholder="0"
@@ -391,12 +394,12 @@ function CatalogoContent() {
                 setSelectedPriceRangeIndex(null);
                 setCustomMinPrice(e.target.value);
               }}
-              className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059]"
+              className="w-full px-2.5 py-1 text-xs rounded-lg border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059]"
             />
           </div>
-          <span className="text-xs text-[#78716C] pt-4">-</span>
+          <span className="text-xs text-[#78716C] pt-3">-</span>
           <div className="flex-1">
-            <span className="text-[10px] text-[#78716C] block mb-0.5">Máximo (R$)</span>
+            <span className="text-[10px] text-[#78716C] block mb-0.5">Máx (R$)</span>
             <input
               type="number"
               placeholder="700"
@@ -405,7 +408,7 @@ function CatalogoContent() {
                 setSelectedPriceRangeIndex(null);
                 setCustomMaxPrice(e.target.value);
               }}
-              className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059]"
+              className="w-full px-2.5 py-1 text-xs rounded-lg border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059]"
             />
           </div>
         </div>
@@ -413,14 +416,14 @@ function CatalogoContent() {
 
       {/* 3. Tamanhos */}
       <div className="pt-4 border-t border-[#C5A059]/20">
-        <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76]">
             Tamanho
           </h3>
           {selectedSize !== 'Todos' && (
             <button
               onClick={() => setSelectedSize('Todos')}
-              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline"
+              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer"
             >
               Limpar
             </button>
@@ -431,7 +434,7 @@ function CatalogoContent() {
             <button
               key={sz}
               onClick={() => setSelectedSize(sz)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
                 selectedSize === sz
                   ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white border-[#1A1918] dark:border-[#C5A059] shadow-xs'
                   : 'bg-white dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] border-black/10 dark:border-white/10 hover:border-[#C5A059]'
@@ -445,20 +448,20 @@ function CatalogoContent() {
 
       {/* 4. Cores */}
       <div className="pt-4 border-t border-[#C5A059]/20">
-        <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76]">
             Cor
           </h3>
           {selectedColor !== 'Todas' && (
             <button
               onClick={() => setSelectedColor('Todas')}
-              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline"
+              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer"
             >
               Limpar
             </button>
           )}
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           {allColors.map((col) => {
             const isSelected = selectedColor === col.value;
             return (
@@ -487,14 +490,14 @@ function CatalogoContent() {
 
       {/* 5. Tecidos */}
       <div className="pt-4 border-t border-[#C5A059]/20">
-        <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76]">
             Tecido
           </h3>
           {selectedFabric !== 'Todos' && (
             <button
               onClick={() => setSelectedFabric('Todos')}
-              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline"
+              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer"
             >
               Limpar
             </button>
@@ -529,14 +532,14 @@ function CatalogoContent() {
 
       {/* 6. Modelagem */}
       <div className="pt-4 border-t border-[#C5A059]/20">
-        <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76]">
             Modelagem
           </h3>
           {selectedFit !== 'Todos' && (
             <button
               onClick={() => setSelectedFit('Todos')}
-              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline"
+              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer"
             >
               Limpar
             </button>
@@ -571,14 +574,14 @@ function CatalogoContent() {
 
       {/* 7. Linha de Estilo */}
       <div className="pt-4 border-t border-[#C5A059]/20">
-        <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76]">
-            Linha de Ocasião
+            Linha
           </h3>
           {selectedLine !== 'Todas' && (
             <button
               onClick={() => setSelectedLine('Todas')}
-              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline"
+              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer"
             >
               Limpar
             </button>
@@ -613,14 +616,14 @@ function CatalogoContent() {
 
       {/* 8. Status */}
       <div className="pt-4 border-t border-[#C5A059]/20">
-        <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76]">
             Status & Destaque
           </h3>
           {selectedStatus !== 'Todos' && selectedStatus !== '' && (
             <button
               onClick={() => setSelectedStatus('Todos')}
-              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline"
+              className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer"
             >
               Limpar
             </button>
@@ -633,7 +636,7 @@ function CatalogoContent() {
               <button
                 key={st}
                 onClick={() => setSelectedStatus(isSelected ? 'Todos' : st)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
                   isSelected
                     ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white border-[#1A1918] dark:border-[#C5A059]'
                     : 'bg-white dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] border-black/10 dark:border-white/10 hover:border-[#C5A059]'
@@ -664,7 +667,7 @@ function CatalogoContent() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300">
-      {/* Header Fixo */}
+      {/* Header Fixo com Barra de Pesquisa */}
       <Header
         cartCount={cartCount}
         wishlistCount={wishlistCount}
@@ -676,10 +679,11 @@ function CatalogoContent() {
       />
 
       <main className="flex-1 pt-24 sm:pt-28 pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* CONTAINER EM LARGURA TOTAL PARA PREENCHER MONITORES LARGOS (Conforme solicitado no print) */}
+        <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
           
           {/* Navegação / Breadcrumb */}
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between">
             <Link
               href="/"
               className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-[#57534E] dark:text-[#A8A29E] hover:text-[#C5A059] font-semibold transition-colors"
@@ -697,12 +701,12 @@ function CatalogoContent() {
           </div>
 
           {/* Cabeçalho do Catálogo */}
-          <div className="border-b border-[#C5A059]/20 pb-6 mb-6">
-            <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-bold block mb-1">
+          <div className="border-b border-[#C5A059]/20 pb-4 mb-6">
+            <span className="text-[11px] uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-bold block mb-1">
               Curadoria & Provador Exclusivo
             </span>
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
-              <h1 className="font-serif-luxury text-3xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
+              <h1 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
                 {selectedCategory === 'Todas as Peças' ? 'Catálogo Completo' : selectedCategory}
               </h1>
               <span className="text-xs text-[#78716C] dark:text-[#A8A29E]">
@@ -711,13 +715,13 @@ function CatalogoContent() {
             </div>
           </div>
 
-          {/* LAYOUT PRINCIPAL: SIDEBAR ESQUERDA + CONTEÚDO */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* LAYOUT PRINCIPAL DE 3 COLUNAS: FILTROS À ESQUERDA + PRODUTOS AO CENTRO + ALTA CONVERSÃO À DIREITA */}
+          <div className="flex flex-col lg:flex-row gap-6 xl:gap-8 items-start">
             
             {/* ============================================================ */}
-            {/* BARRA LATERAL ESQUERDA (DESKTOP)                             */}
+            {/* 1. COLUNA ESQUERDA: FILTROS DA BOUTIQUE (Deslocado para a margem) */}
             {/* ============================================================ */}
-            <aside className="hidden lg:block lg:col-span-3 bg-white dark:bg-[#1A1918] p-5 rounded-3xl border border-[#C5A059]/25 shadow-xs sticky top-24">
+            <aside className="hidden lg:block w-64 xl:w-72 shrink-0 bg-white dark:bg-[#1A1918] p-4 xl:p-5 rounded-3xl border border-[#C5A059]/25 shadow-xs sticky top-24">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#C5A059]/20">
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal className="w-4 h-4 text-[#C5A059]" />
@@ -736,102 +740,88 @@ function CatalogoContent() {
             </aside>
 
             {/* ============================================================ */}
-            {/* CONTEÚDO PRINCIPAL (BARRA SUPERIOR + GRID DE PRODUTOS)       */}
+            {/* 2. COLUNA CENTRAL: BARRA SUPERIOR + GRID DE PRODUTOS         */}
             {/* ============================================================ */}
-            <div className="lg:col-span-9 space-y-6">
+            <div className="flex-1 min-w-0 space-y-5">
               
-              {/* BARRA SUPERIOR DO CATÁLOGO: BUSCA, ORDENAÇÃO E AMOSTRAGEM */}
-              <div className="bg-white dark:bg-[#1A1918] p-4 rounded-2xl border border-[#C5A059]/25 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+              {/* BARRA SUPERIOR DO CATÁLOGO: ORDENAÇÃO, AMOSTRAGEM E FILTRO MOBILE */}
+              <div className="bg-white dark:bg-[#1A1918] p-3.5 sm:p-4 rounded-2xl border border-[#C5A059]/25 shadow-xs flex flex-wrap items-center justify-between gap-3">
                 
-                {/* 1. Campo de Busca Textual */}
-                <div className="relative flex-1">
-                  <Search className="w-4 h-4 text-[#78716C] dark:text-[#A8A29E] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Buscar por peça, tecido, cor ou modelo..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#78716C] hover:text-[#1A1918]"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
+                {/* Botão Mobile para Abrir Gaveta de Filtros */}
+                <button
+                  onClick={() => setMobileFilterDrawerOpen(true)}
+                  className="lg:hidden flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/40 text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] cursor-pointer"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#C5A059]" />
+                  <span>Filtros</span>
+                  {activeFiltersCount > 0 && (
+                    <span className="w-4 h-4 rounded-full bg-[#C5A059] text-white text-[10px] flex items-center justify-center font-bold">
+                      {activeFiltersCount}
+                    </span>
                   )}
+                </button>
+
+                {/* Dropdown de Ordenação */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[#78716C] dark:text-[#A8A29E] hidden sm:inline whitespace-nowrap">
+                    Ordenar:
+                  </span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="px-3 py-1.5 text-xs rounded-xl border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] font-medium cursor-pointer"
+                  >
+                    <option value="relevance">Destaques da Boutique</option>
+                    <option value="price-asc">Menor Preço</option>
+                    <option value="price-desc">Maior Preço</option>
+                    <option value="newest">Mais Recentes</option>
+                  </select>
                 </div>
 
-                {/* 2. Botão Mobile para Abrir Gaveta de Filtros */}
-                <div className="flex items-center justify-between md:justify-end gap-3">
-                  <button
-                    onClick={() => setMobileFilterDrawerOpen(true)}
-                    className="lg:hidden flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/40 text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] cursor-pointer"
-                  >
-                    <SlidersHorizontal className="w-3.5 h-3.5 text-[#C5A059]" />
-                    <span>Filtros</span>
-                    {activeFiltersCount > 0 && (
-                      <span className="w-4 h-4 rounded-full bg-[#C5A059] text-white text-[10px] flex items-center justify-center font-bold">
-                        {activeFiltersCount}
-                      </span>
-                    )}
-                  </button>
-
-                  {/* 3. Dropdown de Ordenação */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-[#78716C] dark:text-[#A8A29E] hidden sm:inline whitespace-nowrap">
-                      Ordenar:
-                    </span>
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as any)}
-                      className="px-3 py-2 text-xs rounded-xl border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] font-medium cursor-pointer"
-                    >
-                      <option value="relevance">Destaques da Boutique</option>
-                      <option value="price-asc">Menor Preço</option>
-                      <option value="price-desc">Maior Preço</option>
-                      <option value="newest">Mais Recentes</option>
-                    </select>
-                  </div>
-
-                  {/* 4. SELETOR DE AMOSTRAGEM / GRADE (Colunas por Linha no Desktop) */}
-                  <div className="hidden lg:flex items-center gap-1 pl-2 border-l border-[#C5A059]/20">
-                    <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E] mr-1.5">
-                      Exibir:
-                    </span>
-                    {[2, 3, 4, 5].map((cols) => {
-                      const isActive = gridColumns === cols;
-                      return (
-                        <button
-                          key={cols}
-                          onClick={() => setGridColumns(cols as 2 | 3 | 4 | 5)}
-                          className={`w-7 h-7 rounded-lg text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
-                            isActive
-                              ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white shadow-xs'
-                              : 'bg-[#FAF8F5] dark:bg-[#252220] text-[#57534E] dark:text-[#A8A29E] hover:border-[#C5A059] border border-transparent'
-                          }`}
-                          title={`Mostrar ${cols} produtos por linha`}
-                        >
-                          {cols}
-                        </button>
-                      );
-                    })}
-                  </div>
-
+                {/* SELETOR DE AMOSTRAGEM / GRADE (Colunas por Linha no Desktop) */}
+                <div className="hidden lg:flex items-center gap-1.5 pl-3 border-l border-[#C5A059]/20 ml-auto">
+                  <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E]">
+                    Produtos por linha:
+                  </span>
+                  {[2, 3, 4, 5].map((cols) => {
+                    const isActive = gridColumns === cols;
+                    return (
+                      <button
+                        key={cols}
+                        onClick={() => setGridColumns(cols as 2 | 3 | 4 | 5)}
+                        className={`w-7 h-7 rounded-lg text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
+                          isActive
+                            ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white shadow-xs'
+                            : 'bg-[#FAF8F5] dark:bg-[#252220] text-[#57534E] dark:text-[#A8A29E] hover:border-[#C5A059] border border-transparent'
+                        }`}
+                        title={`Mostrar ${cols} produtos por linha`}
+                      >
+                        {cols}
+                      </button>
+                    );
+                  })}
                 </div>
 
               </div>
 
               {/* CHIPS DE FILTROS ATIVOS (Remoção Rápida com 'X') */}
               {activeFiltersCount > 0 && (
-                <div className="flex flex-wrap items-center gap-2 pt-1">
+                <div className="flex flex-wrap items-center gap-2 pt-0.5">
                   <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E] font-medium mr-1">
                     Filtros ativos:
                   </span>
 
+                  {searchQuery && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                      <span>Busca: "{searchQuery}"</span>
+                      <button onClick={() => setSearchQuery('')} className="hover:text-red-500 cursor-pointer">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  )}
+
                   {selectedCategory !== 'Todas as Peças' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>{selectedCategory}</span>
                       <button onClick={() => setSelectedCategory('Todas as Peças')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -840,7 +830,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedStatus !== 'Todos' && selectedStatus !== '' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>{selectedStatus}</span>
                       <button onClick={() => setSelectedStatus('Todos')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -849,7 +839,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedPriceRangeIndex !== null && FAIXAS_PRECO[selectedPriceRangeIndex] && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>{FAIXAS_PRECO[selectedPriceRangeIndex].label}</span>
                       <button onClick={() => setSelectedPriceRangeIndex(null)} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -858,7 +848,7 @@ function CatalogoContent() {
                   )}
 
                   {(customMinPrice || customMaxPrice) && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>R$ {customMinPrice || 0} - R$ {customMaxPrice || 'Max'}</span>
                       <button onClick={() => { setCustomMinPrice(''); setCustomMaxPrice(''); }} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -867,7 +857,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedSize !== 'Todos' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>Tam: {selectedSize}</span>
                       <button onClick={() => setSelectedSize('Todos')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -876,7 +866,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedColor !== 'Todas' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>Cor: {selectedColor}</span>
                       <button onClick={() => setSelectedColor('Todas')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -885,7 +875,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedFabric !== 'Todos' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>Tecido: {selectedFabric}</span>
                       <button onClick={() => setSelectedFabric('Todos')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -894,7 +884,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedFit !== 'Todos' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>Modelagem: {selectedFit}</span>
                       <button onClick={() => setSelectedFit('Todos')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -903,7 +893,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedLine !== 'Todas' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>Linha: {selectedLine}</span>
                       <button onClick={() => setSelectedLine('Todas')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -931,7 +921,7 @@ function CatalogoContent() {
                       : gridColumns === 5
                       ? 'lg:grid-cols-5'
                       : 'lg:grid-cols-4'
-                  } gap-3 sm:gap-5`}
+                  } gap-3 sm:gap-4`}
                 >
                   {filteredProducts.map((product) => (
                     <ProductCard
@@ -974,6 +964,13 @@ function CatalogoContent() {
 
             </div>
 
+            {/* ============================================================ */}
+            {/* 3. COLUNA DIREITA: ALTA CONVERSÃO & DESTAQUES ROTATIVOS      */}
+            {/* ============================================================ */}
+            <div className="hidden xl:block w-64 xl:w-72 2xl:w-80 shrink-0">
+              <ConversionSidebar onOpenProduct={openProduct} />
+            </div>
+
           </div>
 
         </div>
@@ -999,7 +996,7 @@ function CatalogoContent() {
                 </div>
                 <button
                   onClick={() => setMobileFilterDrawerOpen(false)}
-                  className="p-1.5 text-[#57534E] dark:text-[#A8A29E] hover:text-[#1A1918] rounded-full"
+                  className="p-1.5 text-[#57534E] dark:text-[#A8A29E] hover:text-[#1A1918] rounded-full cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
