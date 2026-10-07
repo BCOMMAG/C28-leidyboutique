@@ -1,0 +1,77 @@
+@import "tailwindcss";
+@import "lenis/dist/lenis.css";
+
+:root {
+  --bg-cream: #FAF8F5;
+  --bg-card: #FFFFFF;
+  --bg-gold-subtle: #F7F3EB;
+  --text-dark: #1A1918;
+  --text-muted: #57534E;
+  --brand-gold: #C5A059;
+  --brand-gold-dark: #A9833E;
+  --brand-gold-light: #DFBE76;
+  --border-gold: rgba(197, 160, 89, 0.22);
+}
+
+html {
+  scroll-behavior: smooth;
+  max-width: 100vw;
+  overflow-x: clip;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--text-dark);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  max-width: 100vw;
+  overflow-x: clip;
+}
+
+/* Tipografia de Luxo e Editorial */
+.font-serif-luxury {
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  letter-spacing: -0.015em;
+}
+
+.font-sans-clean {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Gradiente Dourado Nobre */
+.text-gold-metallic {
+  background: linear-gradient(135deg, #A9833E 0%, #DFBE76 50%, #C5A059 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-gold-metallic {
+  background: linear-gradient(135deg, #C5A059 0%, #DFBE76 50%, #B38E46 100%);
+}
+
+.bg-gold-metallic-hover:hover {
+  background: linear-gradient(135deg, #B38E46 0%, #C5A059 50%, #9C7837 100%);
+}
+
+/* Bordas Sutis da Boutique */
+.border-gold-subtle {
+  border-color: var(--border-gold);
+}
+
+/* Sombra Suave de Moda de Alto Padrão */
+.shadow-luxury {
+  box-shadow: 0 10px 30px -10px rgba(26, 25, 24, 0.08), 0 4px 6px -2px rgba(26, 25, 24, 0.03);
+}
+
+.shadow-luxury-hover:hover {
+  box-shadow: 0 20px 40px -15px rgba(197, 160, 89, 0.25), 0 8px 12px -4px rgba(26, 25, 24, 0.05);
+}
+
+/* Ocultar barra de rolagem */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
