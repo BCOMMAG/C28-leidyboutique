@@ -262,12 +262,16 @@ export const Header: React.FC<HeaderProps> = ({
               href="/"
               className="flex items-center cursor-pointer transition-transform duration-300 hover:scale-105"
             >
-              <div className="relative w-32 sm:w-36 md:w-40 lg:w-42 h-9 sm:h-10 md:h-11">
+              <div
+                className="relative w-32 sm:w-36 md:w-40 lg:w-42 h-9 sm:h-10 md:h-11 shrink-0 overflow-hidden flex items-center justify-center"
+                style={{ width: '168px', height: '42px', maxWidth: '100%' }}
+              >
                 <Image
                   src="/images/logo-transparente.png"
                   alt="Leidy Boutique"
-                  fill
-                  className="object-contain"
+                  width={168}
+                  height={42}
+                  style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
                   priority
                 />
               </div>

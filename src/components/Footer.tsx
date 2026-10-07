@@ -15,11 +15,15 @@ export const Footer: React.FC = () => {
           {/* Coluna 1: Marca & Logo */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-white p-1 border border-[#C5A059]">
+              <div
+                className="relative w-12 h-12 rounded-full overflow-hidden bg-white p-1 border border-[#C5A059] shrink-0"
+                style={{ width: '48px', height: '48px' }}
+              >
                 <Image
                   src="/images/logo.png"
                   alt="Leidy Boutique"
-                  fill
+                  width={48}
+                  height={48}
                   className="object-contain p-0.5"
                 />
               </div>
