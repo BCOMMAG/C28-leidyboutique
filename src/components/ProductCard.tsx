@@ -30,18 +30,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   const videoSrc = product.media.find((m) => m.type === 'video')?.src;
 
-  // Reproduzir vídeo somente no hover (Desktop)
-  useEffect(() => {
-    if (videoRef.current && videoSrc) {
-      if (isHovered) {
-        videoRef.current.currentTime = 0;
-        videoRef.current.play().catch(() => {});
-      } else {
-        videoRef.current.pause();
-      }
-    }
-  }, [isHovered, videoSrc]);
-
   // Variações de estilo baseadas na densidade de colunas
   const isCompact = columnsCount === 5;
   const isMedium = columnsCount === 4;
@@ -97,18 +85,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           }`}
         />
 
-        {/* Vídeo do Provador (Toca somente no hover) */}
-        {videoSrc && (
+        {/* Vídeo do Provador (Injetado exclusivamente no hover do desktop para performance máxima) */}
+        {isHovered && videoSrc && (
           <video
             ref={videoRef}
             src={videoSrc}
+            autoPlay
             muted
             loop
             playsInline
-            preload="metadata"
-            className={`absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-300 pointer-events-none ${
-              isHovered ? 'opacity-100' : 'opacity-0'
-            }`}
+            preload="auto"
+            className="absolute inset-0 w-full h-full object-cover object-top pointer-events-none opacity-100 transition-opacity duration-300"
           />
         )}
 

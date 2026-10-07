@@ -60,6 +60,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [shippingResult, setShippingResult] = useState<boolean>(false);
   const [shippingLoading, setShippingLoading] = useState<boolean>(false);
   const [addedAnimation, setAddedAnimation] = useState<boolean>(false);
+  const [isVideoBuffering, setIsVideoBuffering] = useState<boolean>(true);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const touchStartX = useRef<number | null>(null);
@@ -73,6 +74,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       setQuantity(1);
       setIsPlaying(true);
       setIsMuted(true);
+      setIsVideoBuffering(true);
       setShippingResult(false);
       setCepInput('');
     }
@@ -197,12 +199,27 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   <video
                     ref={videoRef}
                     src={currentMedia.src}
+                    poster={product.thumbnail}
                     autoPlay
                     loop
                     muted={isMuted}
                     playsInline
+                    preload="auto"
+                    onPlaying={() => setIsVideoBuffering(false)}
+                    onWaiting={() => setIsVideoBuffering(true)}
+                    onCanPlay={() => setIsVideoBuffering(false)}
                     className="w-full h-full object-cover object-top"
                   />
+
+                  {/* Indicador Suave de Carregamento Inicial do Vídeo */}
+                  {isVideoBuffering && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/25 pointer-events-none transition-opacity duration-300">
+                      <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/75 text-white text-[11px] border border-[#C5A059]/40 shadow-xl backdrop-blur-xs">
+                        <span className="w-2.5 h-2.5 rounded-full border-2 border-[#C5A059] border-t-transparent animate-spin" />
+                        <span>Carregando vídeo...</span>
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Badge de Provador em Vídeo */}
                   <div className="absolute top-3 left-3 bg-[#1A1918]/85 text-white text-[10px] uppercase tracking-widest font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-sm border border-[#C5A059]/40 z-10">

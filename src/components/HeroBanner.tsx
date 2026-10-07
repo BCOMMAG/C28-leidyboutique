@@ -25,10 +25,12 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onExploreClick }) => {
         <video
           ref={videoRef}
           src="/video/header_video.mp4"
+          poster="/og-image_optimized_300.jpg"
           autoPlay
           loop
           muted={isMuted}
           playsInline
+          preload="metadata"
           className="w-full h-full object-cover object-top"
         />
 
