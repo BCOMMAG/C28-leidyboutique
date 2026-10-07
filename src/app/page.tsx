@@ -10,8 +10,6 @@ import { ProductModal } from '@/components/ProductModal';
 import { CartDrawer } from '@/components/CartDrawer';
 import { SizeGuideModal } from '@/components/SizeGuideModal';
 import { Footer } from '@/components/Footer';
-import { EditorialBreak } from '@/components/EditorialBreak';
-import { AboutLeidy } from '@/components/AboutLeidy';
 import { PRODUCTS, CATEGORIES, STORE_INFO } from '@/data/products';
 import { useStore } from '@/context/StoreContext';
 import { ArrowRight } from 'lucide-react';
@@ -168,9 +166,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* FAIXA EDITORIAL DE RESPIRO (MANIFESTO DA BOUTIQUE & PROVADOR) */}
-        <EditorialBreak />
-
         {/* 3. SEÇÃO: OUTLET */}
         <section id="outlet" className="py-16 sm:py-24 bg-[#F5EFE6]/70 dark:bg-[#181615] border-t border-[#C5A059]/25">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -217,9 +212,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        {/* 4. SEÇÃO INSTITUCIONAL: SOBRE A LEIDY & PROPÓSITO */}
-        <AboutLeidy />
 
       </main>
 
