@@ -894,19 +894,18 @@ function CatalogoContent() {
               <span>Voltar para a Página Inicial</span>
             </Link>
 
-            <Link
-              href="/favoritos"
-              className="text-xs uppercase tracking-wider text-[#C5A059] dark:text-[#DFBE76] hover:underline font-semibold"
-            >
-              Ver Favoritos ({wishlistCount}) →
-            </Link>
+            {wishlistCount > 0 && (
+              <Link
+                href="/favoritos"
+                className="text-xs uppercase tracking-wider text-[#C5A059] dark:text-[#DFBE76] hover:underline font-semibold"
+              >
+                Ver Favoritos ({wishlistCount}) →
+              </Link>
+            )}
           </div>
 
           {/* Cabeçalho do Catálogo */}
           <div className="border-b border-[#C5A059]/20 pb-4 mb-6">
-            <span className="text-[11px] uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-bold block mb-1">
-              Curadoria & Provador Exclusivo
-            </span>
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
               <h1 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
                 {selectedCategory === 'Todas as Peças' ? 'Catálogo Completo' : selectedCategory}
