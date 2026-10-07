@@ -1,0 +1,202 @@
+'use client';
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { Product } from '@/types';
+import { ProductCard } from '@/components/ProductCard';
+
+interface ProductLoopCarouselProps {
+  products: Product[];
+  onOpenDetails: (product: Product) => void;
+  onQuickAdd: (product: Product) => void;
+  isWishlisted: (productId: string) => boolean;
+  onToggleWishlist: (productId: string) => void;
+  isOutletSection?: boolean;
+  autoPlayInterval?: number; // Milissegundos entre cada avanço (padrão 3500ms)
+}
+
+export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
+  products,
+  onOpenDetails,
+  onQuickAdd,
+  isWishlisted,
+  onToggleWishlist,
+  isOutletSection = false,
+  autoPlayInterval = 3600
+}) => {
+  // Quantidade de itens visíveis por breakpoint
+  const [visibleCount, setVisibleCount] = useState<number>(4);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(true);
+
+  // Se houver poucos produtos, duplicamos para garantir o looping contínuo suave
+  const items = products.length > 0 ? products : [];
+  const baseCount = items.length;
+
+  // Criamos uma lista estendida para suportar looping infinito perfeito
+  const loopList = [...items, ...items, ...items, ...items];
+  const [currentIndex, setCurrentIndex] = useState<number>(baseCount);
+
+  // Detectar resolução para calcular itens visíveis na tela
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setVisibleCount(2); // 2 cards no mobile
+      } else if (width < 1024) {
+        setVisibleCount(3); // 3 cards no tablet
+      } else {
+        setVisibleCount(4); // 4 cards no desktop
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handleNext = useCallback(() => {
+    if (baseCount === 0) return;
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => prev + 1);
+  }, [baseCount]);
+
+  const handlePrev = useCallback(() => {
+    if (baseCount === 0) return;
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => prev - 1);
+  }, [baseCount]);
+
+  // Autoplay contínuo: avança a cada intervalo se não estiver pausado
+  useEffect(() => {
+    if (isPaused || baseCount === 0) return;
+
+    const interval = setInterval(() => {
+      handleNext();
+    }, autoPlayInterval);
+
+    return () => clearInterval(interval);
+  }, [isPaused, baseCount, autoPlayInterval, handleNext]);
+
+  // Ao terminar a transição CSS, normaliza o índice para o bloco central sem transição perceptível
+  const handleTransitionEnd = () => {
+    if (baseCount === 0) return;
+
+    if (currentIndex >= baseCount * 2) {
+      setIsTransitioning(false);
+      setCurrentIndex((prev) => prev - baseCount);
+    } else if (currentIndex < baseCount) {
+      setIsTransitioning(false);
+      setCurrentIndex((prev) => prev + baseCount);
+    }
+  };
+
+  // Reativa a transição caso tenha sido desligada no snap
+  useEffect(() => {
+    if (!isTransitioning) {
+      const timer = requestAnimationFrame(() => {
+        setIsTransitioning(true);
+      });
+      return () => cancelAnimationFrame(timer);
+    }
+  }, [isTransitioning]);
+
+  if (items.length === 0) {
+    return null;
+  }
+
+  // Deslocamento em porcentagem de acordo com o número de itens visíveis
+  const stepPercentage = 100 / visibleCount;
+  const translateX = -(currentIndex * stepPercentage);
+
+  return (
+    <div
+      className="relative w-full group/carousel"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onClick={() => setIsPaused(true)}
+    >
+      {/* Container com máscara de corte */}
+      <div className="overflow-hidden w-full -mx-1.5 sm:-mx-2.5 px-0 py-2">
+        <div
+          className="flex"
+          style={{
+            transform: `translateX(${translateX}%)`,
+            transition: isTransitioning
+              ? 'transform 650ms cubic-bezier(0.25, 1, 0.5, 1)'
+              : 'none'
+          }}
+          onTransitionEnd={handleTransitionEnd}
+        >
+          {loopList.map((product, idx) => (
+            <div
+              key={`${product.id}-${idx}`}
+              className="shrink-0 px-1.5 sm:px-2.5"
+              style={{ width: `${stepPercentage}%` }}
+            >
+              <ProductCard
+                product={product}
+                columnsCount={visibleCount === 4 ? 4 : 2}
+                isOutletSection={isOutletSection}
+                onOpenDetails={(p) => {
+                  setIsPaused(true);
+                  onOpenDetails(p);
+                }}
+                onQuickAdd={(p) => {
+                  setIsPaused(true);
+                  onQuickAdd(p);
+                }}
+                isWishlisted={isWishlisted(product.id)}
+                onToggleWishlist={onToggleWishlist}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Botões de Navegação Lateral (Surgem no hover ou toque) */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          handlePrev();
+        }}
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/95 dark:bg-[#1A1918]/95 border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] flex items-center justify-center shadow-lg transition-all opacity-0 group-hover/carousel:opacity-100 hover:scale-110 active:scale-95 cursor-pointer -translate-x-2 sm:-translate-x-4"
+        aria-label="Peça anterior"
+        title="Ver peça anterior"
+      >
+        <ChevronLeft className="w-5 h-5 text-[#C5A059] hover:text-inherit" />
+      </button>
+
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleNext();
+        }}
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/95 dark:bg-[#1A1918]/95 border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] flex items-center justify-center shadow-lg transition-all opacity-0 group-hover/carousel:opacity-100 hover:scale-110 active:scale-95 cursor-pointer translate-x-2 sm:translate-x-4"
+        aria-label="Próxima peça"
+        title="Ver próxima peça"
+      >
+        <ChevronRight className="w-5 h-5 text-[#C5A059] hover:text-inherit" />
+      </button>
+
+      {/* Indicador Sutil de Estado do Carrossel (Pausado ao Interagir) */}
+      <div className="mt-4 flex items-center justify-center gap-2">
+        <span className="text-[10px] text-[#A8A29E] dark:text-[#78716C] uppercase tracking-widest font-medium flex items-center gap-1.5">
+          {isPaused ? (
+            <>
+              <Pause className="w-2.5 h-2.5 text-[#C5A059]" />
+              <span>Pausado para inspeção</span>
+            </>
+          ) : (
+            <>
+              <Play className="w-2.5 h-2.5 text-[#C5A059] fill-[#C5A059]" />
+              <span>Apresentação automática em looping</span>
+            </>
+          )}
+        </span>
+      </div>
+    </div>
+  );
+};

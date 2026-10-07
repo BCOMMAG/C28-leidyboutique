@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   X,
   Play,
@@ -16,7 +17,9 @@ import {
   Check,
   ChevronRight,
   ChevronLeft,
-  ShieldCheck
+  ShieldCheck,
+  LayoutGrid,
+  ArrowRight
 } from 'lucide-react';
 import { Product } from '@/types';
 import { PRODUCTS, STORE_INFO } from '@/data/products';
@@ -156,6 +159,18 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       {/* Container Principal do Modal */}
       <div className="relative w-full max-w-5xl bg-[#FAF8F5] dark:bg-[#1A1918] rounded-3xl shadow-2xl overflow-hidden border border-[#C5A059]/40 my-auto text-[#1A1918] dark:text-[#FAF8F5]">
         
+        {/* Botão Superior: Ir para o Catálogo / Ver Mais Produtos */}
+        <Link
+          href="/catalogo"
+          onClick={onClose}
+          className="absolute top-3.5 left-3.5 z-30 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/95 dark:bg-[#252220]/95 text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-md border border-[#C5A059]/30 backdrop-blur-xs cursor-pointer group"
+          title="Ver mais produtos no catálogo completo"
+        >
+          <LayoutGrid className="w-3.5 h-3.5 text-[#C5A059] group-hover:text-white transition-colors" />
+          <span>Ir para o Catálogo</span>
+          <ArrowRight className="w-3 h-3 text-[#C5A059] group-hover:text-white transition-colors hidden sm:inline" />
+        </Link>
+
         {/* Botão Fechar */}
         <button
           onClick={onClose}

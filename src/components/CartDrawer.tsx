@@ -254,6 +254,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </span>
               </div>
 
+              {/* Botão Continuar Comprando */}
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-3 px-6 rounded-full text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 border border-[#C5A059]/40 bg-[#FAF8F5] dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all duration-300 shadow-2xs active:scale-95 cursor-pointer"
+              >
+                <span>Continuar Comprando</span>
+              </button>
+
               {/* Botão de Envio para WhatsApp */}
               <a
                 href={generateWhatsAppOrderLink()}

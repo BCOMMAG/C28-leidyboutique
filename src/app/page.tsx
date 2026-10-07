@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { HeroBanner } from '@/components/HeroBanner';
 import { ProductCard } from '@/components/ProductCard';
+import { ProductLoopCarousel } from '@/components/ProductLoopCarousel';
 import { ProductModal } from '@/components/ProductModal';
 import { CartDrawer } from '@/components/CartDrawer';
 import { SizeGuideModal } from '@/components/SizeGuideModal';
 import { Footer } from '@/components/Footer';
 import { PRODUCTS, CATEGORIES, STORE_INFO } from '@/data/products';
 import { useStore } from '@/context/StoreContext';
-import { MessageCircle, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState<string>('Todos os Modelos');
@@ -36,15 +37,6 @@ export default function HomePage() {
     closeSizeGuide,
     isCartOpen
   } = useStore();
-
-  // Filtragem de produtos por categoria
-  const filteredProducts = activeCategory === 'Todos os Modelos'
-    ? PRODUCTS
-    : activeCategory === 'Mais Vendidos'
-    ? PRODUCTS
-    : activeCategory === 'OUTLET'
-    ? PRODUCTS
-    : PRODUCTS.filter((p) => p.category === activeCategory);
 
   // 4 produtos para preencher cada seção na apresentação
   const bestSellerProducts = [PRODUCTS[3], PRODUCTS[0], PRODUCTS[2], PRODUCTS[1]];
@@ -97,26 +89,21 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Grid: 2 por linha no mobile, 4 no desktop */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-            {bestSellerProducts.map((product) => (
-              <ProductCard
-                key={`bestseller-${product.id}`}
-                product={product}
-                onOpenDetails={openProduct}
-                onQuickAdd={(p) => {
-                  addToCart({
-                    product: p,
-                    size: p.sizes[0],
-                    color: p.colors[0].name,
-                    quantity: 1
-                  });
-                }}
-                isWishlisted={wishlistIds.includes(product.id)}
-                onToggleWishlist={toggleWishlist}
-              />
-            ))}
-          </div>
+          {/* Carrossel em looping automático com 4 cards (pausa no hover/clique) */}
+          <ProductLoopCarousel
+            products={bestSellerProducts}
+            onOpenDetails={openProduct}
+            onQuickAdd={(p) => {
+              addToCart({
+                product: p,
+                size: p.sizes[0],
+                color: p.colors[0].name,
+                quantity: 1
+              });
+            }}
+            isWishlisted={(id) => wishlistIds.includes(id)}
+            onToggleWishlist={toggleWishlist}
+          />
 
           {/* Botão Ver Mais Produtos */}
           <div className="mt-8 sm:mt-12 text-center">
@@ -140,50 +127,23 @@ export default function HomePage() {
               Coleção Atual
             </h2>
 
-            {/* Filtros por Categoria */}
-            <div className="mt-6 sm:mt-8 flex flex-wrap justify-center gap-2">
-              {CATEGORIES.map((category) => {
-                const isActive = activeCategory === category;
-                const isOutletTab = category === 'OUTLET';
-                return (
-                  <button
-                    key={category}
-                    onClick={() => handleCategorySelection(category)}
-                    className={`px-4 sm:px-5 py-2 rounded-full text-xs font-semibold tracking-wider transition-all duration-300 cursor-pointer ${
-                      isActive
-                        ? 'bg-[#1A1918] dark:bg-[#C5A059] text-[#FAF8F5] shadow-sm'
-                        : isOutletTab
-                        ? 'bg-white dark:bg-[#1C1A18] text-[#C5A059] border border-[#C5A059] hover:bg-[#C5A059] hover:text-white font-bold'
-                        : 'bg-white dark:bg-[#1C1A18] text-[#57534E] dark:text-[#D6D3D1] border border-[#C5A059]/30 hover:border-[#C5A059] hover:text-[#1A1918] dark:hover:text-white'
-                    }`}
-                  >
-                    {category}
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
-          {/* Grid: 2 por linha no mobile, 4 no desktop */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onOpenDetails={openProduct}
-                onQuickAdd={(p) => {
-                  addToCart({
-                    product: p,
-                    size: p.sizes[0],
-                    color: p.colors[0].name,
-                    quantity: 1
-                  });
-                }}
-                isWishlisted={wishlistIds.includes(product.id)}
-                onToggleWishlist={toggleWishlist}
-              />
-            ))}
-          </div>
+          {/* Carrossel em looping automático com 4 cards (pausa no hover/clique) */}
+          <ProductLoopCarousel
+            products={PRODUCTS}
+            onOpenDetails={openProduct}
+            onQuickAdd={(p) => {
+              addToCart({
+                product: p,
+                size: p.sizes[0],
+                color: p.colors[0].name,
+                quantity: 1
+              });
+            }}
+            isWishlisted={(id) => wishlistIds.includes(id)}
+            onToggleWishlist={toggleWishlist}
+          />
 
           {/* Botão Ver Mais Produtos do Catálogo */}
           <div className="mt-8 sm:mt-12 text-center">
@@ -214,27 +174,22 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Grid: 2 por linha no mobile, 4 no desktop */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-              {outletProducts.map((product) => (
-                <ProductCard
-                  key={`outlet-${product.id}`}
-                  product={product}
-                  isOutletSection={true}
-                  onOpenDetails={openProduct}
-                  onQuickAdd={(p) => {
-                    addToCart({
-                      product: p,
-                      size: p.sizes[0],
-                      color: p.colors[0].name,
-                      quantity: 1
-                    });
-                  }}
-                  isWishlisted={wishlistIds.includes(product.id)}
-                  onToggleWishlist={toggleWishlist}
-                />
-              ))}
-            </div>
+            {/* Carrossel em looping automático com 4 cards (pausa no hover/clique) */}
+            <ProductLoopCarousel
+              products={outletProducts}
+              isOutletSection={true}
+              onOpenDetails={openProduct}
+              onQuickAdd={(p) => {
+                addToCart({
+                  product: p,
+                  size: p.sizes[0],
+                  color: p.colors[0].name,
+                  quantity: 1
+                });
+              }}
+              isWishlisted={(id) => wishlistIds.includes(id)}
+              onToggleWishlist={toggleWishlist}
+            />
 
             {/* Botão Ver Mais Produtos do Outlet */}
             <div className="mt-8 sm:mt-12 text-center">
@@ -282,21 +237,6 @@ export default function HomePage() {
         onClose={closeSizeGuide}
       />
 
-      {/* Botão Flutuante de WhatsApp Geral */}
-      <a
-        href={`https://wa.me/${STORE_INFO.whatsapp}?text=Ol%C3%A1%20Leidy!%20Estou%20visitando%20a%20sua%20loja%20online%20e%20gostaria%20de%20tirar%20uma%20d%C3%BAvida.`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`fixed right-6 z-30 p-3.5 bg-[#25D366] text-white rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center group ${
-          cartCount > 0 ? 'bottom-20 sm:bottom-22' : 'bottom-6'
-        }`}
-        aria-label="Falar com a Leidy no WhatsApp"
-      >
-        <MessageCircle className="w-6 h-6 fill-white text-[#25D366]" />
-        <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-500 ease-in-out text-xs font-bold px-0 group-hover:px-2">
-          Falar com a Leidy
-        </span>
-      </a>
-    </div>
+      </div>
   );
 }

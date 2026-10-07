@@ -946,8 +946,8 @@ function CatalogoContent() {
             {/* ============================================================ */}
             <div className="flex-1 min-w-0 space-y-5">
               
-              {/* BARRA SUPERIOR DO CATÁLOGO FIXADA (NÃO SOME NO SCROLL) */}
-              <div className="sticky top-20 sm:top-24 z-20 bg-white/95 dark:bg-[#1A1918]/95 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-[#C5A059]/25 shadow-sm flex flex-wrap items-center justify-between gap-3">
+              {/* BARRA SUPERIOR DO CATÁLOGO (FLUXO NORMAL) */}
+              <div className="bg-white dark:bg-[#1A1918] p-3.5 sm:p-4 rounded-2xl border border-[#C5A059]/25 shadow-sm flex flex-wrap items-center justify-between gap-3">
                 
                 {/* Botão Mobile para Abrir Gaveta de Filtros */}
                 <button
@@ -1171,22 +1171,6 @@ function CatalogoContent() {
 
         </div>
       </main>
-
-      {/* Botão Flutuante de Atendimento WhatsApp (Discreto e de Alta Conversão) */}
-      <a
-        href={`https://wa.me/${STORE_INFO.whatsapp}?text=Ol%C3%A1%20Leidy!%20Estou%20vendo%20as%20pe%C3%A7as%20no%20cat%C3%A1logo%20e%20gostaria%20de%20ajuda.`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`fixed right-6 z-40 bg-[#25D366] hover:bg-[#20BA5C] text-white p-3.5 sm:px-4 sm:py-3 rounded-full shadow-2xl flex items-center gap-2 hover:scale-105 active:scale-95 transition-all cursor-pointer group ${
-          cartCount > 0 ? 'bottom-20 sm:bottom-22' : 'bottom-6'
-        }`}
-        title="Falar com a Leidy no WhatsApp"
-      >
-        <MessageCircle className="w-5 h-5 fill-white text-[#25D366]" />
-        <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">
-          Falar com a Leidy
-        </span>
-      </a>
 
       <Footer />
 
