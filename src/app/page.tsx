@@ -40,23 +40,28 @@ export default function HomePage() {
     isCartOpen
   } = useStore();
 
-  // 4 produtos para preencher cada seção na apresentação
-  const bestSellerProducts = [PRODUCTS[3], PRODUCTS[0], PRODUCTS[2], PRODUCTS[1]];
-  const outletProducts = PRODUCTS;
+  // Produtos organizados para cada vitrine temática da Home
+  const newReleasesProducts = PRODUCTS.filter(
+    (p) => p.status?.includes('Lançamento') || p.id === '04-conjunto-alfaiataria-bege' || p.id === '03-conjunto-alfaiataria-terracota' || p.id === '07-t-shirt-algodao-egipcio' || p.id === '01-casaco-tricot'
+  );
+  const bestSellerProducts = PRODUCTS.filter((p) => p.isBestSeller);
+  const outletProducts = PRODUCTS.filter((p) => p.isOutlet);
 
   const handleCategorySelection = (category: string) => {
     setActiveCategory(category);
-    if (category === 'Mais Vendidos') {
+    if (category === 'Lançamentos') {
+      document.getElementById('lancamentos')?.scrollIntoView({ behavior: 'smooth' });
+    } else if (category === 'Mais Vendidos') {
       document.getElementById('mais-vendidos')?.scrollIntoView({ behavior: 'smooth' });
     } else if (category === 'OUTLET') {
       document.getElementById('outlet')?.scrollIntoView({ behavior: 'smooth' });
     } else {
-      document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('lancamentos')?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300 relative bg-luxury-noise bg-luxury-glow">
+    <div className="min-h-screen flex flex-col bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300">
       {/* Header Fixo / Transparente */}
       <Header
         cartCount={cartCount}
@@ -70,13 +75,57 @@ export default function HomePage() {
         {/* Banner Hero com Vídeo Oficial */}
         <HeroBanner
           onExploreClick={() => {
-            const el = document.getElementById('mais-vendidos');
+            const el = document.getElementById('lancamentos');
             el?.scrollIntoView({ behavior: 'smooth' });
           }}
         />
 
-        {/* 1. SEÇÃO: MAIS VENDIDOS */}
-        <section id="mais-vendidos" className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-[#C5A059]/20 tailoring-grid-border">
+        {/* 1. SEÇÃO: LANÇAMENTOS */}
+        <section id="lancamentos" className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-[#C5A059]/20">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
+            <div>
+              <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-semibold block mb-1.5">
+                Novidades da Temporada
+              </span>
+              <h2 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
+                Lançamentos Exclusivos
+              </h2>
+            </div>
+            <p className="text-xs text-[#78716C] dark:text-[#A8A29E] max-w-sm hidden sm:block">
+              As últimas novidades que acabaram de chegar na boutique, com tecidos nobres e acabamento impecável.
+            </p>
+          </div>
+
+          {/* Carrossel em looping automático com 4 cards (pausa no hover/clique) */}
+          <ProductLoopCarousel
+            products={newReleasesProducts}
+            onOpenDetails={openProduct}
+            onQuickAdd={(p) => {
+              addToCart({
+                product: p,
+                size: p.sizes[0],
+                color: p.colors[0].name,
+                quantity: 1
+              });
+            }}
+            isWishlisted={(id) => wishlistIds.includes(id)}
+            onToggleWishlist={toggleWishlist}
+          />
+
+          {/* Botão Ver Todos os Lançamentos */}
+          <div className="mt-8 sm:mt-12 text-center">
+            <Link
+              href="/catalogo?status=Lançamento"
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
+            >
+              <span>Ver Todos os Lançamentos no Catálogo</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </section>
+
+        {/* 2. SEÇÃO: MAIS VENDIDOS */}
+        <section id="mais-vendidos" className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-[#C5A059]/20">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
             <div>
               <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-semibold block mb-1.5">
@@ -113,7 +162,7 @@ export default function HomePage() {
               href="/catalogo?categoria=Mais%20Vendidos"
               className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
             >
-              <span>Ver Mais Produtos</span>
+              <span>Ver Mais Produtos Mais Vendidos</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -121,46 +170,6 @@ export default function HomePage() {
 
         {/* FAIXA EDITORIAL DE RESPIRO (MANIFESTO DA BOUTIQUE & PROVADOR) */}
         <EditorialBreak />
-
-        {/* 2. SEÇÃO: COLEÇÃO ATUAL (CATÁLOGO GERAL) */}
-        <section id="catalogo" className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 tailoring-grid-border">
-          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
-            <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-semibold block mb-2">
-              Todas as Peças
-            </span>
-            <h2 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
-              Coleção Atual
-            </h2>
-
-          </div>
-
-          {/* Carrossel em looping automático com 4 cards (pausa no hover/clique) */}
-          <ProductLoopCarousel
-            products={PRODUCTS}
-            onOpenDetails={openProduct}
-            onQuickAdd={(p) => {
-              addToCart({
-                product: p,
-                size: p.sizes[0],
-                color: p.colors[0].name,
-                quantity: 1
-              });
-            }}
-            isWishlisted={(id) => wishlistIds.includes(id)}
-            onToggleWishlist={toggleWishlist}
-          />
-
-          {/* Botão Ver Mais Produtos do Catálogo */}
-          <div className="mt-8 sm:mt-12 text-center">
-            <Link
-              href="/catalogo"
-              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 rounded-none bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md cursor-pointer"
-            >
-              <span>Ver Mais Produtos no Catálogo Completo</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </section>
 
         {/* 3. SEÇÃO: OUTLET */}
         <section id="outlet" className="py-16 sm:py-24 bg-[#F5EFE6]/70 dark:bg-[#181615] border-t border-[#C5A059]/25">

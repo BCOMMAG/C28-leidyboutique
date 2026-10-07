@@ -868,7 +868,7 @@ function CatalogoContent() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300 relative bg-luxury-noise bg-luxury-glow">
+    <div className="min-h-screen flex flex-col bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300">
       {/* Header Fixo com Barra de Pesquisa */}
       <Header
         cartCount={cartCount}

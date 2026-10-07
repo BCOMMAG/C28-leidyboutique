@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   X,
   Play,
@@ -50,6 +51,9 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   onOpenSizeGuide,
   onSelectPairedProduct
 }) => {
+  const pathname = usePathname();
+  const isAlreadyInCatalog = pathname?.includes('/catalogo');
+
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [selectedSize, setSelectedSize] = useState<string>('');
@@ -163,20 +167,17 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      {/* Wrapper Central: Modal Principal + Card Lateral de Opções (Catálogo) */}
-      <div className="relative flex flex-col xl:flex-row items-center xl:items-stretch justify-center gap-4 xl:gap-5 max-w-[1360px] w-full my-auto">
+      {/* Container Principal do Modal Centralizado */}
+      <div className="relative w-full max-w-5xl bg-[#FAF8F5] dark:bg-[#1A1918] rounded-none shadow-2xl overflow-hidden border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] my-auto">
         
-        {/* Container Principal do Modal */}
-        <div className="relative w-full max-w-5xl bg-[#FAF8F5] dark:bg-[#1A1918] rounded-none shadow-2xl overflow-hidden border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] flex-1">
-          
-          {/* Botão Fechar */}
-          <button
-            onClick={onClose}
-            className="absolute top-3.5 right-3.5 z-30 p-2 sm:p-2.5 rounded-none bg-white/90 dark:bg-[#252220]/90 text-[#1A1918] dark:text-white hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all shadow-md cursor-pointer"
-            aria-label="Fechar"
-          >
-            <X className="w-5 h-5" />
-          </button>
+        {/* Botão Fechar Isolado no Topo */}
+        <button
+          onClick={onClose}
+          className="absolute top-3.5 right-3.5 z-30 p-2 sm:p-2.5 rounded-none bg-white/90 dark:bg-[#252220]/90 text-[#1A1918] dark:text-white hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all shadow-md cursor-pointer"
+          aria-label="Fechar"
+        >
+          <X className="w-5 h-5" />
+        </button>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 max-h-[92vh] overflow-y-auto lg:overflow-visible">
           
@@ -337,39 +338,28 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           {/* COLUNA DIREITA: INFORMAÇÕES & PEDIDO */}
           <div className="lg:col-span-7 p-5 sm:p-8 flex flex-col justify-between overflow-y-auto max-h-[85vh]">
             <div>
-              {/* Header de Categoria e Favorito */}
-              <div className="flex items-center justify-between">
+              {/* Header de Categoria e Atalho */}
+              <div className="flex items-center justify-between pr-12">
                 <span className="text-xs uppercase tracking-widest text-[#C5A059] dark:text-[#DFBE76] font-semibold">
                   {product.category}
                 </span>
 
-                <button
-                  onClick={() => onToggleWishlist(product.id)}
-                  className={`p-2 rounded-none border transition-colors cursor-pointer ${
-                    isWishlisted
-                      ? 'bg-[#C5A059] text-white border-[#C5A059]'
-                      : 'border-[#C5A059]/30 text-[#1A1918] dark:text-[#FAF8F5] hover:border-[#C5A059]'
-                  }`}
-                  title="Favoritar"
-                >
-                  <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
-                </button>
+                {!isAlreadyInCatalog && (
+                  <Link
+                    href="/catalogo"
+                    onClick={onClose}
+                    className="text-[11px] uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E] hover:text-[#C5A059] font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                  >
+                    <span>Catálogo</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                )}
               </div>
 
               {/* Título */}
               <h2 className="font-serif-luxury text-xl sm:text-3xl font-medium text-[#1A1918] dark:text-[#FAF8F5] mt-1.5">
                 {product.name}
               </h2>
-
-              {/* Preço Limpo */}
-              <div className="mt-2.5 flex items-baseline gap-3">
-                <span className="text-2xl sm:text-3xl font-bold text-[#1A1918] dark:text-[#FAF8F5] tracking-tight">
-                  {product.formattedPrice}
-                </span>
-                <span className="text-xs text-[#78716C] dark:text-[#A8A29E]">
-                  Peça Exclusiva Sob Consulta
-                </span>
-              </div>
 
               {/* Descrição */}
               <p className="mt-3 text-sm text-[#57534E] dark:text-[#D6D3D1] leading-relaxed">
@@ -447,6 +437,44 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     );
                   })}
                 </div>
+              </div>
+
+              {/* Valor do Produto & Favoritar (Estrategicamente posicionado acima dos botões de ação) */}
+              <div className="mt-6 pt-5 border-t border-[#C5A059]/20 flex items-center justify-between gap-4">
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E] block mb-0.5 font-medium">
+                    Valor da Peça
+                  </span>
+                  <div className="flex items-baseline gap-2.5">
+                    <span className="text-2xl sm:text-3xl font-bold text-[#1A1918] dark:text-[#FAF8F5] tracking-tight">
+                      {product.formattedPrice}
+                    </span>
+                    {product.formattedOriginalPrice && (
+                      <span className="text-sm text-[#A8A29E] line-through font-normal">
+                        {product.formattedOriginalPrice}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-[#C5A059] dark:text-[#DFBE76] font-medium block mt-0.5">
+                    Peça Exclusiva &bull; Em até 3x sem juros
+                  </span>
+                </div>
+
+                {/* Botão de Salvar nos Favoritos com Coração integrado ao Preço */}
+                <button
+                  onClick={() => onToggleWishlist(product.id)}
+                  className={`flex items-center gap-2 px-3.5 py-2.5 rounded-none border text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+                    isWishlisted
+                      ? 'bg-[#C5A059] text-white border-[#C5A059] shadow-sm'
+                      : 'border-[#C5A059]/40 bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:border-[#C5A059] hover:bg-[#FAF8F5]'
+                  }`}
+                  title={isWishlisted ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+                >
+                  <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current text-white' : 'text-[#C5A059]'}`} />
+                  <span className="hidden sm:inline">
+                    {isWishlisted ? 'Salvo' : 'Favoritar'}
+                  </span>
+                </button>
               </div>
 
               {/* Seletor de Quantidade & Ações Principais */}
@@ -594,21 +622,19 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 </div>
               )}
 
-              {/* Opção para Mobile / Tablet: Ver outras opções no Catálogo */}
-              <div className="mt-5 pt-4 border-t border-[#C5A059]/20 xl:hidden">
-                <Link
-                  href="/catalogo"
-                  onClick={onClose}
-                  className="flex items-center justify-between gap-3 p-4 rounded-none bg-[#F4EFE6]/70 dark:bg-[#252220] border border-[#C5A059]/30 hover:border-[#C5A059] transition-all text-[#1A1918] dark:text-[#FAF8F5] group shadow-xs cursor-pointer"
-                >
-                  <span className="text-xs sm:text-sm font-semibold font-serif">
-                    Ver outras opções no Catálogo
-                  </span>
-                  <div className="w-8 h-8 rounded-none bg-[#C5A059] text-white dark:text-[#1A1918] flex items-center justify-center shrink-0 group-hover:translate-x-1 transition-transform shadow-sm">
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
-                </Link>
-              </div>
+              {/* Opção elegante quando visualizado fora do catálogo: Ver catálogo completo */}
+              {!isAlreadyInCatalog && (
+                <div className="mt-6 pt-4 border-t border-[#C5A059]/20">
+                  <Link
+                    href="/catalogo"
+                    onClick={onClose}
+                    className="w-full py-3 px-4 rounded-none bg-[#F4EFE6]/70 dark:bg-[#252220] border border-[#C5A059]/30 hover:border-[#C5A059] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] dark:hover:text-[#1A1918] transition-all flex items-center justify-between text-xs uppercase tracking-widest font-semibold text-[#1A1918] dark:text-[#FAF8F5] group shadow-xs cursor-pointer"
+                  >
+                    <span className="font-serif font-bold">Ver outras opções no Catálogo Completo</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-[#C5A059] group-hover:text-current" />
+                  </Link>
+                </div>
+              )}
 
             </div>
           </div>
@@ -616,24 +642,6 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         </div>
 
       </div>
-
-      {/* Opção Lateral Direita: Simples "Ver outras opções no Catálogo" com flecha */}
-      <aside className="hidden xl:flex flex-col justify-center shrink-0 self-center animate-fadeIn">
-        <Link
-          href="/catalogo"
-          onClick={onClose}
-          className="group flex items-center gap-3.5 px-6 py-5 rounded-none bg-[#FAF8F5] dark:bg-[#1A1918] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] dark:hover:text-[#1A1918] border border-[#C5A059]/40 hover:border-[#C5A059] shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02]"
-        >
-          <span className="font-serif font-bold text-sm sm:text-base tracking-wide whitespace-nowrap">
-            Ver outras opções no Catálogo
-          </span>
-          <div className="w-9 h-9 rounded-none bg-[#C5A059] text-white dark:text-[#1A1918] group-hover:bg-white group-hover:text-[#1A1918] dark:group-hover:bg-[#1A1918] dark:group-hover:text-[#FAF8F5] flex items-center justify-center transition-all group-hover:translate-x-1 shadow-md shrink-0">
-            <ArrowRight className="w-4 h-4" />
-          </div>
-        </Link>
-      </aside>
-
     </div>
-  </div>
-);
+  );
 };
