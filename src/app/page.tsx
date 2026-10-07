@@ -10,6 +10,8 @@ import { ProductModal } from '@/components/ProductModal';
 import { CartDrawer } from '@/components/CartDrawer';
 import { SizeGuideModal } from '@/components/SizeGuideModal';
 import { Footer } from '@/components/Footer';
+import { EditorialBreak } from '@/components/EditorialBreak';
+import { AboutLeidy } from '@/components/AboutLeidy';
 import { PRODUCTS, CATEGORIES, STORE_INFO } from '@/data/products';
 import { useStore } from '@/context/StoreContext';
 import { ArrowRight } from 'lucide-react';
@@ -54,7 +56,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300">
+    <div className="min-h-screen flex flex-col bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300 relative bg-luxury-noise bg-luxury-glow">
       {/* Header Fixo / Transparente */}
       <Header
         cartCount={cartCount}
@@ -74,7 +76,7 @@ export default function HomePage() {
         />
 
         {/* 1. SEÇÃO: MAIS VENDIDOS */}
-        <section id="mais-vendidos" className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-[#C5A059]/20">
+        <section id="mais-vendidos" className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-[#C5A059]/20 tailoring-grid-border">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
             <div>
               <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-semibold block mb-1.5">
@@ -117,8 +119,11 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* FAIXA EDITORIAL DE RESPIRO (MANIFESTO DA BOUTIQUE & PROVADOR) */}
+        <EditorialBreak />
+
         {/* 2. SEÇÃO: COLEÇÃO ATUAL (CATÁLOGO GERAL) */}
-        <section id="catalogo" className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="catalogo" className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 tailoring-grid-border">
           <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-semibold block mb-2">
               Todas as Peças
@@ -203,6 +208,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* 4. SEÇÃO INSTITUCIONAL: SOBRE A LEIDY & PROPÓSITO */}
+        <AboutLeidy />
 
       </main>
 
