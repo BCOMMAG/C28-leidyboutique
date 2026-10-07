@@ -291,7 +291,7 @@ function CatalogoContent() {
               Categorias
             </span>
             {selectedCategory !== 'Todas as Peças' && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
+              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
             )}
           </div>
           <div className="flex items-center gap-1.5">
@@ -319,7 +319,7 @@ function CatalogoContent() {
           <div className="pt-2 max-h-56 overflow-y-auto pr-1 space-y-1 text-xs custom-scrollbar">
             <button
               onClick={() => setSelectedCategory('Todas as Peças')}
-              className={`w-full text-left py-1.5 px-2.5 rounded-lg transition-colors flex items-center justify-between cursor-pointer ${
+              className={`w-full text-left py-1.5 px-2.5 rounded-none transition-colors flex items-center justify-between cursor-pointer ${
                 selectedCategory === 'Todas as Peças'
                   ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-semibold'
                   : 'hover:bg-[#FAF8F5] dark:hover:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1]'
@@ -339,7 +339,7 @@ function CatalogoContent() {
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`w-full text-left py-1.5 px-2.5 rounded-lg transition-colors flex items-center justify-between cursor-pointer ${
+                  className={`w-full text-left py-1.5 px-2.5 rounded-none transition-colors flex items-center justify-between cursor-pointer ${
                     isSelected
                       ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-semibold'
                       : 'hover:bg-[#FAF8F5] dark:hover:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1]'
@@ -361,7 +361,7 @@ function CatalogoContent() {
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`w-full text-left py-1.5 px-2.5 rounded-lg transition-colors flex items-center justify-between cursor-pointer ${
+                  className={`w-full text-left py-1.5 px-2.5 rounded-none transition-colors flex items-center justify-between cursor-pointer ${
                     isSelected
                       ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-semibold'
                       : 'hover:bg-[#FAF8F5] dark:hover:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1]'
@@ -388,7 +388,7 @@ function CatalogoContent() {
               Faixa de Preço
             </span>
             {(selectedPriceRangeIndex !== null || customMinPrice || customMaxPrice) && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
+              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
             )}
           </div>
           <div className="flex items-center gap-1.5">
@@ -431,7 +431,7 @@ function CatalogoContent() {
                         setCustomMaxPrice('');
                       }
                     }}
-                    className={`w-full text-left py-1.5 px-2.5 rounded-lg border transition-all flex items-center justify-between cursor-pointer ${
+                    className={`w-full text-left py-1.5 px-2.5 rounded-none border transition-all flex items-center justify-between cursor-pointer ${
                       isSelected
                         ? 'border-[#C5A059] bg-[#C5A059]/15 text-[#1A1918] dark:text-[#FAF8F5] font-semibold'
                         : 'border-transparent text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
@@ -456,7 +456,7 @@ function CatalogoContent() {
                     setSelectedPriceRangeIndex(null);
                     setCustomMinPrice(e.target.value);
                   }}
-                  className="w-full px-2 py-1 text-xs rounded-lg border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059]"
+                  className="w-full px-2 py-1 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059]"
                 />
               </div>
               <span className="text-xs text-[#78716C] pt-3">-</span>
@@ -470,7 +470,7 @@ function CatalogoContent() {
                     setSelectedPriceRangeIndex(null);
                     setCustomMaxPrice(e.target.value);
                   }}
-                  className="w-full px-2 py-1 text-xs rounded-lg border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059]"
+                  className="w-full px-2 py-1 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059]"
                 />
               </div>
             </div>
@@ -490,7 +490,7 @@ function CatalogoContent() {
               Tamanho
             </span>
             {selectedSize !== 'Todos' && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
+              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
             )}
           </div>
           <div className="flex items-center gap-1.5">
@@ -520,7 +520,7 @@ function CatalogoContent() {
               <button
                 key={sz}
                 onClick={() => setSelectedSize(sz)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                className={`px-2.5 py-1 rounded-none text-xs font-medium border transition-colors cursor-pointer ${
                   selectedSize === sz
                     ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white border-[#1A1918] dark:border-[#C5A059] shadow-xs'
                     : 'bg-white dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] border-black/10 dark:border-white/10 hover:border-[#C5A059]'
@@ -545,7 +545,7 @@ function CatalogoContent() {
               Cor
             </span>
             {selectedColor !== 'Todas' && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
+              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
             )}
           </div>
           <div className="flex items-center gap-1.5">
@@ -577,7 +577,7 @@ function CatalogoContent() {
                 <button
                   key={col.value}
                   onClick={() => setSelectedColor(col.value)}
-                  className={`w-full text-left py-1 px-2 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                  className={`w-full text-left py-1 px-2 rounded-none text-xs flex items-center justify-between transition-colors cursor-pointer ${
                     isSelected
                       ? 'bg-[#1A1918]/10 dark:bg-[#C5A059]/20 font-semibold text-[#1A1918] dark:text-white'
                       : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
@@ -585,7 +585,7 @@ function CatalogoContent() {
                 >
                   <div className="flex items-center gap-2">
                     <span
-                      className="w-3.5 h-3.5 rounded-full border border-black/25 dark:border-white/25 shrink-0"
+                      className="w-3.5 h-3.5 rounded-none border border-black/25 dark:border-white/25 shrink-0"
                       style={{ backgroundColor: col.hex }}
                     />
                     <span>{col.label}</span>
@@ -610,7 +610,7 @@ function CatalogoContent() {
               Tecido
             </span>
             {selectedFabric !== 'Todos' && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
+              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
             )}
           </div>
           <div className="flex items-center gap-1.5">
@@ -638,7 +638,7 @@ function CatalogoContent() {
           <div className="pt-2 space-y-1 text-xs">
             <button
               onClick={() => setSelectedFabric('Todos')}
-              className={`w-full text-left py-1 px-2 rounded-lg transition-colors cursor-pointer ${
+              className={`w-full text-left py-1 px-2 rounded-none transition-colors cursor-pointer ${
                 selectedFabric === 'Todos'
                   ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-medium'
                   : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
@@ -650,7 +650,7 @@ function CatalogoContent() {
               <button
                 key={tec}
                 onClick={() => setSelectedFabric(tec)}
-                className={`w-full text-left py-1 px-2 rounded-lg transition-colors cursor-pointer ${
+                className={`w-full text-left py-1 px-2 rounded-none transition-colors cursor-pointer ${
                   selectedFabric === tec
                     ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-medium'
                     : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
@@ -675,7 +675,7 @@ function CatalogoContent() {
               Modelagem
             </span>
             {selectedFit !== 'Todos' && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
+              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
             )}
           </div>
           <div className="flex items-center gap-1.5">
@@ -703,7 +703,7 @@ function CatalogoContent() {
           <div className="pt-2 space-y-1 text-xs">
             <button
               onClick={() => setSelectedFit('Todos')}
-              className={`w-full text-left py-1 px-2 rounded-lg transition-colors cursor-pointer ${
+              className={`w-full text-left py-1 px-2 rounded-none transition-colors cursor-pointer ${
                 selectedFit === 'Todos'
                   ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-medium'
                   : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
@@ -715,7 +715,7 @@ function CatalogoContent() {
               <button
                 key={mod}
                 onClick={() => setSelectedFit(mod)}
-                className={`w-full text-left py-1 px-2 rounded-lg transition-colors cursor-pointer ${
+                className={`w-full text-left py-1 px-2 rounded-none transition-colors cursor-pointer ${
                   selectedFit === mod
                     ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-medium'
                     : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
@@ -740,7 +740,7 @@ function CatalogoContent() {
               Linha
             </span>
             {selectedLine !== 'Todas' && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
+              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
             )}
           </div>
           <div className="flex items-center gap-1.5">
@@ -768,7 +768,7 @@ function CatalogoContent() {
           <div className="pt-2 space-y-1 text-xs">
             <button
               onClick={() => setSelectedLine('Todas')}
-              className={`w-full text-left py-1 px-2 rounded-lg transition-colors cursor-pointer ${
+              className={`w-full text-left py-1 px-2 rounded-none transition-colors cursor-pointer ${
                 selectedLine === 'Todas'
                   ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-medium'
                   : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
@@ -780,7 +780,7 @@ function CatalogoContent() {
               <button
                 key={lin}
                 onClick={() => setSelectedLine(lin)}
-                className={`w-full text-left py-1 px-2 rounded-lg transition-colors cursor-pointer ${
+                className={`w-full text-left py-1 px-2 rounded-none transition-colors cursor-pointer ${
                   selectedLine === lin
                     ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-medium'
                     : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
@@ -805,7 +805,7 @@ function CatalogoContent() {
               Status & Destaque
             </span>
             {selectedStatus !== 'Todos' && selectedStatus !== '' && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
+              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
             )}
           </div>
           <div className="flex items-center gap-1.5">
@@ -837,7 +837,7 @@ function CatalogoContent() {
                 <button
                   key={st}
                   onClick={() => setSelectedStatus(isSelected ? 'Todos' : st)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-none text-xs font-medium border transition-colors cursor-pointer ${
                     isSelected
                       ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white border-[#1A1918] dark:border-[#C5A059]'
                       : 'bg-white dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] border-black/10 dark:border-white/10 hover:border-[#C5A059]'
@@ -856,7 +856,7 @@ function CatalogoContent() {
         <div className="pt-2">
           <button
             onClick={resetAllFilters}
-            className="w-full py-2 rounded-xl border border-[#C5A059] text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full py-2 rounded-none border border-[#C5A059] text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Limpar Todos os Filtros ({activeFiltersCount})</span>
@@ -923,7 +923,7 @@ function CatalogoContent() {
             {/* ============================================================ */}
             {/* 1. COLUNA ESQUERDA: FILTROS DA BOUTIQUE (Scroll Independente) */}
             {/* ============================================================ */}
-            <aside className="hidden lg:block w-64 xl:w-72 shrink-0 bg-white dark:bg-[#1A1918] p-4 xl:p-5 rounded-3xl border border-[#C5A059]/25 shadow-xs sticky top-28 max-h-[calc(100vh-8.5rem)] overflow-y-auto pr-2 custom-scrollbar">
+            <aside className="hidden lg:block w-64 xl:w-72 shrink-0 bg-white dark:bg-[#1A1918] p-4 xl:p-5 rounded-none border border-[#C5A059]/25 shadow-xs sticky top-28 max-h-[calc(100vh-8.5rem)] overflow-y-auto pr-2 custom-scrollbar">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#C5A059]/20">
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal className="w-4 h-4 text-[#C5A059]" />
@@ -932,7 +932,7 @@ function CatalogoContent() {
                   </span>
                 </div>
                 {activeFiltersCount > 0 && (
-                  <span className="text-[11px] bg-[#C5A059] text-white px-2 py-0.5 rounded-full font-bold">
+                  <span className="text-[11px] bg-[#C5A059] text-white px-2 py-0.5 rounded-none font-bold">
                     {activeFiltersCount}
                   </span>
                 )}
@@ -947,17 +947,17 @@ function CatalogoContent() {
             <div className="flex-1 min-w-0 space-y-5">
               
               {/* BARRA SUPERIOR DO CATÁLOGO (FLUXO NORMAL) */}
-              <div className="bg-white dark:bg-[#1A1918] p-3.5 sm:p-4 rounded-2xl border border-[#C5A059]/25 shadow-sm flex flex-wrap items-center justify-between gap-3">
+              <div className="bg-white dark:bg-[#1A1918] p-3.5 sm:p-4 rounded-none border border-[#C5A059]/25 shadow-sm flex flex-wrap items-center justify-between gap-3">
                 
                 {/* Botão Mobile para Abrir Gaveta de Filtros */}
                 <button
                   onClick={() => setMobileFilterDrawerOpen(true)}
-                  className="lg:hidden flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/40 text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] cursor-pointer"
+                  className="lg:hidden flex items-center gap-2 px-3.5 py-2 rounded-none bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/40 text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] cursor-pointer"
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5 text-[#C5A059]" />
                   <span>Filtros</span>
                   {activeFiltersCount > 0 && (
-                    <span className="w-4 h-4 rounded-full bg-[#C5A059] text-white text-[10px] flex items-center justify-center font-bold">
+                    <span className="w-4 h-4 rounded-none bg-[#C5A059] text-white text-[10px] flex items-center justify-center font-bold">
                       {activeFiltersCount}
                     </span>
                   )}
@@ -971,7 +971,7 @@ function CatalogoContent() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as any)}
-                    className="px-3 py-1.5 text-xs rounded-xl border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] font-medium cursor-pointer"
+                    className="px-3 py-1.5 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] font-medium cursor-pointer"
                   >
                     <option value="relevance">Destaques da Boutique</option>
                     <option value="price-asc">Menor Preço</option>
@@ -991,7 +991,7 @@ function CatalogoContent() {
                       <button
                         key={cols}
                         onClick={() => setGridColumns(cols as 2 | 3 | 4 | 5)}
-                        className={`w-7 h-7 rounded-lg text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
+                        className={`w-7 h-7 rounded-none text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
                           isActive
                             ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white shadow-xs'
                             : 'bg-[#FAF8F5] dark:bg-[#252220] text-[#57534E] dark:text-[#A8A29E] hover:border-[#C5A059] border border-transparent'
@@ -1014,7 +1014,7 @@ function CatalogoContent() {
                   </span>
 
                   {searchQuery && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>Busca: "{searchQuery}"</span>
                       <button onClick={() => setSearchQuery('')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -1023,7 +1023,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedCategory !== 'Todas as Peças' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>{selectedCategory}</span>
                       <button onClick={() => setSelectedCategory('Todas as Peças')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -1032,7 +1032,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedStatus !== 'Todos' && selectedStatus !== '' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>{selectedStatus}</span>
                       <button onClick={() => setSelectedStatus('Todos')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -1041,7 +1041,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedPriceRangeIndex !== null && FAIXAS_PRECO[selectedPriceRangeIndex] && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>{FAIXAS_PRECO[selectedPriceRangeIndex].label}</span>
                       <button onClick={() => setSelectedPriceRangeIndex(null)} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -1050,7 +1050,7 @@ function CatalogoContent() {
                   )}
 
                   {(customMinPrice || customMaxPrice) && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>R$ {customMinPrice || 0} - R$ {customMaxPrice || 'Max'}</span>
                       <button onClick={() => { setCustomMinPrice(''); setCustomMaxPrice(''); }} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -1059,7 +1059,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedSize !== 'Todos' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>Tam: {selectedSize}</span>
                       <button onClick={() => setSelectedSize('Todos')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -1068,7 +1068,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedColor !== 'Todas' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>Cor: {selectedColor}</span>
                       <button onClick={() => setSelectedColor('Todas')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -1077,7 +1077,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedFabric !== 'Todos' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>Tecido: {selectedFabric}</span>
                       <button onClick={() => setSelectedFabric('Todos')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -1086,7 +1086,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedFit !== 'Todos' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>Modelagem: {selectedFit}</span>
                       <button onClick={() => setSelectedFit('Todos')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -1095,7 +1095,7 @@ function CatalogoContent() {
                   )}
 
                   {selectedLine !== 'Todas' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>Linha: {selectedLine}</span>
                       <button onClick={() => setSelectedLine('Todas')} className="hover:text-red-500 cursor-pointer">
                         <X className="w-3 h-3" />
@@ -1146,8 +1146,8 @@ function CatalogoContent() {
                   ))}
                 </div>
               ) : (
-                <div className="bg-white dark:bg-[#1A1918] rounded-3xl p-12 text-center border border-[#C5A059]/20 space-y-4 my-8">
-                  <div className="w-16 h-16 rounded-full bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/30 flex items-center justify-center mx-auto text-[#C5A059]">
+                <div className="bg-white dark:bg-[#1A1918] rounded-none p-12 text-center border border-[#C5A059]/20 space-y-4 my-8">
+                  <div className="w-16 h-16 rounded-none bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/30 flex items-center justify-center mx-auto text-[#C5A059]">
                     <SlidersHorizontal className="w-7 h-7" />
                   </div>
                   <h3 className="font-serif-luxury text-xl sm:text-2xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
@@ -1158,7 +1158,7 @@ function CatalogoContent() {
                   </p>
                   <button
                     onClick={resetAllFilters}
-                    className="px-6 py-2.5 bg-[#1A1918] dark:bg-[#C5A059] text-white rounded-full text-xs uppercase tracking-widest font-semibold hover:bg-[#C5A059] transition-all cursor-pointer"
+                    className="px-6 py-2.5 bg-[#1A1918] dark:bg-[#C5A059] text-white rounded-none text-xs uppercase tracking-widest font-semibold hover:bg-[#C5A059] transition-all cursor-pointer"
                   >
                     Ver Todas as Peças ({PRODUCTS.length})
                   </button>
@@ -1192,7 +1192,7 @@ function CatalogoContent() {
                 </div>
                 <button
                   onClick={() => setMobileFilterDrawerOpen(false)}
-                  className="p-1.5 text-[#57534E] dark:text-[#A8A29E] hover:text-[#1A1918] rounded-full cursor-pointer"
+                  className="p-1.5 text-[#57534E] dark:text-[#A8A29E] hover:text-[#1A1918] rounded-none cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1205,7 +1205,7 @@ function CatalogoContent() {
               <div className="p-4 border-t border-[#C5A059]/20 bg-[#FAF8F5] dark:bg-[#141312]">
                 <button
                   onClick={() => setMobileFilterDrawerOpen(false)}
-                  className="w-full py-3 bg-[#1A1918] dark:bg-[#C5A059] text-white rounded-full text-xs uppercase tracking-wider font-semibold cursor-pointer"
+                  className="w-full py-3 bg-[#1A1918] dark:bg-[#C5A059] text-white rounded-none text-xs uppercase tracking-wider font-semibold cursor-pointer"
                 >
                   Ver {filteredProducts.length} Peças
                 </button>

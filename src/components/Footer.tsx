@@ -16,7 +16,7 @@ export const Footer: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div
-                className="relative w-12 h-12 rounded-full overflow-hidden bg-white p-1 border border-[#C5A059] shrink-0"
+                className="relative w-12 h-12 rounded-none overflow-hidden bg-white p-1 border border-[#C5A059] shrink-0"
                 style={{ width: '48px', height: '48px' }}
               >
                 <Image
@@ -46,7 +46,7 @@ export const Footer: React.FC = () => {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#C5A059] flex items-center justify-center transition-colors text-white"
+                className="w-8 h-8 rounded-none bg-white/10 hover:bg-[#C5A059] flex items-center justify-center transition-colors text-white"
                 aria-label="Instagram"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -57,7 +57,7 @@ export const Footer: React.FC = () => {
                 href={`https://wa.me/${STORE_INFO.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#25D366] flex items-center justify-center transition-colors text-white"
+                className="w-8 h-8 rounded-none bg-white/10 hover:bg-[#25D366] flex items-center justify-center transition-colors text-white"
                 aria-label="WhatsApp"
               >
                 <MessageCircle className="w-4 h-4" />
@@ -112,7 +112,7 @@ export const Footer: React.FC = () => {
             <p className="text-xs text-[#A8A29E] leading-relaxed">
               Você escolhe suas peças aqui no catálogo, clica em finalizar e a lista detalhada é enviada diretamente para a Leidy no WhatsApp.
             </p>
-            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-[11px] text-[#DFBE76]">
+            <div className="p-3 rounded-none bg-white/5 border border-white/10 text-[11px] text-[#DFBE76]">
               ✓ Estoque conferido na hora <br />
               ✓ Sem taxas ou intermediários
             </div>

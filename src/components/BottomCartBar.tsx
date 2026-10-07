@@ -39,7 +39,7 @@ export const BottomCartBar: React.FC = () => {
             {cartItems.slice(0, 3).map((item, idx) => (
               <div
                 key={idx}
-                className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-white dark:border-[#1A1918] shadow-sm bg-[#FAF8F5]"
+                className="relative w-9 h-9 rounded-none overflow-hidden border-2 border-white dark:border-[#1A1918] shadow-sm bg-[#FAF8F5]"
               >
                 <Image
                   src={item.image}
@@ -50,16 +50,16 @@ export const BottomCartBar: React.FC = () => {
               </div>
             ))}
             {cartItems.length > 3 && (
-              <div className="w-9 h-9 rounded-full bg-[#1A1918] dark:bg-[#C5A059] text-white text-[11px] font-bold flex items-center justify-center border-2 border-white dark:border-[#1A1918] shadow-sm">
+              <div className="w-9 h-9 rounded-none bg-[#1A1918] dark:bg-[#C5A059] text-white text-[11px] font-bold flex items-center justify-center border-2 border-white dark:border-[#1A1918] shadow-sm">
                 +{cartItems.length - 3}
               </div>
             )}
           </div>
 
           {/* Ícone de Sacola no Mobile */}
-          <div className="sm:hidden relative p-2 rounded-xl bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/30 text-[#C5A059] shrink-0">
+          <div className="sm:hidden relative p-2 rounded-none bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/30 text-[#C5A059] shrink-0">
             <ShoppingBag className="w-4 h-4" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#C5A059] text-white text-[10px] font-bold flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-none bg-[#C5A059] text-white text-[10px] font-bold flex items-center justify-center">
               {cartCount}
             </span>
           </div>
@@ -71,7 +71,7 @@ export const BottomCartBar: React.FC = () => {
                 {cartCount} {cartCount === 1 ? 'peça adicionada' : 'peças adicionadas'}
               </span>
               {isFreeShipping && (
-                <span className="text-[10px] font-semibold text-[#25D366] bg-[#25D366]/10 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                <span className="text-[10px] font-semibold text-[#25D366] bg-[#25D366]/10 px-2 py-0.5 rounded-none inline-flex items-center gap-1">
                   <Check className="w-2.5 h-2.5" /> Frete Cortesia
                 </span>
               )}
@@ -90,7 +90,7 @@ export const BottomCartBar: React.FC = () => {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={openCart}
-            className="px-5 sm:px-8 py-2.5 sm:py-3 rounded-full bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] transition-all font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95 cursor-pointer"
+            className="px-5 sm:px-8 py-2.5 sm:py-3 rounded-none bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] transition-all font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95 cursor-pointer"
           >
             <span>Finalizar Compras</span>
             <ArrowRight className="w-4 h-4" />

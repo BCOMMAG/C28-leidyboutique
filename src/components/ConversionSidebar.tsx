@@ -67,7 +67,7 @@ export const ConversionSidebar: React.FC<ConversionSidebarProps> = ({ onOpenProd
     <aside className="space-y-3.5 sticky top-24">
       
       {/* 1. VITRINE COMPACTA DE OPORTUNIDADES (Tamanho Reduzido) */}
-      <div className="bg-white dark:bg-[#1A1918] p-3 rounded-2xl border border-[#C5A059]/30 shadow-xs relative overflow-hidden">
+      <div className="bg-white dark:bg-[#1A1918] p-3 rounded-none border border-[#C5A059]/30 shadow-xs relative overflow-hidden">
         
         {/* Header Compacto com Navegação */}
         <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#C5A059]/15">
@@ -82,14 +82,14 @@ export const ConversionSidebar: React.FC<ConversionSidebarProps> = ({ onOpenProd
           <div className="flex items-center gap-0.5">
             <button
               onClick={() => setActiveSlide((prev) => (prev > 0 ? prev - 1 : slides.length - 1))}
-              className="p-1 rounded-md text-[#78716C] dark:text-[#A8A29E] hover:text-[#1A1918] dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#252220] transition-colors cursor-pointer"
+              className="p-1 rounded-none text-[#78716C] dark:text-[#A8A29E] hover:text-[#1A1918] dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#252220] transition-colors cursor-pointer"
               title="Anterior"
             >
               <ChevronLeft className="w-3 h-3" />
             </button>
             <button
               onClick={() => setActiveSlide((prev) => (prev + 1) % slides.length)}
-              className="p-1 rounded-md text-[#78716C] dark:text-[#A8A29E] hover:text-[#1A1918] dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#252220] transition-colors cursor-pointer"
+              className="p-1 rounded-none text-[#78716C] dark:text-[#A8A29E] hover:text-[#1A1918] dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#252220] transition-colors cursor-pointer"
               title="Próximo"
             >
               <ChevronRight className="w-3 h-3" />
@@ -104,14 +104,14 @@ export const ConversionSidebar: React.FC<ConversionSidebarProps> = ({ onOpenProd
             className="group cursor-pointer"
           >
             {/* Foto Compacta com Altura Contida */}
-            <div className="relative h-32 sm:h-36 w-full rounded-xl overflow-hidden bg-[#F4F2EE] dark:bg-[#252220] mb-2">
+            <div className="relative h-32 sm:h-36 w-full rounded-none overflow-hidden bg-[#F4F2EE] dark:bg-[#252220] mb-2">
               <Image
                 src={currentSlide.product.thumbnail}
                 alt={currentSlide.product.name}
                 fill
                 className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
               />
-              <span className={`absolute top-2 left-2 text-[8px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded shadow-xs ${currentSlide.tagColor}`}>
+              <span className={`absolute top-2 left-2 text-[8px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-none shadow-xs ${currentSlide.tagColor}`}>
                 {currentSlide.tag}
               </span>
             </div>
@@ -145,7 +145,7 @@ export const ConversionSidebar: React.FC<ConversionSidebarProps> = ({ onOpenProd
             <button
               key={idx}
               onClick={() => setActiveSlide(idx)}
-              className={`h-1 rounded-full transition-all cursor-pointer ${
+              className={`h-1 rounded-none transition-all cursor-pointer ${
                 activeSlide === idx ? 'w-4 bg-[#C5A059]' : 'w-1 bg-[#C5A059]/25 hover:bg-[#C5A059]/50'
               }`}
             />
@@ -159,14 +159,14 @@ export const ConversionSidebar: React.FC<ConversionSidebarProps> = ({ onOpenProd
         href={`https://wa.me/${STORE_INFO.whatsapp}?text=Ol%C3%A1%20Leidy!%20Estou%20vendo%20as%20pe%C3%A7as%20no%20cat%C3%A1logo%20e%20gostaria%20de%20tirar%20uma%20d%C3%BAvida.`}
         target="_blank"
         rel="noopener noreferrer"
-        className="w-full py-3 px-4 rounded-2xl bg-[#25D366] hover:bg-[#20BA5C] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer hover:scale-[1.02] active:scale-95"
+        className="w-full py-3 px-4 rounded-none bg-[#25D366] hover:bg-[#20BA5C] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer hover:scale-[1.02] active:scale-95"
       >
         <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
         <span>Falar no WhatsApp</span>
       </a>
 
       {/* 3. BENEFÍCIOS & GARANTIAS DA BOUTIQUE */}
-      <div className="bg-white dark:bg-[#1A1918] p-3 rounded-2xl border border-[#C5A059]/25 shadow-2xs space-y-2 text-[11px] text-[#57534E] dark:text-[#D6D3D1]">
+      <div className="bg-white dark:bg-[#1A1918] p-3 rounded-none border border-[#C5A059]/25 shadow-2xs space-y-2 text-[11px] text-[#57534E] dark:text-[#D6D3D1]">
         <div className="flex items-center gap-2">
           <Truck className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
           <span>

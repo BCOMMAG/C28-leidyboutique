@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
 import Image from 'next/image';
@@ -14,7 +14,7 @@ export const AboutLeidy: React.FC = () => {
           
           {/* Lado Esquerdo: Imagem e Identidade */}
           <div className="lg:col-span-5 relative">
-            <div className="relative mx-auto max-w-md aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl border-2 border-[#C5A059]/40 bg-[#FAF8F5]">
+            <div className="relative mx-auto max-w-md aspect-[3/4] rounded-none overflow-hidden shadow-2xl border-2 border-[#C5A059]/40 bg-[#FAF8F5]">
               <Image
                 src="/products/04-conjunto-alfaiataria-bege/bege.jpg"
                 alt="Leidy - Curadoria & Estilo"
@@ -37,8 +37,8 @@ export const AboutLeidy: React.FC = () => {
             </div>
 
             {/* Selo Flutuante */}
-            <div className="absolute -bottom-6 -right-2 sm:right-6 bg-white p-4 rounded-2xl shadow-xl border border-[#C5A059]/40 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#FAF8F5] flex items-center justify-center border border-[#C5A059]/30">
+            <div className="absolute -bottom-6 -right-2 sm:right-6 bg-white p-4 rounded-none shadow-xl border border-[#C5A059]/40 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-none bg-[#FAF8F5] flex items-center justify-center border border-[#C5A059]/30">
                 <Heart className="w-5 h-5 text-[#C5A059] fill-[#C5A059]" />
               </div>
               <div>
@@ -55,7 +55,7 @@ export const AboutLeidy: React.FC = () => {
           {/* Lado Direito: A Mensagem da Boutique */}
           <div className="lg:col-span-7 space-y-6">
             
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#C5A059]/30 text-xs text-[#C5A059] tracking-widest uppercase font-semibold">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-none bg-white border border-[#C5A059]/30 text-xs text-[#C5A059] tracking-widest uppercase font-semibold">
               
               <span>O Propósito da Boutique</span>
             </div>
@@ -74,7 +74,7 @@ export const AboutLeidy: React.FC = () => {
 
             {/* 3 Diferenciais */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-              <div className="p-4 rounded-2xl bg-white border border-[#C5A059]/20 shadow-xs">
+              <div className="p-4 rounded-none bg-white border border-[#C5A059]/20 shadow-xs">
                 <h4 className="text-xs uppercase tracking-wider font-bold text-[#1A1918] mb-1">
                   Transparência Total
                 </h4>
@@ -83,7 +83,7 @@ export const AboutLeidy: React.FC = () => {
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white border border-[#C5A059]/20 shadow-xs">
+              <div className="p-4 rounded-none bg-white border border-[#C5A059]/20 shadow-xs">
                 <h4 className="text-xs uppercase tracking-wider font-bold text-[#1A1918] mb-1">
                   🕊️ Toque Humano
                 </h4>
@@ -99,7 +99,7 @@ export const AboutLeidy: React.FC = () => {
                 href={`https://wa.me/${STORE_INFO.whatsapp}?text=Ol%C3%A1%20Leidy!%20Adorei%20conhecer%20a%20proposta%20da%20sua%20boutique.`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-[#1A1918] text-white text-xs uppercase tracking-widest font-semibold hover:bg-[#C5A059] transition-all shadow-md active:scale-95"
+                className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-none bg-[#1A1918] text-white text-xs uppercase tracking-widest font-semibold hover:bg-[#C5A059] transition-all shadow-md active:scale-95"
               >
                 <MessageCircle className="w-4 h-4 text-[#25D366]" />
                 <span>Conversar com a Leidy no WhatsApp</span>

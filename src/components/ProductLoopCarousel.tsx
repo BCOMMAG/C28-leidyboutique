@@ -161,7 +161,7 @@ export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
           e.stopPropagation();
           handlePrev();
         }}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/95 dark:bg-[#1A1918]/95 border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] flex items-center justify-center shadow-lg transition-all opacity-0 group-hover/carousel:opacity-100 hover:scale-110 active:scale-95 cursor-pointer -translate-x-2 sm:-translate-x-4"
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-none bg-white/95 dark:bg-[#1A1918]/95 border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] flex items-center justify-center shadow-lg transition-all opacity-0 group-hover/carousel:opacity-100 hover:scale-105 active:scale-95 cursor-pointer -translate-x-2 sm:-translate-x-4"
         aria-label="Peça anterior"
         title="Ver peça anterior"
       >
@@ -174,7 +174,7 @@ export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
           e.stopPropagation();
           handleNext();
         }}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/95 dark:bg-[#1A1918]/95 border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] flex items-center justify-center shadow-lg transition-all opacity-0 group-hover/carousel:opacity-100 hover:scale-110 active:scale-95 cursor-pointer translate-x-2 sm:translate-x-4"
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-none bg-white/95 dark:bg-[#1A1918]/95 border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] flex items-center justify-center shadow-lg transition-all opacity-0 group-hover/carousel:opacity-100 hover:scale-105 active:scale-95 cursor-pointer translate-x-2 sm:translate-x-4"
         aria-label="Próxima peça"
         title="Ver próxima peça"
       >

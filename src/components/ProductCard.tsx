@@ -65,7 +65,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <div
-      className="group relative flex flex-col h-full bg-white dark:bg-[#1A1918] rounded-2xl overflow-hidden border border-[#C5A059]/20 dark:border-[#C5A059]/30 transition-all duration-300 hover:border-[#C5A059]/60 hover:shadow-xl"
+      className="group relative flex flex-col h-full bg-white dark:bg-[#1A1918] rounded-none overflow-hidden border border-[#C5A059]/20 dark:border-[#C5A059]/30 transition-all duration-300 hover:border-[#C5A059]/60 hover:shadow-xl"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -104,13 +104,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Badge de Destaque: Somente OUTLET com % de OFF ou 'Restam apenas 5 peças' */}
         {product.discountBadge ? (
-          <div className={`absolute top-2.5 left-2.5 bg-[#C5A059] text-white uppercase tracking-wider font-bold rounded-md backdrop-blur-sm shadow-xs ${
+          <div className={`absolute top-2.5 left-2.5 bg-[#C5A059] text-white uppercase tracking-wider font-bold rounded-none backdrop-blur-sm shadow-xs ${
             isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2.5 py-1'
           }`}>
             {product.discountBadge}
           </div>
         ) : product.badge?.includes('Restam') ? (
-          <div className={`absolute top-2.5 left-2.5 bg-[#8B5A2B]/90 dark:bg-black/90 text-[#FAF8F5] uppercase tracking-wider font-semibold rounded-md backdrop-blur-sm border border-[#C5A059]/40 ${
+          <div className={`absolute top-2.5 left-2.5 bg-[#8B5A2B]/90 dark:bg-black/90 text-[#FAF8F5] uppercase tracking-wider font-semibold rounded-none backdrop-blur-sm border border-[#C5A059]/40 ${
             isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2.5 py-1'
           }`}>
             {product.badge}
@@ -123,7 +123,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             e.stopPropagation();
             onToggleWishlist(product.id);
           }}
-          className={`absolute bottom-2.5 right-2.5 p-2 rounded-full transition-all duration-300 shadow-md cursor-pointer ${
+          className={`absolute bottom-2.5 right-2.5 p-2 rounded-none transition-all duration-300 shadow-md cursor-pointer ${
             isWishlisted
               ? 'bg-[#C5A059] text-white'
               : 'bg-white/90 dark:bg-[#1A1918]/90 text-[#1A1918] dark:text-white hover:bg-white hover:text-[#C5A059]'
@@ -140,7 +140,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               e.stopPropagation();
               onOpenDetails(product);
             }}
-            className="w-full py-2 bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] text-[11px] font-semibold uppercase tracking-wider rounded-lg shadow-md hover:bg-[#1A1918] hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full py-2 bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] text-[11px] font-semibold uppercase tracking-wider rounded-none shadow-md hover:bg-[#1A1918] hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <Eye className="w-3 h-3" />
             <span className="truncate">{isCompact ? 'Detalhes' : 'Ver Detalhes'}</span>
@@ -185,11 +185,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <div className="mt-1.5 sm:mt-2 h-6 sm:h-7 flex items-center justify-between gap-1">
             {/* Cores */}
             <div className="flex items-center gap-1 min-w-0">
-              <div className="flex items-center -space-x-1 shrink-0">
+              <div className="flex items-center gap-1 shrink-0">
                 {product.colors.slice(0, 3).map((color, idx) => (
                   <span
                     key={idx}
-                    className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full border border-black/20 dark:border-white/20 shadow-2xs block shrink-0"
+                    className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-none border border-black/20 dark:border-white/20 shadow-2xs block shrink-0"
                     style={{ backgroundColor: color.hex }}
                     title={color.name}
                   />
@@ -205,7 +205,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </div>
 
             {/* Tamanho */}
-            <span className={`text-[#78716C] dark:text-[#A8A29E] bg-[#FAF8F5] dark:bg-[#252220] rounded border border-[#C5A059]/20 font-medium shrink-0 ${
+            <span className={`text-[#78716C] dark:text-[#A8A29E] bg-[#FAF8F5] dark:bg-[#252220] rounded-none border border-[#C5A059]/20 font-medium shrink-0 ${
               isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] sm:text-[11px] px-2 py-0.5'
             }`}>
               {product.sizes[0]?.split(' ')[0]}
@@ -239,7 +239,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {cartCount === 0 ? (
             <button
               onClick={handleAction}
-              className={`rounded-lg bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-xs ${
+              className={`rounded-none bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-xs ${
                 isCompact
                   ? 'px-2 py-1.5 gap-1 text-[11px] font-semibold'
                   : 'px-3 py-2 gap-1.5 text-xs font-semibold'
@@ -253,7 +253,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           ) : (
             <button
               onClick={handleAction}
-              className={`rounded-lg transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-2xs border ${
+              className={`rounded-none transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-2xs border ${
                 isJustAdded
                   ? 'bg-[#25D366] text-white border-[#25D366]'
                   : 'bg-[#FAF8F5] dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] border-[#C5A059]/40'

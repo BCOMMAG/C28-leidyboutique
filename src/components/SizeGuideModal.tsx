@@ -14,12 +14,12 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose 
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/65 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-      <div className="relative w-full max-w-2xl bg-[#FAF8F5] dark:bg-[#1A1918] rounded-3xl shadow-2xl border border-[#C5A059]/40 p-6 sm:p-8 text-[#1A1918] dark:text-[#FAF8F5]">
+      <div className="relative w-full max-w-2xl bg-[#FAF8F5] dark:bg-[#1A1918] rounded-none shadow-2xl border border-[#C5A059]/40 p-6 sm:p-8 text-[#1A1918] dark:text-[#FAF8F5]">
         
         {/* Botão Fechar */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-[#57534E] dark:text-[#A8A29E] hover:text-[#1A1918] dark:hover:text-white rounded-full hover:bg-white dark:hover:bg-[#252220] transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 text-[#57534E] dark:text-[#A8A29E] hover:text-[#1A1918] dark:hover:text-white rounded-none hover:bg-white dark:hover:bg-[#252220] transition-colors cursor-pointer"
           aria-label="Fechar Guia"
         >
           <X className="w-5 h-5" />
@@ -27,7 +27,7 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose 
 
         {/* Título do Guia */}
         <div className="flex items-center gap-2.5 mb-2">
-          <div className="p-2 rounded-xl bg-[#C5A059]/15 text-[#C5A059]">
+          <div className="p-2 rounded-none bg-[#C5A059]/15 text-[#C5A059]">
             <Ruler className="w-5 h-5" />
           </div>
           <div>
@@ -41,7 +41,7 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose 
         </div>
 
         {/* Tabela de Medidas */}
-        <div className="mt-6 overflow-x-auto rounded-2xl border border-[#C5A059]/30 bg-white dark:bg-[#1E1B19]">
+        <div className="mt-6 overflow-x-auto rounded-none border border-[#C5A059]/30 bg-white dark:bg-[#1E1B19]">
           <table className="w-full text-left text-xs">
             <thead className="bg-[#F7F3EB] dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] uppercase tracking-wider font-semibold border-b border-[#C5A059]/20">
               <tr>
@@ -87,22 +87,22 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose 
 
         {/* Dicas de Como Medir */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-[#57534E] dark:text-[#D6D3D1]">
-          <div className="p-3 bg-white dark:bg-[#1E1B19] rounded-xl border border-[#C5A059]/20">
+          <div className="p-3 bg-white dark:bg-[#1E1B19] rounded-none border border-[#C5A059]/20">
             <h5 className="font-bold text-[#1A1918] dark:text-[#FAF8F5] mb-1">1. Busto</h5>
             <p className="text-[11px] leading-relaxed">Passe a fita métrica sobre a parte mais saliente do busto, mantendo-a na horizontal.</p>
           </div>
-          <div className="p-3 bg-white dark:bg-[#1E1B19] rounded-xl border border-[#C5A059]/20">
+          <div className="p-3 bg-white dark:bg-[#1E1B19] rounded-none border border-[#C5A059]/20">
             <h5 className="font-bold text-[#1A1918] dark:text-[#FAF8F5] mb-1">2. Cintura</h5>
             <p className="text-[11px] leading-relaxed">Meça a circunferência na parte mais fina da cintura, cerca de 2 dedos acima do umbigo.</p>
           </div>
-          <div className="p-3 bg-white dark:bg-[#1E1B19] rounded-xl border border-[#C5A059]/20">
+          <div className="p-3 bg-white dark:bg-[#1E1B19] rounded-none border border-[#C5A059]/20">
             <h5 className="font-bold text-[#1A1918] dark:text-[#FAF8F5] mb-1">3. Quadril</h5>
             <p className="text-[11px] leading-relaxed">Contorne a parte mais larga dos quadris, garantindo que a fita não fique apertada.</p>
           </div>
         </div>
 
         {/* Suporte Direto no WhatsApp */}
-        <div className="mt-6 p-4 rounded-2xl bg-[#F7F3EB] dark:bg-[#1E1B19] border border-[#C5A059]/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-6 p-4 rounded-none bg-[#F7F3EB] dark:bg-[#1E1B19] border border-[#C5A059]/30 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3 text-left">
             <HelpCircle className="w-5 h-5 text-[#C5A059] shrink-0" />
             <p className="text-xs text-[#57534E] dark:text-[#D6D3D1]">
@@ -113,7 +113,7 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose 
             href={`https://wa.me/${STORE_INFO.whatsapp}?text=Ol%C3%A1%20Leidy!%20Fiquei%20com%20d%C3%BAvida%20sobre%20as%20minhas%20medidas%20para%20uma%20pe%C3%A7a.`}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 bg-[#1A1918] dark:bg-[#C5A059] text-white rounded-full text-xs font-semibold hover:bg-[#25D366] transition-colors flex items-center gap-1.5 shrink-0"
+            className="px-4 py-2 bg-[#1A1918] dark:bg-[#C5A059] text-white rounded-none text-xs font-semibold hover:bg-[#25D366] transition-colors flex items-center gap-1.5 shrink-0"
           >
             <MessageCircle className="w-3.5 h-3.5" />
             <span>Consultar Medidas no WhatsApp</span>

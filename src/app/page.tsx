@@ -109,7 +109,7 @@ export default function HomePage() {
           <div className="mt-8 sm:mt-12 text-center">
             <Link
               href="/catalogo?categoria=Mais%20Vendidos"
-              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-full border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
             >
               <span>Ver Mais Produtos</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -149,7 +149,7 @@ export default function HomePage() {
           <div className="mt-8 sm:mt-12 text-center">
             <Link
               href="/catalogo"
-              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 rounded-full bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 rounded-none bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md cursor-pointer"
             >
               <span>Ver Mais Produtos no Catálogo Completo</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -195,7 +195,7 @@ export default function HomePage() {
             <div className="mt-8 sm:mt-12 text-center">
               <Link
                 href="/catalogo?categoria=OUTLET"
-                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-full border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#C5A059] hover:text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
+                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#C5A059] hover:text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
               >
                 <span>Ver Mais Peças do OUTLET</span>
                 <ArrowRight className="w-3.5 h-3.5" />

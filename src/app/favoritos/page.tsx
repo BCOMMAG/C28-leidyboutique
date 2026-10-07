@@ -92,7 +92,7 @@ export default function FavoritosPage() {
 
             {favoriteProducts.length > 0 && (
               <div className="flex items-center gap-3">
-                <span className="text-xs text-[#78716C] dark:text-[#A8A29E] bg-white dark:bg-[#1C1A18] px-3 py-1.5 rounded-full border border-[#C5A059]/30 font-medium">
+                <span className="text-xs text-[#78716C] dark:text-[#A8A29E] bg-white dark:bg-[#1C1A18] px-3 py-1.5 rounded-none border border-[#C5A059]/30 font-medium">
                   {favoriteProducts.length} {favoriteProducts.length === 1 ? 'peça salva' : 'peças salvas'}
                 </span>
 
@@ -100,7 +100,7 @@ export default function FavoritosPage() {
                   href={generateWhatsAppWishlistLink()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#25D366] dark:hover:bg-[#25D366] text-xs uppercase tracking-wider font-semibold rounded-full transition-all shadow-sm cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#25D366] dark:hover:bg-[#25D366] text-xs uppercase tracking-wider font-semibold rounded-none transition-all shadow-sm cursor-pointer"
                 >
                   <MessageCircle className="w-3.5 h-3.5 text-[#25D366] group-hover:text-white" />
                   <span>Consultar Lista no WhatsApp</span>
@@ -131,8 +131,8 @@ export default function FavoritosPage() {
               ))}
             </div>
           ) : (
-            <div className="bg-white dark:bg-[#1A1918] rounded-3xl p-12 text-center border border-[#C5A059]/20 max-w-lg mx-auto space-y-5 my-12 shadow-xs">
-              <div className="w-16 h-16 rounded-full bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/30 flex items-center justify-center mx-auto text-[#C5A059]">
+            <div className="bg-white dark:bg-[#1A1918] rounded-none p-12 text-center border border-[#C5A059]/20 max-w-lg mx-auto space-y-5 my-12 shadow-xs">
+              <div className="w-16 h-16 rounded-none bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/30 flex items-center justify-center mx-auto text-[#C5A059]">
                 <Heart className="w-7 h-7" />
               </div>
 
@@ -148,7 +148,7 @@ export default function FavoritosPage() {
               <div className="pt-2">
                 <Link
                   href="/catalogo"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] rounded-full text-xs uppercase tracking-widest font-semibold transition-all shadow-md cursor-pointer"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] rounded-none text-xs uppercase tracking-widest font-semibold transition-all shadow-md cursor-pointer"
                 >
                   <ShoppingBag className="w-4 h-4" />
                   <span>Explorar Coleção da Leidy</span>

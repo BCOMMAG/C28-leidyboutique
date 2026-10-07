@@ -134,7 +134,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
 
               {activeDropdown === 'roupas' && (
-                <div className="absolute top-full left-0 w-80 bg-white dark:bg-[#1A1918] rounded-2xl shadow-2xl border border-[#C5A059]/30 p-4 grid grid-cols-2 gap-1.5 animate-fadeIn z-50">
+                <div className="absolute top-full left-0 w-80 bg-white dark:bg-[#1A1918] rounded-none shadow-2xl border border-[#C5A059]/30 p-4 grid grid-cols-2 gap-1.5 animate-fadeIn z-50">
                   <div className="col-span-2 pb-2 mb-1 border-b border-[#C5A059]/15 flex items-center justify-between">
                     <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-bold">
                       Categorias de Roupas
@@ -150,7 +150,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       key={cat}
                       onClick={() => handleCategoryNavigation(cat)}
-                      className="text-left text-xs py-2 px-2.5 rounded-lg text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer truncate"
+                      className="text-left text-xs py-2 px-2.5 rounded-none text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer truncate"
                     >
                       {cat}
                     </button>
@@ -177,7 +177,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
 
               {activeDropdown === 'acessorios' && (
-                <div className="absolute top-full left-0 w-56 bg-white dark:bg-[#1A1918] rounded-2xl shadow-2xl border border-[#C5A059]/30 p-3 flex flex-col gap-1 animate-fadeIn z-50">
+                <div className="absolute top-full left-0 w-56 bg-white dark:bg-[#1A1918] rounded-none shadow-2xl border border-[#C5A059]/30 p-3 flex flex-col gap-1 animate-fadeIn z-50">
                   <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-bold px-2 py-1 border-b border-[#C5A059]/15 mb-1">
                     Acessórios Nobres
                   </span>
@@ -185,7 +185,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       key={item}
                       onClick={() => handleCategoryNavigation(item)}
-                      className="text-left text-xs py-2 px-2.5 rounded-lg text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer"
+                      className="text-left text-xs py-2 px-2.5 rounded-none text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer"
                     >
                       {item}
                     </button>
@@ -213,7 +213,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
 
               {activeDropdown === 'precos' && (
-                <div className="absolute top-full left-0 w-52 bg-white dark:bg-[#1A1918] rounded-2xl shadow-2xl border border-[#C5A059]/30 p-3 flex flex-col gap-1 animate-fadeIn z-50">
+                <div className="absolute top-full left-0 w-52 bg-white dark:bg-[#1A1918] rounded-none shadow-2xl border border-[#C5A059]/30 p-3 flex flex-col gap-1 animate-fadeIn z-50">
                   <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-bold px-2 py-1 border-b border-[#C5A059]/15 mb-1">
                     Faixas de Preço
                   </span>
@@ -221,7 +221,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       key={faixa.label}
                       onClick={() => handlePriceNavigation(faixa.min, faixa.max)}
-                      className="text-left text-xs py-2 px-2.5 rounded-lg text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer font-medium"
+                      className="text-left text-xs py-2 px-2.5 rounded-none text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer font-medium"
                     >
                       {faixa.label}
                     </button>
@@ -245,7 +245,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* 5. OUTLET */}
             <button
               onClick={() => handleStatusNavigation('OUTLET')}
-              className={`text-sm tracking-wide transition-all py-1.5 px-3 rounded-full cursor-pointer font-semibold ${
+              className={`text-sm tracking-wide transition-all py-1.5 px-3 rounded-none cursor-pointer font-semibold ${
                 isScrolled
                   ? 'bg-[#C5A059]/10 text-[#C5A059] dark:text-[#DFBE76] border border-[#C5A059]/40 hover:bg-[#C5A059] hover:text-white'
                   : 'bg-black/30 text-[#DFBE76] border border-[#DFBE76]/60 hover:bg-[#DFBE76] hover:text-[#1A1918] drop-shadow-sm'
@@ -298,7 +298,7 @@ export const Header: React.FC<HeaderProps> = ({
                     router.push(`/catalogo?q=${encodeURIComponent(searchQuery)}`);
                   }
                 }}
-                className={`w-32 lg:w-44 xl:w-56 pl-8 pr-7 py-1.5 text-xs rounded-full border transition-all duration-300 focus:w-44 lg:focus:w-56 xl:focus:w-64 focus:outline-none ${
+                className={`w-32 lg:w-44 xl:w-56 pl-8 pr-7 py-1.5 text-xs rounded-none border transition-all duration-300 focus:w-44 lg:focus:w-56 xl:focus:w-64 focus:outline-none ${
                   isScrolled
                     ? 'bg-[#FAF8F5] dark:bg-[#201D1B] text-[#1A1918] dark:text-[#FAF8F5] border-[#C5A059]/30 focus:border-[#C5A059]'
                     : 'bg-black/25 text-white placeholder-white/70 border-white/30 focus:border-white focus:bg-black/40'
@@ -318,7 +318,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Toggle Modo Escuro / Claro */}
             <button
               onClick={toggleTheme}
-              className={`p-2 rounded-full transition-colors cursor-pointer ${
+              className={`p-2 rounded-none transition-colors cursor-pointer ${
                 isScrolled
                   ? 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
                   : 'text-white hover:text-[#DFBE76] drop-shadow-sm'
@@ -346,7 +346,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
               {wishlistCount > 0 && (
-                <span className="absolute top-1 right-1 bg-[#C5A059] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                <span className="absolute top-1 right-1 bg-[#C5A059] text-white text-[10px] w-4 h-4 rounded-none flex items-center justify-center font-bold">
                   {wishlistCount}
                 </span>
               )}
@@ -366,7 +366,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="relative">
                 <ShoppingBag className="w-6 h-6 sm:w-7 sm:h-7 stroke-[1.7]" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#C5A059] text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-bold border-2 border-white dark:border-[#141312] animate-scale shadow-sm">
+                  <span className="absolute -top-1 -right-1 bg-[#C5A059] text-white text-[11px] w-5 h-5 rounded-none flex items-center justify-center font-bold border-2 border-white dark:border-[#141312] animate-scale shadow-sm">
                     {cartCount}
                   </span>
                 )}
@@ -394,7 +394,7 @@ export const Header: React.FC<HeaderProps> = ({
                   router.push(`/catalogo?q=${encodeURIComponent(searchQuery)}`);
                 }
               }}
-              className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#201D1B] focus:outline-none focus:border-[#C5A059]"
+              className="w-full pl-9 pr-4 py-2 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#201D1B] focus:outline-none focus:border-[#C5A059]"
             />
             <Search className="w-4 h-4 text-[#78716C] absolute left-3 top-1/2 -translate-y-1/2" />
           </div>
@@ -500,7 +500,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="text-left text-base text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] py-1 flex items-center justify-between"
             >
               <span>Meus Favoritos</span>
-              <span className="text-xs bg-[#C5A059] text-white px-2 py-0.5 rounded-full font-bold">
+              <span className="text-xs bg-[#C5A059] text-white px-2 py-0.5 rounded-none font-bold">
                 {wishlistCount}
               </span>
             </Link>
@@ -511,7 +511,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="text-xs text-[#78716C] dark:text-[#A8A29E]">Tema Visual</span>
             <button
               onClick={toggleTheme}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#C5A059]/40 text-xs font-semibold cursor-pointer"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-none border border-[#C5A059]/40 text-xs font-semibold cursor-pointer"
             >
               {theme === 'dark' ? (
                 <>

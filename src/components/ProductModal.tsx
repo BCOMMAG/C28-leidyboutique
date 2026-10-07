@@ -167,12 +167,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       <div className="relative flex flex-col xl:flex-row items-center xl:items-stretch justify-center gap-4 xl:gap-5 max-w-[1360px] w-full my-auto">
         
         {/* Container Principal do Modal */}
-        <div className="relative w-full max-w-5xl bg-[#FAF8F5] dark:bg-[#1A1918] rounded-3xl shadow-2xl overflow-hidden border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] flex-1">
+        <div className="relative w-full max-w-5xl bg-[#FAF8F5] dark:bg-[#1A1918] rounded-none shadow-2xl overflow-hidden border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] flex-1">
           
           {/* Botão Fechar */}
           <button
             onClick={onClose}
-            className="absolute top-3.5 right-3.5 z-30 p-2 sm:p-2.5 rounded-full bg-white/90 dark:bg-[#252220]/90 text-[#1A1918] dark:text-white hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all shadow-md cursor-pointer"
+            className="absolute top-3.5 right-3.5 z-30 p-2 sm:p-2.5 rounded-none bg-white/90 dark:bg-[#252220]/90 text-[#1A1918] dark:text-white hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all shadow-md cursor-pointer"
             aria-label="Fechar"
           >
             <X className="w-5 h-5" />
@@ -188,7 +188,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              className="relative w-full max-w-[290px] sm:max-w-[360px] lg:max-w-none h-[260px] sm:h-[340px] lg:h-[480px] rounded-2xl overflow-hidden bg-black shadow-lg mx-auto select-none touch-pan-y"
+              className="relative w-full max-w-[290px] sm:max-w-[360px] lg:max-w-none h-[260px] sm:h-[340px] lg:h-[480px] rounded-none overflow-hidden bg-black shadow-lg mx-auto select-none touch-pan-y"
             >
               {currentMedia.type === 'video' ? (
                 <div className="relative w-full h-full">
@@ -210,15 +210,15 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   {/* Indicador Suave de Carregamento Inicial do Vídeo */}
                   {isVideoBuffering && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/25 pointer-events-none transition-opacity duration-300">
-                      <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/75 text-white text-[11px] border border-[#C5A059]/40 shadow-xl backdrop-blur-xs">
-                        <span className="w-2.5 h-2.5 rounded-full border-2 border-[#C5A059] border-t-transparent animate-spin" />
+                      <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-none bg-black/75 text-white text-[11px] border border-[#C5A059]/40 shadow-xl backdrop-blur-xs">
+                        <span className="w-2.5 h-2.5 rounded-none border-2 border-[#C5A059] border-t-transparent animate-spin" />
                         <span>Carregando vídeo...</span>
                       </div>
                     </div>
                   )}
                   
                   {/* Badge de Provador em Vídeo */}
-                  <div className="absolute top-3 left-3 bg-[#1A1918]/85 text-white text-[10px] uppercase tracking-widest font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-sm border border-[#C5A059]/40 z-10">
+                  <div className="absolute top-3 left-3 bg-[#1A1918]/85 text-white text-[10px] uppercase tracking-widest font-semibold px-2.5 py-1 rounded-none flex items-center gap-1.5 backdrop-blur-sm border border-[#C5A059]/40 z-10">
                     <span>Provador da Leidy</span>
                   </div>
 
@@ -226,14 +226,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   <div className="absolute bottom-3 right-3 flex items-center gap-1.5 z-10">
                     <button
                       onClick={() => setIsMuted(!isMuted)}
-                      className="p-1.5 rounded-full bg-black/60 text-white hover:bg-black/90 backdrop-blur-sm transition-all cursor-pointer"
+                      className="p-1.5 rounded-none bg-black/60 text-white hover:bg-black/90 backdrop-blur-sm transition-all cursor-pointer"
                       title={isMuted ? 'Ativar Som' : 'Silenciar'}
                     >
                       {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-[#DFBE76]" />}
                     </button>
                     <button
                       onClick={() => setIsPlaying(!isPlaying)}
-                      className="p-1.5 rounded-full bg-black/60 text-white hover:bg-black/90 backdrop-blur-sm transition-all cursor-pointer"
+                      className="p-1.5 rounded-none bg-black/60 text-white hover:bg-black/90 backdrop-blur-sm transition-all cursor-pointer"
                       title={isPlaying ? 'Pausar' : 'Play'}
                     >
                       {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-white" />}
@@ -256,7 +256,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               {product.media.length > 1 && (
                 <button
                   onClick={goToPrevMedia}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/55 text-white hover:bg-black/85 backdrop-blur-sm transition-all hover:scale-110 active:scale-95 shadow-md cursor-pointer"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-none bg-black/55 text-white hover:bg-black/85 backdrop-blur-sm transition-all hover:scale-105 active:scale-95 shadow-md cursor-pointer"
                   aria-label="Foto anterior"
                 >
                   <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -267,20 +267,20 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               {product.media.length > 1 && (
                 <button
                   onClick={goToNextMedia}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/55 text-white hover:bg-black/85 backdrop-blur-sm transition-all hover:scale-110 active:scale-95 shadow-md cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-none bg-black/55 text-white hover:bg-black/85 backdrop-blur-sm transition-all hover:scale-105 active:scale-95 shadow-md cursor-pointer"
                   aria-label="Próxima foto"
                 >
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               )}
 
-              {/* Indicador de Slide (Bolinhas) */}
+              {/* Indicador de Slide */}
               {product.media.length > 1 && (
-                <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-black/40 backdrop-blur-xs px-2 py-1 rounded-full">
+                <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-black/40 backdrop-blur-xs px-2 py-1 rounded-none">
                   {product.media.map((_, idx) => (
                     <span
                       key={idx}
-                      className={`h-1.5 rounded-full transition-all ${
+                      className={`h-1.5 rounded-none transition-all ${
                         activeMediaIndex === idx ? 'w-4 bg-[#DFBE76]' : 'w-1.5 bg-white/60'
                       }`}
                     />
@@ -300,7 +300,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       setActiveMediaIndex(index);
                       if (item.type === 'video') setIsPlaying(true);
                     }}
-                    className={`relative w-14 h-16 sm:w-16 sm:h-20 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                    className={`relative w-14 h-16 sm:w-16 sm:h-20 rounded-none overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
                       isSelected
                         ? 'border-[#C5A059] shadow-md ring-2 ring-[#C5A059]/40 scale-105'
                         : 'border-white/80 dark:border-white/20 opacity-70 hover:opacity-100 hover:border-[#C5A059]/50'
@@ -308,7 +308,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   >
                     {item.type === 'video' ? (
                       <div className="w-full h-full bg-[#1A1918] flex flex-col items-center justify-center text-white p-1">
-                        <div className="w-6 h-6 rounded-full bg-[#C5A059] flex items-center justify-center mb-0.5">
+                        <div className="w-6 h-6 rounded-none bg-[#C5A059] flex items-center justify-center mb-0.5">
                           <Play className="w-3 h-3 fill-white ml-0.5" />
                         </div>
                         <span className="text-[8px] uppercase font-bold tracking-tight text-[#DFBE76]">
@@ -345,7 +345,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
                 <button
                   onClick={() => onToggleWishlist(product.id)}
-                  className={`p-2 rounded-full border transition-colors cursor-pointer ${
+                  className={`p-2 rounded-none border transition-colors cursor-pointer ${
                     isWishlisted
                       ? 'bg-[#C5A059] text-white border-[#C5A059]'
                       : 'border-[#C5A059]/30 text-[#1A1918] dark:text-[#FAF8F5] hover:border-[#C5A059]'
@@ -396,14 +396,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                             if (mediaIdx !== -1) setActiveMediaIndex(mediaIdx);
                           }
                         }}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs transition-all cursor-pointer ${
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-none border text-xs transition-all cursor-pointer ${
                           isColorSelected
                             ? 'border-[#C5A059] bg-[#C5A059]/10 font-semibold text-[#1A1918] dark:text-white ring-1 ring-[#C5A059]'
                             : 'border-black/15 dark:border-white/20 bg-white dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] hover:border-[#C5A059]'
                         }`}
                       >
                         <span
-                          className="w-4 h-4 rounded-full border border-black/20 dark:border-white/20"
+                          className="w-3.5 h-3.5 rounded-none border border-black/20 dark:border-white/20"
                           style={{ backgroundColor: color.hex }}
                         />
                         <span>{color.name}</span>
@@ -436,7 +436,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       <button
                         key={idx}
                         onClick={() => setSelectedSize(size)}
-                        className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all border cursor-pointer ${
+                        className={`px-4 py-2 rounded-none text-xs font-semibold transition-all border cursor-pointer ${
                           isSizeSelected
                             ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white border-[#1A1918] dark:border-[#C5A059] shadow-sm'
                             : 'bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] border-[#C5A059]/30 hover:border-[#C5A059]'
@@ -453,7 +453,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               <div className="mt-6 space-y-3">
                 <div className="flex items-center gap-3">
                   {/* Contador de Quantidade */}
-                  <div className="flex items-center border border-[#C5A059]/40 rounded-full bg-white dark:bg-[#252220] px-3 py-1.5">
+                  <div className="flex items-center border border-[#C5A059]/40 rounded-none bg-white dark:bg-[#252220] px-3 py-1.5">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       className="text-sm font-bold text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] px-2 cursor-pointer"
@@ -474,7 +474,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   {/* Botão Adicionar à Sacola */}
                   <button
                     onClick={handleAdd}
-                    className={`flex-1 py-3 px-6 rounded-full text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-md cursor-pointer ${
+                    className={`flex-1 py-3 px-6 rounded-none text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-md cursor-pointer ${
                       addedAnimation
                         ? 'bg-[#25D366] text-white'
                         : 'bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] active:scale-95'
@@ -499,7 +499,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   href={generateWhatsAppDirectLink()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3.5 px-6 rounded-full text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 border border-[#C5A059] bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FBF7EE] dark:hover:bg-[#2E2A27] transition-all duration-300 shadow-sm cursor-pointer"
+                  className="w-full py-3.5 px-6 rounded-none text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 border border-[#C5A059] bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FBF7EE] dark:hover:bg-[#2E2A27] transition-all duration-300 shadow-sm cursor-pointer"
                 >
                   <MessageCircle className="w-4 h-4 text-[#25D366]" />
                   <span>Pedir Esta Peça no WhatsApp da Leidy</span>
@@ -518,19 +518,19 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     placeholder="Digite seu CEP (Ex: 01310-100)"
                     value={cepInput}
                     onChange={(e) => setCepInput(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                    className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-[#C5A059]/30 bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
+                    className="flex-1 px-3.5 py-2 text-xs rounded-none border border-[#C5A059]/30 bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
                   />
                   <button
                     onClick={handleCalculateShipping}
                     disabled={shippingLoading}
-                    className="px-4 py-2 bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer"
+                    className="px-4 py-2 bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white rounded-none text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer"
                   >
                     {shippingLoading ? 'Calculando...' : 'Calcular'}
                   </button>
                 </div>
 
                 {shippingResult && (
-                  <div className="mt-3 p-3 rounded-xl bg-white dark:bg-[#252220] border border-[#C5A059]/30 space-y-2 text-xs">
+                  <div className="mt-3 p-3 rounded-none bg-white dark:bg-[#252220] border border-[#C5A059]/30 space-y-2 text-xs">
                     <div className="flex justify-between items-center text-[#1A1918] dark:text-[#FAF8F5]">
                       <span>📦 <strong>Sedex Express / Correios</strong> (1 a 3 dias úteis)</span>
                       <span className="font-bold text-[#C5A059]">R$ 18,90</span>
@@ -556,7 +556,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 <ul className="text-xs text-[#57534E] dark:text-[#D6D3D1] space-y-1.5">
                   {product.details.map((item, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059] mt-1 shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059] mt-1 shrink-0" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -571,9 +571,9 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   </span>
                   <div
                     onClick={() => onSelectPairedProduct(pairedProduct)}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-[#252220] border border-[#C5A059]/30 hover:border-[#C5A059] transition-all cursor-pointer group shadow-xs"
+                    className="flex items-center gap-3 p-3 rounded-none bg-white dark:bg-[#252220] border border-[#C5A059]/30 hover:border-[#C5A059] transition-all cursor-pointer group shadow-xs"
                   >
-                    <div className="relative w-12 h-14 rounded-lg overflow-hidden bg-[#F4F2EE] shrink-0">
+                    <div className="relative w-12 h-14 rounded-none overflow-hidden bg-[#F4F2EE] shrink-0">
                       <Image
                         src={pairedProduct.thumbnail}
                         alt={pairedProduct.name}
@@ -599,12 +599,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 <Link
                   href="/catalogo"
                   onClick={onClose}
-                  className="flex items-center justify-between gap-3 p-4 rounded-2xl bg-[#F4EFE6]/70 dark:bg-[#252220] border border-[#C5A059]/30 hover:border-[#C5A059] transition-all text-[#1A1918] dark:text-[#FAF8F5] group shadow-xs cursor-pointer"
+                  className="flex items-center justify-between gap-3 p-4 rounded-none bg-[#F4EFE6]/70 dark:bg-[#252220] border border-[#C5A059]/30 hover:border-[#C5A059] transition-all text-[#1A1918] dark:text-[#FAF8F5] group shadow-xs cursor-pointer"
                 >
                   <span className="text-xs sm:text-sm font-semibold font-serif">
                     Ver outras opções no Catálogo
                   </span>
-                  <div className="w-8 h-8 rounded-full bg-[#C5A059] text-white dark:text-[#1A1918] flex items-center justify-center shrink-0 group-hover:translate-x-1 transition-transform shadow-sm">
+                  <div className="w-8 h-8 rounded-none bg-[#C5A059] text-white dark:text-[#1A1918] flex items-center justify-center shrink-0 group-hover:translate-x-1 transition-transform shadow-sm">
                     <ArrowRight className="w-4 h-4" />
                   </div>
                 </Link>
@@ -622,12 +622,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         <Link
           href="/catalogo"
           onClick={onClose}
-          className="group flex items-center gap-3.5 px-6 py-5 rounded-2xl bg-[#FAF8F5] dark:bg-[#1A1918] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] dark:hover:text-[#1A1918] border border-[#C5A059]/40 hover:border-[#C5A059] shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02]"
+          className="group flex items-center gap-3.5 px-6 py-5 rounded-none bg-[#FAF8F5] dark:bg-[#1A1918] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] dark:hover:text-[#1A1918] border border-[#C5A059]/40 hover:border-[#C5A059] shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02]"
         >
           <span className="font-serif font-bold text-sm sm:text-base tracking-wide whitespace-nowrap">
             Ver outras opções no Catálogo
           </span>
-          <div className="w-9 h-9 rounded-full bg-[#C5A059] text-white dark:text-[#1A1918] group-hover:bg-white group-hover:text-[#1A1918] dark:group-hover:bg-[#1A1918] dark:group-hover:text-[#FAF8F5] flex items-center justify-center transition-all group-hover:translate-x-1 shadow-md shrink-0">
+          <div className="w-9 h-9 rounded-none bg-[#C5A059] text-white dark:text-[#1A1918] group-hover:bg-white group-hover:text-[#1A1918] dark:group-hover:bg-[#1A1918] dark:group-hover:text-[#FAF8F5] flex items-center justify-center transition-all group-hover:translate-x-1 shadow-md shrink-0">
             <ArrowRight className="w-4 h-4" />
           </div>
         </Link>
