@@ -12,6 +12,7 @@ interface ProductCardProps {
   isWishlisted: boolean;
   onToggleWishlist: (productId: string) => void;
   isOutletSection?: boolean;
+  columnsCount?: 2 | 3 | 4 | 5;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -20,7 +21,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onQuickAdd,
   isWishlisted,
   onToggleWishlist,
-  isOutletSection = false
+  isOutletSection = false,
+  columnsCount = 4
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -39,9 +41,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     }
   }, [isHovered, videoSrc]);
 
+  // Variações de estilo baseadas na densidade de colunas
+  const isCompact = columnsCount === 5;
+  const isMedium = columnsCount === 4;
+  const isSpacious = columnsCount === 2 || columnsCount === 3;
+
   return (
     <div
-      className="group relative flex flex-col bg-white dark:bg-[#1A1918] rounded-2xl overflow-hidden border border-[#C5A059]/20 dark:border-[#C5A059]/30 transition-all duration-300 hover:border-[#C5A059]/60 hover:shadow-xl"
+      className="group relative flex flex-col h-full bg-white dark:bg-[#1A1918] rounded-2xl overflow-hidden border border-[#C5A059]/20 dark:border-[#C5A059]/30 transition-all duration-300 hover:border-[#C5A059]/60 hover:shadow-xl"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -55,7 +62,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           src={product.thumbnail}
           alt={product.name}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
           className={`object-cover object-top transition-all duration-700 ${
             isHovered && videoSrc ? 'opacity-0' : 'opacity-100 group-hover:scale-105'
           }`}
@@ -81,11 +88,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Badge de Destaque da Peça ou Desconto */}
         {isOutletSection && product.discountBadge ? (
-          <div className="absolute top-3 left-3 bg-[#C5A059] text-white text-[10px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-md backdrop-blur-sm shadow-sm">
+          <div className={`absolute top-2.5 left-2.5 bg-[#C5A059] text-white uppercase tracking-wider font-bold rounded-md backdrop-blur-sm shadow-xs ${
+            isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2.5 py-1'
+          }`}>
             {product.discountBadge}
           </div>
         ) : product.badge ? (
-          <div className="absolute top-3 left-3 bg-[#1A1918]/90 dark:bg-black/90 text-[#FAF8F5] text-[10px] uppercase tracking-widest font-semibold px-2.5 py-1 rounded-md backdrop-blur-sm border border-[#C5A059]/30">
+          <div className={`absolute top-2.5 left-2.5 bg-[#1A1918]/90 dark:bg-black/90 text-[#FAF8F5] uppercase tracking-wider font-semibold rounded-md backdrop-blur-sm border border-[#C5A059]/30 ${
+            isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2.5 py-1'
+          }`}>
             {product.badge}
           </div>
         ) : null}
@@ -96,94 +107,133 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             e.stopPropagation();
             onToggleWishlist(product.id);
           }}
-          className={`absolute bottom-3 right-3 p-2.5 rounded-full transition-all duration-300 shadow-md cursor-pointer ${
+          className={`absolute bottom-2.5 right-2.5 p-2 rounded-full transition-all duration-300 shadow-md cursor-pointer ${
             isWishlisted
               ? 'bg-[#C5A059] text-white'
               : 'bg-white/90 dark:bg-[#1A1918]/90 text-[#1A1918] dark:text-white hover:bg-white hover:text-[#C5A059]'
           }`}
           aria-label="Adicionar aos favoritos"
         >
-          <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+          <Heart className={`w-3.5 h-3.5 ${isWishlisted ? 'fill-current' : ''}`} />
         </button>
 
         {/* Botão Overlay Flutuante ao Hover (Desktop) */}
-        <div className="absolute bottom-3 left-3 right-14 hidden sm:block opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+        <div className="absolute bottom-2.5 left-2.5 right-12 hidden md:block opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onOpenDetails(product);
             }}
-            className="w-full py-2.5 bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] text-xs font-semibold uppercase tracking-wider rounded-lg shadow-md hover:bg-[#1A1918] hover:text-white transition-colors flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-2 bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] text-[11px] font-semibold uppercase tracking-wider rounded-lg shadow-md hover:bg-[#1A1918] hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <Eye className="w-3.5 h-3.5" />
-            <span>Ver no Provador</span>
+            <Eye className="w-3 h-3" />
+            <span className="truncate">{isCompact ? 'Provador' : 'Ver no Provador'}</span>
           </button>
         </div>
       </div>
 
-      {/* Detalhes do Produto */}
-      <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between bg-white dark:bg-[#1A1918]">
-        <div>
-          {/* Categoria */}
-          <span className="text-[11px] uppercase tracking-widest text-[#C5A059] dark:text-[#DFBE76] font-medium block mb-1">
-            {product.category}
-          </span>
+      {/* Detalhes do Produto com Slots de Altura Garantida */}
+      <div className={`flex flex-col flex-1 justify-between bg-white dark:bg-[#1A1918] ${
+        isCompact ? 'p-2.5 sm:p-3' : isMedium ? 'p-3 sm:p-4' : 'p-4 sm:p-5'
+      }`}>
+        <div className="flex flex-col">
+          {/* SLOT 1: Categoria (Altura fixa garantida para nunca empurrar o título) */}
+          <div className="h-5 sm:h-6 flex items-center">
+            <span className={`uppercase tracking-widest text-[#C5A059] dark:text-[#DFBE76] font-medium truncate block ${
+              isCompact ? 'text-[9px] sm:text-[10px]' : 'text-[10px] sm:text-[11px]'
+            }`}>
+              {product.category}
+            </span>
+          </div>
 
-          {/* Nome */}
-          <h3
-            onClick={() => onOpenDetails(product)}
-            className="font-serif-luxury text-base sm:text-lg font-medium text-[#1A1918] dark:text-[#FAF8F5] leading-snug hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer line-clamp-2"
-          >
-            {product.name}
-          </h3>
+          {/* SLOT 2: Nome da Peça (Altura fixa reservada com line-clamp-2) */}
+          <div className={`flex items-start ${
+            isCompact ? 'h-8 sm:h-9' : isMedium ? 'h-9 sm:h-10' : 'h-11 sm:h-12'
+          }`}>
+            <h3
+              onClick={() => onOpenDetails(product)}
+              className={`font-serif-luxury font-medium text-[#1A1918] dark:text-[#FAF8F5] leading-snug hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer line-clamp-2 ${
+                isCompact
+                  ? 'text-xs sm:text-[13px]'
+                  : isMedium
+                  ? 'text-xs sm:text-sm'
+                  : 'text-sm sm:text-base'
+              }`}
+              title={product.name}
+            >
+              {product.name}
+            </h3>
+          </div>
 
-          {/* Paleta de Cores e Tamanhos */}
-          <div className="mt-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              {product.colors.map((color, idx) => (
-                <span
-                  key={idx}
-                  className="w-3.5 h-3.5 rounded-full border border-black/20 dark:border-white/20 shadow-xs"
-                  style={{ backgroundColor: color.hex }}
-                  title={color.name}
-                />
-              ))}
-              <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E] ml-1">
-                {product.colors.length > 1 ? `${product.colors.length} cores` : product.colors[0]?.name}
+          {/* SLOT 3: Paleta de Cores e Tamanhos (Altura fixa perfeitamente nivelada) */}
+          <div className="mt-1.5 sm:mt-2 h-6 sm:h-7 flex items-center justify-between gap-1">
+            {/* Cores */}
+            <div className="flex items-center gap-1 min-w-0">
+              <div className="flex items-center -space-x-1 shrink-0">
+                {product.colors.slice(0, 3).map((color, idx) => (
+                  <span
+                    key={idx}
+                    className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full border border-black/20 dark:border-white/20 shadow-2xs block shrink-0"
+                    style={{ backgroundColor: color.hex }}
+                    title={color.name}
+                  />
+                ))}
+              </div>
+              <span className={`text-[#78716C] dark:text-[#A8A29E] truncate ${
+                isCompact ? 'text-[10px] max-w-[60px]' : 'text-[11px] max-w-[90px]'
+              }`}>
+                {product.colors.length > 1
+                  ? `${product.colors.length} cores`
+                  : product.colors[0]?.name}
               </span>
             </div>
 
-            <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E] bg-[#FAF8F5] dark:bg-[#252220] px-2 py-0.5 rounded border border-[#C5A059]/20">
+            {/* Tamanho */}
+            <span className={`text-[#78716C] dark:text-[#A8A29E] bg-[#FAF8F5] dark:bg-[#252220] rounded border border-[#C5A059]/20 font-medium shrink-0 ${
+              isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] sm:text-[11px] px-2 py-0.5'
+            }`}>
               {product.sizes[0]?.split(' ')[0]}
             </span>
           </div>
         </div>
 
-        {/* Preço e Botão de Ação */}
-        <div className="mt-4 pt-3 border-t border-[#C5A059]/15 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] uppercase tracking-widest text-[#78716C] dark:text-[#A8A29E] block">
+        {/* SLOT 4: Preço e Botão de Ação (Cravado na base do card) */}
+        <div className="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-[#C5A059]/15 flex items-end justify-between gap-1">
+          <div className="min-w-0 flex-1">
+            {/* Rótulo de preço */}
+            <span className="text-[9px] uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E] block truncate leading-none mb-1">
               {isOutletSection ? 'Preço Outlet' : 'Valor da Peça'}
             </span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg font-bold text-[#1A1918] dark:text-[#FAF8F5] tracking-tight">
+            {/* Valor numérico */}
+            <div className="flex items-baseline gap-1 flex-wrap">
+              <span className={`font-bold text-[#1A1918] dark:text-[#FAF8F5] tracking-tight leading-none ${
+                isCompact ? 'text-sm sm:text-base' : isMedium ? 'text-base sm:text-lg' : 'text-lg sm:text-xl'
+              }`}>
                 {product.formattedPrice}
               </span>
               {isOutletSection && product.formattedOriginalPrice && (
-                <span className="text-xs text-[#A8A29E] line-through font-normal">
+                <span className="text-[10px] text-[#A8A29E] line-through font-normal leading-none">
                   {product.formattedOriginalPrice}
                 </span>
               )}
             </div>
           </div>
 
+          {/* Botão de Provador (Design adaptativo anti-overflow) */}
           <button
             onClick={() => onOpenDetails(product)}
-            className="p-2 sm:px-3 sm:py-2 rounded-lg bg-[#FAF8F5] dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all border border-[#C5A059]/30 flex items-center gap-1.5 text-xs font-medium cursor-pointer"
-            title="Abrir Provador"
+            className={`rounded-lg bg-[#FAF8F5] dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all border border-[#C5A059]/30 flex items-center justify-center shrink-0 cursor-pointer shadow-2xs ${
+              isCompact
+                ? 'p-1.5 sm:px-2 sm:py-1.5 gap-1 text-[11px]'
+                : 'p-2 sm:px-3 sm:py-2 gap-1.5 text-xs font-medium'
+            }`}
+            title="Assistir no Provador em Vídeo"
+            aria-label="Abrir Provador"
           >
-            <Play className="w-3 h-3 text-[#C5A059] fill-[#C5A059]" />
-            <span className="hidden sm:inline">Provador</span>
+            <Play className="w-3 h-3 text-[#C5A059] fill-[#C5A059] shrink-0" />
+            <span className={isCompact ? 'hidden xl:inline' : 'hidden sm:inline'}>
+              Provador
+            </span>
           </button>
         </div>
 

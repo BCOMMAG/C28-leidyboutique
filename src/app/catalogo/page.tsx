@@ -939,6 +939,7 @@ function CatalogoContent() {
                       isWishlisted={wishlistIds.includes(product.id)}
                       onToggleWishlist={toggleWishlist}
                       isOutletSection={product.isOutlet}
+                      columnsCount={gridColumns}
                     />
                   ))}
                 </div>
