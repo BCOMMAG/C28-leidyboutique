@@ -15,7 +15,6 @@ export const PRODUCTS: Product[] = [
     fit: 'Ampla / Oversized',
     line: 'Casual Chic',
     status: ['Mais Vendido', 'OUTLET', 'Pronta Entrega'],
-    badge: 'Mais Vendido',
     isBestSeller: true,
     isOutlet: true,
     description: 'Casaco confeccionado em tricot premium Biamar, com textura canelada encorpada e toque aveludado irresistível. Modelagem ampla com caimento elegante para compor sobreposições refinadas em dias de meia-estação e inverno.',
@@ -70,7 +69,6 @@ export const PRODUCTS: Product[] = [
     isOutlet: true,
     isBestSeller: true,
     isNewArrival: true,
-    badge: 'Edição Especial',
     description: 'Blusa em tricot canelado com ponto refinado e decote suave. Peça curinga que combina a delicadeza dos tons rosados com a sofisticação de uma malharia estruturada e confortável para qualquer momento do dia.',
     details: [
       'Trama trabalhada com toque suave na pele',
@@ -116,7 +114,6 @@ export const PRODUCTS: Product[] = [
     status: ['Mais Vendido', 'OUTLET'],
     isOutlet: true,
     isBestSeller: true,
-    badge: 'Look Casual Chic',
     description: 'Conjunto em cetim toque de seda com brilho suave e movimento natural. O match perfeito entre conforto descomplicado e o requinte de uma produção sofisticada para ocasiões especiais, jantares e passeios com estilo.',
     details: [
       'Cetim acetinado com toque acetinado premium antiestático',
@@ -160,7 +157,6 @@ export const PRODUCTS: Product[] = [
     fit: 'Alfaiataria Estruturada',
     line: 'Trabalho & Alfaiataria',
     status: ['Mais Vendido', 'OUTLET', 'Pronta Entrega'],
-    badge: 'Top 1 Mais Vendido',
     isBestSeller: true,
     isOutlet: true,
     description: 'A definição absoluta da alfaiataria feminina contemporânea. Peça esculpida em tecido estruturado de caimento impecável em tom bege sofisticado. Projetado para mulheres que se posicionam com autoridade e elegância onde chegam.',
@@ -204,7 +200,7 @@ export const PRODUCTS: Product[] = [
     line: 'Trabalho & Alfaiataria',
     status: ['Novidade', 'Pronta Entrega'],
     isNewArrival: true,
-    badge: 'Lançamento',
+    badge: 'Restam apenas 5 peças',
     description: 'Blazer confeccionado em crepe de alfaiataria nobre com forro em cetim puro. Lapela alongada, botões frontais em banho ouro fosco e caimento que impõe presença em qualquer reunião ou evento especial.',
     details: [
       'Forro 100% acetato com costura embutida de alto padrão',
@@ -245,7 +241,6 @@ export const PRODUCTS: Product[] = [
     line: 'Trabalho & Alfaiataria',
     status: ['Pronta Entrega', 'Mais Vendido'],
     isBestSeller: true,
-    badge: 'Curinga Clássico',
     description: 'Pantalona em modelagem impecável com cintura alta e cós limpo. Possui pregas frontais que criam uma linha vertical alongadora e fluidez em cada passo.',
     details: [
       'Cós entretelado firme que valoriza a cintura',
@@ -285,7 +280,6 @@ export const PRODUCTS: Product[] = [
     line: 'Festa & Noite',
     status: ['Novidade'],
     isNewArrival: true,
-    badge: 'Alta Costura',
     description: 'Vestido midi confeccionado em cetim seda com corte no viés, abraçando as curvas com leveza e sensualidade sutil. Decote degagê delicado e alças ajustáveis.',
     details: [
       'Corte em viés que proporciona caimento orgânico único',
@@ -325,7 +319,6 @@ export const PRODUCTS: Product[] = [
     fit: 'Reta Clássica',
     line: 'Casual Chic',
     status: ['Pronta Entrega'],
-    badge: 'Atemporal',
     description: 'Camisa de mangas compridas em seda acetinada de toque macio e fresco. Gola estruturada, punhos com abotoamento refinado e caimento leve para composições sofisticadas.',
     details: [
       'Botões tingidos no tom exato do tecido',
@@ -366,7 +359,6 @@ export const PRODUCTS: Product[] = [
     line: 'Casual Chic',
     status: ['Novidade', 'Pronta Entrega'],
     isNewArrival: true,
-    badge: 'Fluidez & Estilo',
     description: 'Saia em malharia fina plissada com elástico confortável na cintura. Cria um movimento belíssimo ao caminhar, perfeita para transitar do dia para a noite.',
     details: [
       'Plissado permanente que não deforma com a lavagem',
@@ -406,7 +398,7 @@ export const PRODUCTS: Product[] = [
     fit: 'Reta Clássica',
     line: 'Casual Chic',
     status: ['Pronta Entrega'],
-    badge: 'Frescor Chic',
+    badge: 'Restam apenas 5 peças',
     description: 'Bermuda de corte reto em alfaiataria premium com comprimento meia-coxa elegante. Traz pregas frontais bem definidas e bolsos laterais funcionais.',
     details: [
       'Acabamento de alfaiataria masculina adaptado ao corpo feminino',
@@ -445,7 +437,6 @@ export const PRODUCTS: Product[] = [
     line: 'Casual Chic',
     status: ['Mais Vendido', 'Pronta Entrega'],
     isBestSeller: true,
-    badge: 'Acessório Must-Have',
     description: 'Cinto fino em couro estruturado com acabamento fosco e fivela geométrica em banho dourado de alta durabilidade. O toque final que transforma qualquer produção básica.',
     details: [
       'Couro macio que não craquela',
@@ -481,7 +472,6 @@ export const PRODUCTS: Product[] = [
     line: 'Festa & Noite',
     status: ['Novidade', 'Pronta Entrega'],
     isNewArrival: true,
-    badge: 'Semijoia Fina',
     description: 'Colar com corrente de elos entrelaçados em acabamento polido reluzente. Design marcante que valoriza decotes e eleva produções com camisas e tricots.',
     details: [
       'Banho de alta espessura com camada hipoalergênica',
@@ -516,7 +506,6 @@ export const PRODUCTS: Product[] = [
     line: 'Festa & Noite',
     status: ['Novidade'],
     isNewArrival: true,
-    badge: 'Exclusividade',
     description: 'Bolsa modelo baguette em material nobre com acabamento impecável. Acompanha duas opções de alça: uma em corrente dourada para eventos e outra em couro para o dia a dia.',
     details: [
       'Compartimento interno com bolso para cartões e documentos',
@@ -545,6 +534,9 @@ export const PRODUCTS: Product[] = [
     name: 'Lenço em Seda Pura Acabamento Rolotê',
     price: 79.90,
     formattedPrice: 'R$ 79,90',
+    originalPrice: 94.90,
+    formattedOriginalPrice: 'R$ 94,90',
+    discountBadge: 'OUTLET 15% OFF',
     category: 'Acessórios',
     subcategory: 'Lenços',
     fabric: 'Cetim de Seda',
@@ -552,7 +544,6 @@ export const PRODUCTS: Product[] = [
     line: 'Resort & Elegância',
     status: ['OUTLET', 'Pronta Entrega'],
     isOutlet: true,
-    badge: 'Toque de Charme',
     description: 'Lenço quadrado em seda fluida com estampa geométrica inspirada na Riviera Italiana. Versatilidade infinita: amarre no pescoço, no cabelo, na bolsa ou use como cinto delicado.',
     details: [
       'Barra enrolada à mão com acabamento artesanal',
@@ -588,7 +579,6 @@ export const PRODUCTS: Product[] = [
     status: ['Novidade', 'Mais Vendido'],
     isNewArrival: true,
     isBestSeller: true,
-    badge: 'Tendência Forte',
     description: 'Colete com decote V e abotoamento frontal em crepe de alfaiataria. A peça queridinha da temporada que pode ser usada fechada como blusa ou aberta em sobreposições chiques.',
     details: [
       'Pala traseira com fivela de ajuste para cinturar o corpo',
@@ -627,7 +617,7 @@ export const PRODUCTS: Product[] = [
     line: 'Resort & Elegância',
     status: ['Novidade'],
     isNewArrival: true,
-    badge: 'Edição Limitada',
+    badge: 'Restam apenas 5 peças',
     description: 'Casaco sobretudo longo com gola imponente e cinto faixa para amarração. Confeccionado para quem exige o mais alto padrão térmico e estético nos dias frios.',
     details: [
       'Lã batida de toque denso e macio',

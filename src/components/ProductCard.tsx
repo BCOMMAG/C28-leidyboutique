@@ -86,15 +86,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Gradiente sutil inferior */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        {/* Badge de Destaque da Peça ou Desconto */}
-        {isOutletSection && product.discountBadge ? (
+        {/* Badge de Destaque: Somente OUTLET com % de OFF ou 'Restam apenas 5 peças' */}
+        {product.discountBadge ? (
           <div className={`absolute top-2.5 left-2.5 bg-[#C5A059] text-white uppercase tracking-wider font-bold rounded-md backdrop-blur-sm shadow-xs ${
             isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2.5 py-1'
           }`}>
             {product.discountBadge}
           </div>
-        ) : product.badge ? (
-          <div className={`absolute top-2.5 left-2.5 bg-[#1A1918]/90 dark:bg-black/90 text-[#FAF8F5] uppercase tracking-wider font-semibold rounded-md backdrop-blur-sm border border-[#C5A059]/30 ${
+        ) : product.badge?.includes('Restam') ? (
+          <div className={`absolute top-2.5 left-2.5 bg-[#8B5A2B]/90 dark:bg-black/90 text-[#FAF8F5] uppercase tracking-wider font-semibold rounded-md backdrop-blur-sm border border-[#C5A059]/40 ${
             isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2.5 py-1'
           }`}>
             {product.badge}
