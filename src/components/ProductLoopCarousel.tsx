@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
 
@@ -180,23 +180,6 @@ export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
       >
         <ChevronRight className="w-5 h-5 text-[#C5A059] hover:text-inherit" />
       </button>
-
-      {/* Indicador Sutil de Estado do Carrossel (Pausado ao Interagir) */}
-      <div className="mt-4 flex items-center justify-center gap-2">
-        <span className="text-[10px] text-[#A8A29E] dark:text-[#78716C] uppercase tracking-widest font-medium flex items-center gap-1.5">
-          {isPaused ? (
-            <>
-              <Pause className="w-2.5 h-2.5 text-[#C5A059]" />
-              <span>Pausado para inspeção</span>
-            </>
-          ) : (
-            <>
-              <Play className="w-2.5 h-2.5 text-[#C5A059] fill-[#C5A059]" />
-              <span>Apresentação automática em looping</span>
-            </>
-          )}
-        </span>
-      </div>
     </div>
   );
 };
