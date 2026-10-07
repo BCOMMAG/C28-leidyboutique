@@ -25,7 +25,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onExploreClick }) => {
         <video
           ref={videoRef}
           src="/video/header_video.mp4"
-          poster="/og-image_optimized_300.jpg"
+          poster="/video/header_poster.jpg"
           autoPlay
           loop
           muted={isMuted}
