@@ -14,7 +14,13 @@ export interface Product {
   discountBadge?: string;
   isOutlet?: boolean;
   isBestSeller?: boolean;
+  isNewArrival?: boolean;
   category: string;
+  subcategory?: string;
+  fabric?: string; // Tecido
+  fit?: string; // Modelagem
+  line?: string; // Linha
+  status?: string[]; // Status: Novidade, Mais Vendido, OUTLET, Pronta Entrega
   badge?: string;
   description: string;
   details: string[];

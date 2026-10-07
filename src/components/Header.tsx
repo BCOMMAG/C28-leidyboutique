@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Heart, Menu, X, Sun, Moon } from 'lucide-react';
+import { ShoppingBag, Heart, Menu, X, Sun, Moon, ChevronDown, Tag, Sparkles } from 'lucide-react';
 import { useStore } from '@/context/StoreContext';
+import { CATEGORIES_ROUPAS, CATEGORIES_ACESSORIOS, FAIXAS_PRECO } from '@/data/products';
 
 interface HeaderProps {
   cartCount: number;
@@ -22,13 +23,22 @@ export const Header: React.FC<HeaderProps> = ({
   wishlistCount,
   onOpenCart,
   onSelectCategory,
-  activeCategory = 'Todos os Modelos',
+  activeCategory = 'Todas as Peças',
   isSubpage = false
 }) => {
   const router = useRouter();
   const { theme, toggleTheme } = useStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Estados dos dropdowns desktop
+  const [activeDropdown, setActiveDropdown] = useState<'roupas' | 'acessorios' | 'precos' | null>(null);
+  const dropdownTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Estados dos acordions mobile
+  const [mobileRoupasOpen, setMobileRoupasOpen] = useState(false);
+  const [mobileAcessoriosOpen, setMobileAcessoriosOpen] = useState(false);
+  const [mobilePrecosOpen, setMobilePrecosOpen] = useState(false);
 
   useEffect(() => {
     if (isSubpage) {
@@ -44,29 +54,37 @@ export const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isSubpage]);
 
-  const navCategories = [
-    { label: 'Todos os Modelos', value: 'Todos os Modelos' },
-    { label: 'Mais Vendidos', value: 'Mais Vendidos' },
-    { label: 'Casacos & Tricots', value: 'Casacos & Tricots' },
-    { label: 'Conjuntos', value: 'Conjuntos Exclusivos' },
-    { label: 'Alfaiataria', value: 'Alfaiataria Nobre' },
-    { label: 'Blusas & Tops', value: 'Blusas & Tops' },
-    { label: 'OUTLET', value: 'OUTLET', isHighlight: true }
-  ];
+  const handleMouseEnter = (menu: 'roupas' | 'acessorios' | 'precos') => {
+    if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
+    setActiveDropdown(menu);
+  };
 
-  const handleNavClick = (catValue: string) => {
-    if (isSubpage) {
-      if (onSelectCategory && window.location.pathname === '/catalogo') {
-        onSelectCategory(catValue);
-      } else {
-        router.push(`/catalogo?categoria=${encodeURIComponent(catValue)}`);
-      }
-    } else {
-      if (onSelectCategory) {
-        onSelectCategory(catValue);
-      }
-    }
+  const handleMouseLeave = () => {
+    dropdownTimeout.current = setTimeout(() => {
+      setActiveDropdown(null);
+    }, 150);
+  };
+
+  const handleCategoryNavigation = (cat: string) => {
+    setActiveDropdown(null);
     setMobileMenuOpen(false);
+    if (onSelectCategory && window.location.pathname.includes('/catalogo')) {
+      onSelectCategory(cat);
+    } else {
+      router.push(`/catalogo?categoria=${encodeURIComponent(cat)}`);
+    }
+  };
+
+  const handlePriceNavigation = (min: number, max: number) => {
+    setActiveDropdown(null);
+    setMobileMenuOpen(false);
+    router.push(`/catalogo?precoMin=${min}&precoMax=${max}`);
+  };
+
+  const handleStatusNavigation = (statusName: string) => {
+    setActiveDropdown(null);
+    setMobileMenuOpen(false);
+    router.push(`/catalogo?status=${encodeURIComponent(statusName)}`);
   };
 
   return (
@@ -80,7 +98,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20 transition-all duration-300">
           
-          {/* Menu Mobile Button */}
+          {/* Botão Menu Mobile */}
           <div className="flex items-center lg:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -95,28 +113,147 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </div>
 
-          {/* Links de Navegação Desktop (Esquerda) */}
-          <nav className="hidden lg:flex items-center space-x-7">
-            {navCategories.map((cat) => {
-              const isActive = activeCategory === cat.value;
-              return (
-                <button
-                  key={cat.value}
-                  onClick={() => handleNavClick(cat.value)}
-                  className={`text-sm tracking-wide transition-all relative py-1 cursor-pointer ${
-                    isScrolled
-                      ? isActive
-                        ? 'text-[#C5A059] dark:text-[#DFBE76] font-semibold after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-[#C5A059] dark:after:bg-[#DFBE76]'
-                        : 'text-[#1A1918]/85 dark:text-[#FAF8F5]/85 hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
-                      : isActive
-                      ? 'text-[#DFBE76] font-semibold drop-shadow-sm after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-[#DFBE76]'
-                      : 'text-white/90 hover:text-[#DFBE76] drop-shadow-sm font-medium'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
+          {/* Links de Navegação Desktop com Mega-Menus / Dropdowns */}
+          <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+            
+            {/* 1. Roupas (Dropdown de Categorias Femininas) */}
+            <div
+              className="relative"
+              onMouseEnter={() => handleMouseEnter('roupas')}
+              onMouseLeave={handleMouseLeave}
+            >
+              <button
+                className={`flex items-center gap-1 text-sm tracking-wide transition-all py-2 cursor-pointer font-medium ${
+                  isScrolled
+                    ? 'text-[#1A1918]/90 dark:text-[#FAF8F5]/90 hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
+                    : 'text-white/95 hover:text-[#DFBE76] drop-shadow-sm'
+                }`}
+              >
+                <span>Roupas</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDropdown === 'roupas' ? 'rotate-180' : ''}`} />
+              </button>
+
+              {activeDropdown === 'roupas' && (
+                <div className="absolute top-full left-0 w-80 bg-white dark:bg-[#1A1918] rounded-2xl shadow-2xl border border-[#C5A059]/30 p-4 grid grid-cols-2 gap-1.5 animate-fadeIn z-50">
+                  <div className="col-span-2 pb-2 mb-1 border-b border-[#C5A059]/15 flex items-center justify-between">
+                    <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-bold">
+                      Categorias de Roupas
+                    </span>
+                    <button
+                      onClick={() => handleCategoryNavigation('Todas as Peças')}
+                      className="text-[11px] text-[#78716C] dark:text-[#A8A29E] hover:text-[#C5A059] underline cursor-pointer"
+                    >
+                      Ver Tudo
+                    </button>
+                  </div>
+                  {CATEGORIES_ROUPAS.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => handleCategoryNavigation(cat)}
+                      className="text-left text-xs py-2 px-2.5 rounded-lg text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer truncate"
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 2. Acessórios (Dropdown) */}
+            <div
+              className="relative"
+              onMouseEnter={() => handleMouseEnter('acessorios')}
+              onMouseLeave={handleMouseLeave}
+            >
+              <button
+                className={`flex items-center gap-1 text-sm tracking-wide transition-all py-2 cursor-pointer font-medium ${
+                  isScrolled
+                    ? 'text-[#1A1918]/90 dark:text-[#FAF8F5]/90 hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
+                    : 'text-white/95 hover:text-[#DFBE76] drop-shadow-sm'
+                }`}
+              >
+                <span>Acessórios</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDropdown === 'acessorios' ? 'rotate-180' : ''}`} />
+              </button>
+
+              {activeDropdown === 'acessorios' && (
+                <div className="absolute top-full left-0 w-56 bg-white dark:bg-[#1A1918] rounded-2xl shadow-2xl border border-[#C5A059]/30 p-3 flex flex-col gap-1 animate-fadeIn z-50">
+                  <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-bold px-2 py-1 border-b border-[#C5A059]/15 mb-1">
+                    Acessórios Nobres
+                  </span>
+                  {CATEGORIES_ACESSORIOS.map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => handleCategoryNavigation(item)}
+                      className="text-left text-xs py-2 px-2.5 rounded-lg text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 3. Por Preço (Dropdown de Faixas de Preço) */}
+            <div
+              className="relative"
+              onMouseEnter={() => handleMouseEnter('precos')}
+              onMouseLeave={handleMouseLeave}
+            >
+              <button
+                className={`flex items-center gap-1 text-sm tracking-wide transition-all py-2 cursor-pointer font-medium ${
+                  isScrolled
+                    ? 'text-[#1A1918]/90 dark:text-[#FAF8F5]/90 hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
+                    : 'text-white/95 hover:text-[#DFBE76] drop-shadow-sm'
+                }`}
+              >
+                <Tag className="w-3.5 h-3.5 text-[#C5A059]" />
+                <span>Por Preço</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDropdown === 'precos' ? 'rotate-180' : ''}`} />
+              </button>
+
+              {activeDropdown === 'precos' && (
+                <div className="absolute top-full left-0 w-52 bg-white dark:bg-[#1A1918] rounded-2xl shadow-2xl border border-[#C5A059]/30 p-3 flex flex-col gap-1 animate-fadeIn z-50">
+                  <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-bold px-2 py-1 border-b border-[#C5A059]/15 mb-1">
+                    Faixas de Preço
+                  </span>
+                  {FAIXAS_PRECO.map((faixa) => (
+                    <button
+                      key={faixa.label}
+                      onClick={() => handlePriceNavigation(faixa.min, faixa.max)}
+                      className="text-left text-xs py-2 px-2.5 rounded-lg text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer font-medium"
+                    >
+                      {faixa.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 4. Mais Vendidos */}
+            <button
+              onClick={() => handleStatusNavigation('Mais Vendidos')}
+              className={`text-sm tracking-wide transition-all py-2 cursor-pointer font-medium ${
+                isScrolled
+                  ? 'text-[#1A1918]/90 dark:text-[#FAF8F5]/90 hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
+                  : 'text-white/95 hover:text-[#DFBE76] drop-shadow-sm'
+              }`}
+            >
+              Mais Vendidos
+            </button>
+
+            {/* 5. OUTLET (Destaque Especial) */}
+            <button
+              onClick={() => handleStatusNavigation('OUTLET')}
+              className={`text-sm tracking-wide transition-all py-1.5 px-3 rounded-full cursor-pointer font-semibold ${
+                isScrolled
+                  ? 'bg-[#C5A059]/10 text-[#C5A059] dark:text-[#DFBE76] border border-[#C5A059]/40 hover:bg-[#C5A059] hover:text-white'
+                  : 'bg-black/30 text-[#DFBE76] border border-[#DFBE76]/60 hover:bg-[#DFBE76] hover:text-[#1A1918] drop-shadow-sm'
+              }`}
+            >
+              OUTLET
+            </button>
+
           </nav>
 
           {/* Logo Marca Leidy Boutique (Reduzida em 20% no desktop) */}
@@ -125,7 +262,6 @@ export const Header: React.FC<HeaderProps> = ({
               href="/"
               className="flex items-center cursor-pointer transition-transform duration-300 hover:scale-105"
             >
-              {/* Dimensões reduzidas em 20% no desktop: md:w-40 lg:w-42 md:h-11 */}
               <div className="relative w-32 sm:w-36 md:w-40 lg:w-42 h-9 sm:h-10 md:h-11">
                 <Image
                   src="/images/logo-transparente.png"
@@ -159,7 +295,7 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            {/* Favoritos: Leva para a Página de Favoritos */}
+            {/* Favoritos */}
             <Link
               href="/favoritos"
               className={`relative p-2 transition-colors cursor-pointer ${
@@ -203,43 +339,123 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Menu Gaveta Mobile */}
+      {/* Menu Gaveta Mobile com Acordeões */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white dark:bg-[#181615] border-b border-[#C5A059]/20 px-6 py-5 space-y-4 animate-fade-in-down shadow-xl text-[#1A1918] dark:text-[#FAF8F5]">
-          <p className="text-[11px] uppercase tracking-widest text-[#C5A059] font-semibold">
-            Categorias da Coleção
-          </p>
-          <div className="flex flex-col space-y-3">
-            {navCategories.map((cat) => (
-              <button
-                key={cat.value}
-                onClick={() => handleNavClick(cat.value)}
-                className={`text-left text-base transition-colors py-1 cursor-pointer ${
-                  activeCategory === cat.value
-                    ? 'text-[#C5A059] dark:text-[#DFBE76] font-semibold'
-                    : 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059]'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+        <div className="lg:hidden bg-white dark:bg-[#181615] border-b border-[#C5A059]/20 px-6 py-5 space-y-4 animate-fade-in-down shadow-xl text-[#1A1918] dark:text-[#FAF8F5] max-h-[85vh] overflow-y-auto">
+          
+          {/* Seção 1: Roupas */}
+          <div className="border-b border-[#C5A059]/15 pb-3">
+            <button
+              onClick={() => setMobileRoupasOpen(!mobileRoupasOpen)}
+              className="w-full flex items-center justify-between py-2 text-base font-semibold text-[#1A1918] dark:text-[#FAF8F5]"
+            >
+              <span>Roupas Femininas</span>
+              <ChevronDown className={`w-4 h-4 transition-transform ${mobileRoupasOpen ? 'rotate-180 text-[#C5A059]' : ''}`} />
+            </button>
+            {mobileRoupasOpen && (
+              <div className="pl-3 pt-2 grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => handleCategoryNavigation('Todas as Peças')}
+                  className="col-span-2 text-left text-xs py-1.5 text-[#C5A059] font-bold"
+                >
+                  Ver Todas as Roupas →
+                </button>
+                {CATEGORIES_ROUPAS.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => handleCategoryNavigation(cat)}
+                    className="text-left text-xs py-1.5 text-[#57534E] dark:text-[#D6D3D1] hover:text-[#C5A059] truncate"
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Seção 2: Acessórios */}
+          <div className="border-b border-[#C5A059]/15 pb-3">
+            <button
+              onClick={() => setMobileAcessoriosOpen(!mobileAcessoriosOpen)}
+              className="w-full flex items-center justify-between py-2 text-base font-semibold text-[#1A1918] dark:text-[#FAF8F5]"
+            >
+              <span>Acessórios</span>
+              <ChevronDown className={`w-4 h-4 transition-transform ${mobileAcessoriosOpen ? 'rotate-180 text-[#C5A059]' : ''}`} />
+            </button>
+            {mobileAcessoriosOpen && (
+              <div className="pl-3 pt-2 flex flex-col gap-2">
+                {CATEGORIES_ACESSORIOS.map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => handleCategoryNavigation(item)}
+                    className="text-left text-xs py-1.5 text-[#57534E] dark:text-[#D6D3D1] hover:text-[#C5A059]"
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Seção 3: Faixas de Preço */}
+          <div className="border-b border-[#C5A059]/15 pb-3">
+            <button
+              onClick={() => setMobilePrecosOpen(!mobilePrecosOpen)}
+              className="w-full flex items-center justify-between py-2 text-base font-semibold text-[#1A1918] dark:text-[#FAF8F5]"
+            >
+              <div className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-[#C5A059]" />
+                <span>Comprar por Preço</span>
+              </div>
+              <ChevronDown className={`w-4 h-4 transition-transform ${mobilePrecosOpen ? 'rotate-180 text-[#C5A059]' : ''}`} />
+            </button>
+            {mobilePrecosOpen && (
+              <div className="pl-3 pt-2 flex flex-col gap-2">
+                {FAIXAS_PRECO.map((f) => (
+                  <button
+                    key={f.label}
+                    onClick={() => handlePriceNavigation(f.min, f.max)}
+                    className="text-left text-xs py-1.5 text-[#57534E] dark:text-[#D6D3D1] hover:text-[#C5A059] font-medium"
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Links Rápidos: Mais Vendidos & OUTLET */}
+          <div className="flex flex-col space-y-2 pt-1">
+            <button
+              onClick={() => handleStatusNavigation('Mais Vendidos')}
+              className="text-left text-base text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] py-1 font-semibold"
+            >
+              Mais Vendidos
+            </button>
+            <button
+              onClick={() => handleStatusNavigation('OUTLET')}
+              className="text-left text-base text-[#C5A059] font-bold py-1"
+            >
+              OUTLET & Promoções
+            </button>
             <Link
               href="/favoritos"
               onClick={() => setMobileMenuOpen(false)}
               className="text-left text-base text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] py-1 flex items-center justify-between"
             >
-              <span>Ver Meus Favoritos</span>
+              <span>Meus Favoritos</span>
               <span className="text-xs bg-[#C5A059] text-white px-2 py-0.5 rounded-full font-bold">
                 {wishlistCount}
               </span>
             </Link>
           </div>
 
+          {/* Alternador de Tema no Mobile */}
           <div className="pt-4 border-t border-[#C5A059]/20 flex items-center justify-between">
             <span className="text-xs text-[#78716C] dark:text-[#A8A29E]">Tema Visual</span>
             <button
               onClick={toggleTheme}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#C5A059]/40 text-xs font-semibold"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#C5A059]/40 text-xs font-semibold cursor-pointer"
             >
               {theme === 'dark' ? (
                 <>

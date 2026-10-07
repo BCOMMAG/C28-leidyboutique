@@ -9,7 +9,12 @@ export const PRODUCTS: Product[] = [
     originalPrice: 349.90,
     formattedOriginalPrice: 'R$ 349,90',
     discountBadge: 'OUTLET 17% OFF',
-    category: 'Casacos & Tricots',
+    category: 'Casacos & Jaquetas',
+    subcategory: 'Tricots',
+    fabric: 'Tricot Biamar',
+    fit: 'Ampla / Oversized',
+    line: 'Casual Chic',
+    status: ['Mais Vendido', 'OUTLET', 'Pronta Entrega'],
     badge: 'Mais Vendido',
     isBestSeller: true,
     isOutlet: true,
@@ -21,7 +26,7 @@ export const PRODUCTS: Product[] = [
       'Composição: 70% Acrílico nobre, 30% Poliamida',
       'Cuidados: Lavagem manual ou ciclo delicado para preservar a fibra'
     ],
-    sizes: ['Tamanho Único (veste 38 ao 44)'],
+    sizes: ['Tamanho Único'],
     colors: [
       { name: 'Marrom Caramelo', hex: '#8B5A2B', imageSrc: '/products/01-casaco-tricot/marrom.jpg' },
       { name: 'Branco Off-White', hex: '#FAF9F6', imageSrc: '/products/01-casaco-tricot/branco.jpg' }
@@ -56,9 +61,15 @@ export const PRODUCTS: Product[] = [
     originalPrice: 249.90,
     formattedOriginalPrice: 'R$ 249,90',
     discountBadge: 'OUTLET 24% OFF',
+    category: 'Blusas & Tops',
+    subcategory: 'Tricots',
+    fabric: 'Tricot Biamar',
+    fit: 'Ajustada / Slim',
+    line: 'Casual Chic',
+    status: ['Mais Vendido', 'OUTLET', 'Novidade'],
     isOutlet: true,
     isBestSeller: true,
-    category: 'Blusas & Tops',
+    isNewArrival: true,
     badge: 'Edição Especial',
     description: 'Blusa em tricot canelado com ponto refinado e decote suave. Peça curinga que combina a delicadeza dos tons rosados com a sofisticação de uma malharia estruturada e confortável para qualquer momento do dia.',
     details: [
@@ -68,7 +79,7 @@ export const PRODUCTS: Product[] = [
       'Composição: 80% Fio Especial, 20% Elastano de reforço',
       'Peça versátil para combinar com alfaiataria ou jeans premium'
     ],
-    sizes: ['Tamanho Único (veste 36 ao 42)'],
+    sizes: ['P', 'M', 'Tamanho Único'],
     colors: [
       { name: 'Rosa Quartz', hex: '#E8A598', imageSrc: '/products/02-blusa-tricot-rosa/rosa.jpg' }
     ],
@@ -97,9 +108,14 @@ export const PRODUCTS: Product[] = [
     originalPrice: 429.90,
     formattedOriginalPrice: 'R$ 429,90',
     discountBadge: 'OUTLET 18% OFF',
+    category: 'Conjuntos Exclusivos',
+    subcategory: 'Camisas',
+    fabric: 'Cetim de Seda',
+    fit: 'Fluida / Evasê',
+    line: 'Festa & Noite',
+    status: ['Mais Vendido', 'OUTLET'],
     isOutlet: true,
     isBestSeller: true,
-    category: 'Conjuntos Exclusivos',
     badge: 'Look Casual Chic',
     description: 'Conjunto em cetim toque de seda com brilho suave e movimento natural. O match perfeito entre conforto descomplicado e o requinte de uma produção sofisticada para ocasiões especiais, jantares e passeios com estilo.',
     details: [
@@ -109,7 +125,7 @@ export const PRODUCTS: Product[] = [
       'Composição: 97% Cetim Seda Toque Suave, 3% Elastano',
       'Não amassa facilmente e traz frescor imediato'
     ],
-    sizes: ['P (veste 38)', 'M (veste 40)', 'G (veste 42/44)'],
+    sizes: ['P', 'M', 'G'],
     colors: [
       { name: 'Prata Acetinado', hex: '#D1D5DB', imageSrc: '/products/03-conjunto-cetim/prata.jpg' }
     ],
@@ -138,7 +154,12 @@ export const PRODUCTS: Product[] = [
     originalPrice: 489.90,
     formattedOriginalPrice: 'R$ 489,90',
     discountBadge: 'OUTLET 20% OFF',
-    category: 'Alfaiataria Nobre',
+    category: 'Blazers & Alfaiataria',
+    subcategory: 'Calças',
+    fabric: 'Crepe Alfaiataria',
+    fit: 'Alfaiataria Estruturada',
+    line: 'Trabalho & Alfaiataria',
+    status: ['Mais Vendido', 'OUTLET', 'Pronta Entrega'],
     badge: 'Top 1 Mais Vendido',
     isBestSeller: true,
     isOutlet: true,
@@ -146,11 +167,11 @@ export const PRODUCTS: Product[] = [
     details: [
       'Alfaiataria encorpada com costura e forro de alto padrão',
       'Blazer com ombreiras sutis que desenham a postura com harmonia',
-      'Calça pantalona com pregas frontaisRequesting alongadoras',
+      'Calça pantalona com pregas frontais alongadoras',
       'Composição: 95% Crepe Alfaiataria, 5% Spandex',
       'Acompanha botões nobres com acabamento em banho dourado fosco'
     ],
-    sizes: ['P (veste 38)', 'M (veste 40)', 'G (veste 42/44)'],
+    sizes: ['P', 'M', 'G'],
     colors: [
       { name: 'Bege Areia Nobre', hex: '#E2D3B8', imageSrc: '/products/04-conjunto-alfaiataria-bege/bege.jpg' }
     ],
@@ -170,15 +191,547 @@ export const PRODUCTS: Product[] = [
     rating: 5.0,
     reviewCount: 31,
     pairedWithId: '02-blusa-tricot-rosa'
+  },
+  {
+    id: '05-blazer-alfaiataria-offwhite',
+    name: 'Blazer Estruturado Imperial Off-White',
+    price: 459.90,
+    formattedPrice: 'R$ 459,90',
+    category: 'Blazers & Alfaiataria',
+    subcategory: 'Blazers & Alfaiataria',
+    fabric: 'Crepe Alfaiataria',
+    fit: 'Alfaiataria Estruturada',
+    line: 'Trabalho & Alfaiataria',
+    status: ['Novidade', 'Pronta Entrega'],
+    isNewArrival: true,
+    badge: 'Lançamento',
+    description: 'Blazer confeccionado em crepe de alfaiataria nobre com forro em cetim puro. Lapela alongada, botões frontais em banho ouro fosco e caimento que impõe presença em qualquer reunião ou evento especial.',
+    details: [
+      'Forro 100% acetato com costura embutida de alto padrão',
+      'Bolsos embutidos com lapela italiana',
+      'Ombreiras anatômicas que desenham os ombros com perfeição',
+      'Tecido resistente a vincos e marcas de uso'
+    ],
+    sizes: ['PP', 'P', 'M', 'G'],
+    colors: [
+      { name: 'Branco Off-White', hex: '#FAF9F6', imageSrc: '/products/01-casaco-tricot/branco.jpg' }
+    ],
+    media: [
+      {
+        type: 'video',
+        src: '/products/04-conjunto-alfaiataria-bege/video.mp4',
+        label: 'Vídeo no Provador (Leidy)'
+      },
+      {
+        type: 'image',
+        src: '/products/01-casaco-tricot/branco.jpg',
+        label: 'Branco Off-White'
+      }
+    ],
+    thumbnail: '/products/01-casaco-tricot/branco.jpg',
+    rating: 5.0,
+    reviewCount: 9,
+    pairedWithId: '04-conjunto-alfaiataria-bege'
+  },
+  {
+    id: '06-calca-pantalona-areia',
+    name: 'Calça Pantalona Cintura Alta Elegance',
+    price: 249.90,
+    formattedPrice: 'R$ 249,90',
+    category: 'Calças',
+    subcategory: 'Calças',
+    fabric: 'Crepe Alfaiataria',
+    fit: 'Reta Clássica',
+    line: 'Trabalho & Alfaiataria',
+    status: ['Pronta Entrega', 'Mais Vendido'],
+    isBestSeller: true,
+    badge: 'Curinga Clássico',
+    description: 'Pantalona em modelagem impecável com cintura alta e cós limpo. Possui pregas frontais que criam uma linha vertical alongadora e fluidez em cada passo.',
+    details: [
+      'Cós entretelado firme que valoriza a cintura',
+      'Fecho invisível e bolsos faca funcionais',
+      'Caimento solto e estruturado sem marcar',
+      'Comprimento ideal para salto fino ou mocassim'
+    ],
+    sizes: ['P', 'M', 'G', 'GG'],
+    colors: [
+      { name: 'Bege Areia Nobre', hex: '#E2D3B8', imageSrc: '/products/04-conjunto-alfaiataria-bege/bege.jpg' }
+    ],
+    media: [
+      {
+        type: 'video',
+        src: '/products/04-conjunto-alfaiataria-bege/video.mp4',
+        label: 'Vídeo no Provador (Leidy)'
+      },
+      {
+        type: 'image',
+        src: '/products/04-conjunto-alfaiataria-bege/bege.jpg',
+        label: 'Bege Areia'
+      }
+    ],
+    thumbnail: '/products/04-conjunto-alfaiataria-bege/bege.jpg',
+    rating: 4.8,
+    reviewCount: 16
+  },
+  {
+    id: '07-vestido-midi-seda',
+    name: 'Vestido Midi Fluido em Cetim Champagne',
+    price: 620.00,
+    formattedPrice: 'R$ 620,00',
+    category: 'Vestidos & Macacões',
+    subcategory: 'Vestidos & Macacões',
+    fabric: 'Cetim de Seda',
+    fit: 'Fluida / Evasê',
+    line: 'Festa & Noite',
+    status: ['Novidade'],
+    isNewArrival: true,
+    badge: 'Alta Costura',
+    description: 'Vestido midi confeccionado em cetim seda com corte no viés, abraçando as curvas com leveza e sensualidade sutil. Decote degagê delicado e alças ajustáveis.',
+    details: [
+      'Corte em viés que proporciona caimento orgânico único',
+      'Costura invisível e acabamento francês',
+      'Brilho sofisticado que reflete a luz com elegância',
+      'Ideal para celebrações, casamentos e coquetéis'
+    ],
+    sizes: ['P', 'M', 'G'],
+    colors: [
+      { name: 'Dourado Champagne', hex: '#DFBE76', imageSrc: '/products/03-conjunto-cetim/prata.jpg' },
+      { name: 'Prata Acetinado', hex: '#D1D5DB', imageSrc: '/products/03-conjunto-cetim/prata.jpg' }
+    ],
+    media: [
+      {
+        type: 'video',
+        src: '/products/03-conjunto-cetim/video.mp4',
+        label: 'Vídeo no Provador (Leidy)'
+      },
+      {
+        type: 'image',
+        src: '/products/03-conjunto-cetim/prata.jpg',
+        label: 'Prata Acetinado'
+      }
+    ],
+    thumbnail: '/products/03-conjunto-cetim/prata.jpg',
+    rating: 5.0,
+    reviewCount: 11
+  },
+  {
+    id: '08-camisa-seda-botoes',
+    name: 'Camisa Pura Elegância em Seda Acetinada',
+    price: 219.90,
+    formattedPrice: 'R$ 219,90',
+    category: 'Camisas',
+    subcategory: 'Camisas',
+    fabric: 'Cetim de Seda',
+    fit: 'Reta Clássica',
+    line: 'Casual Chic',
+    status: ['Pronta Entrega'],
+    badge: 'Atemporal',
+    description: 'Camisa de mangas compridas em seda acetinada de toque macio e fresco. Gola estruturada, punhos com abotoamento refinado e caimento leve para composições sofisticadas.',
+    details: [
+      'Botões tingidos no tom exato do tecido',
+      'Gola francesa entretelada com corte impecável',
+      'Fácil de sobrepor com tricots ou usar como peça principal',
+      'Excelente respiração do tecido'
+    ],
+    sizes: ['PP', 'P', 'M', 'G'],
+    colors: [
+      { name: 'Branco Off-White', hex: '#FAF9F6', imageSrc: '/products/01-casaco-tricot/branco.jpg' },
+      { name: 'Marrom Caramelo', hex: '#8B5A2B', imageSrc: '/products/01-casaco-tricot/marrom.jpg' }
+    ],
+    media: [
+      {
+        type: 'video',
+        src: '/products/03-conjunto-cetim/video.mp4',
+        label: 'Vídeo no Provador (Leidy)'
+      },
+      {
+        type: 'image',
+        src: '/products/01-casaco-tricot/branco.jpg',
+        label: 'Branco Off-White'
+      }
+    ],
+    thumbnail: '/products/01-casaco-tricot/branco.jpg',
+    rating: 4.9,
+    reviewCount: 20
+  },
+  {
+    id: '09-saia-midi-plissada',
+    name: 'Saia Midi Plissada Textura Canelada',
+    price: 199.90,
+    formattedPrice: 'R$ 199,90',
+    category: 'Saias',
+    subcategory: 'Saias',
+    fabric: 'Tricot Biamar',
+    fit: 'Fluida / Evasê',
+    line: 'Casual Chic',
+    status: ['Novidade', 'Pronta Entrega'],
+    isNewArrival: true,
+    badge: 'Fluidez & Estilo',
+    description: 'Saia em malharia fina plissada com elástico confortável na cintura. Cria um movimento belíssimo ao caminhar, perfeita para transitar do dia para a noite.',
+    details: [
+      'Plissado permanente que não deforma com a lavagem',
+      'Cós elástico macio que se molda suavemente à cintura',
+      'Comprimento midi elegante abaixo do joelho',
+      'Trama encorpada que dispensa o uso de forro extra'
+    ],
+    sizes: ['P', 'M', 'Tamanho Único'],
+    colors: [
+      { name: 'Marrom Caramelo', hex: '#8B5A2B', imageSrc: '/products/01-casaco-tricot/marrom.jpg' },
+      { name: 'Rosa Quartz', hex: '#E8A598', imageSrc: '/products/02-blusa-tricot-rosa/rosa.jpg' }
+    ],
+    media: [
+      {
+        type: 'video',
+        src: '/products/01-casaco-tricot/video.mp4',
+        label: 'Vídeo no Provador (Leidy)'
+      },
+      {
+        type: 'image',
+        src: '/products/01-casaco-tricot/marrom.jpg',
+        label: 'Marrom Caramelo'
+      }
+    ],
+    thumbnail: '/products/01-casaco-tricot/marrom.jpg',
+    rating: 4.8,
+    reviewCount: 8
+  },
+  {
+    id: '10-bermuda-alfaiataria-chic',
+    name: 'Bermuda Alfaiataria Pregas Duplas',
+    price: 179.90,
+    formattedPrice: 'R$ 179,90',
+    category: 'Bermudas & Shorts',
+    subcategory: 'Bermudas & Shorts',
+    fabric: 'Crepe Alfaiataria',
+    fit: 'Reta Clássica',
+    line: 'Casual Chic',
+    status: ['Pronta Entrega'],
+    badge: 'Frescor Chic',
+    description: 'Bermuda de corte reto em alfaiataria premium com comprimento meia-coxa elegante. Traz pregas frontais bem definidas e bolsos laterais funcionais.',
+    details: [
+      'Acabamento de alfaiataria masculina adaptado ao corpo feminino',
+      'Comprimento moderado ideal para propostas elegantes no calor',
+      'Passantes largos para compor com cintos de couro'
+    ],
+    sizes: ['36', '38', '40', '42'],
+    colors: [
+      { name: 'Bege Areia Nobre', hex: '#E2D3B8', imageSrc: '/products/04-conjunto-alfaiataria-bege/bege.jpg' }
+    ],
+    media: [
+      {
+        type: 'video',
+        src: '/products/04-conjunto-alfaiataria-bege/video.mp4',
+        label: 'Vídeo no Provador (Leidy)'
+      },
+      {
+        type: 'image',
+        src: '/products/04-conjunto-alfaiataria-bege/bege.jpg',
+        label: 'Bege Areia'
+      }
+    ],
+    thumbnail: '/products/04-conjunto-alfaiataria-bege/bege.jpg',
+    rating: 4.7,
+    reviewCount: 7
+  },
+  {
+    id: '11-cinto-couro-fivela-dourada',
+    name: 'Cinto em Couro Legítimo com Fivela Dourada',
+    price: 89.90,
+    formattedPrice: 'R$ 89,90',
+    category: 'Acessórios',
+    subcategory: 'Cintos',
+    fabric: 'Couro Premium',
+    fit: 'Ajustada / Slim',
+    line: 'Casual Chic',
+    status: ['Mais Vendido', 'Pronta Entrega'],
+    isBestSeller: true,
+    badge: 'Acessório Must-Have',
+    description: 'Cinto fino em couro estruturado com acabamento fosco e fivela geométrica em banho dourado de alta durabilidade. O toque final que transforma qualquer produção básica.',
+    details: [
+      'Couro macio que não craquela',
+      'Fivela antialérgica com banho especial verniz',
+      'Largura média ideal para calças de alfaiataria ou acinturar blazers',
+      'Comprimento ajustável com 7 furos'
+    ],
+    sizes: ['Tamanho Único'],
+    colors: [
+      { name: 'Marrom Caramelo', hex: '#8B5A2B', imageSrc: '/products/01-casaco-tricot/marrom.jpg' },
+      { name: 'Preto Clássico', hex: '#1A1918', imageSrc: '/products/01-casaco-tricot/marrom.jpg' }
+    ],
+    media: [
+      {
+        type: 'image',
+        src: '/products/01-casaco-tricot/marrom.jpg',
+        label: 'Cinto Couro Caramelo'
+      }
+    ],
+    thumbnail: '/products/01-casaco-tricot/marrom.jpg',
+    rating: 4.9,
+    reviewCount: 25
+  },
+  {
+    id: '12-colar-elo-dourado',
+    name: 'Colar Elos Portugueses Banho Ouro 18k',
+    price: 99.00,
+    formattedPrice: 'R$ 99,00',
+    category: 'Acessórios',
+    subcategory: 'Colares & Joias',
+    fabric: 'Metal Nobre Banho 18k',
+    fit: 'Ajustada / Slim',
+    line: 'Festa & Noite',
+    status: ['Novidade', 'Pronta Entrega'],
+    isNewArrival: true,
+    badge: 'Semijoia Fina',
+    description: 'Colar com corrente de elos entrelaçados em acabamento polido reluzente. Design marcante que valoriza decotes e eleva produções com camisas e tricots.',
+    details: [
+      'Banho de alta espessura com camada hipoalergênica',
+      'Fecho lagosta seguro com extensor de 5cm',
+      'Brilho radiante que dura anos com os devidos cuidados',
+      'Acompanha saquinho de veludo para proteção'
+    ],
+    sizes: ['Tamanho Único'],
+    colors: [
+      { name: 'Dourado Champagne', hex: '#DFBE76', imageSrc: '/products/04-conjunto-alfaiataria-bege/bege.jpg' }
+    ],
+    media: [
+      {
+        type: 'image',
+        src: '/products/04-conjunto-alfaiataria-bege/bege.jpg',
+        label: 'Colar Elos Dourados'
+      }
+    ],
+    thumbnail: '/products/04-conjunto-alfaiataria-bege/bege.jpg',
+    rating: 5.0,
+    reviewCount: 19
+  },
+  {
+    id: '13-bolsa-clutch-acetinada',
+    name: 'Bolsa Baguette Estruturada com Alça Corrente',
+    price: 299.90,
+    formattedPrice: 'R$ 299,90',
+    category: 'Acessórios',
+    subcategory: 'Bolsas & Carteiras',
+    fabric: 'Couro Premium',
+    fit: 'Reta Clássica',
+    line: 'Festa & Noite',
+    status: ['Novidade'],
+    isNewArrival: true,
+    badge: 'Exclusividade',
+    description: 'Bolsa modelo baguette em material nobre com acabamento impecável. Acompanha duas opções de alça: uma em corrente dourada para eventos e outra em couro para o dia a dia.',
+    details: [
+      'Compartimento interno com bolso para cartões e documentos',
+      'Fechamento com botão magnético de precisão',
+      'Forro interno em camurça aveludada',
+      'Espaço perfeito para celular, chaves e maquiagem'
+    ],
+    sizes: ['Tamanho Único'],
+    colors: [
+      { name: 'Prata Acetinado', hex: '#D1D5DB', imageSrc: '/products/03-conjunto-cetim/prata.jpg' },
+      { name: 'Branco Off-White', hex: '#FAF9F6', imageSrc: '/products/01-casaco-tricot/branco.jpg' }
+    ],
+    media: [
+      {
+        type: 'image',
+        src: '/products/03-conjunto-cetim/prata.jpg',
+        label: 'Bolsa Baguette'
+      }
+    ],
+    thumbnail: '/products/03-conjunto-cetim/prata.jpg',
+    rating: 5.0,
+    reviewCount: 12
+  },
+  {
+    id: '14-lenco-seda-estampado',
+    name: 'Lenço em Seda Pura Acabamento Rolotê',
+    price: 79.90,
+    formattedPrice: 'R$ 79,90',
+    category: 'Acessórios',
+    subcategory: 'Lenços',
+    fabric: 'Cetim de Seda',
+    fit: 'Fluida / Evasê',
+    line: 'Resort & Elegância',
+    status: ['OUTLET', 'Pronta Entrega'],
+    isOutlet: true,
+    badge: 'Toque de Charme',
+    description: 'Lenço quadrado em seda fluida com estampa geométrica inspirada na Riviera Italiana. Versatilidade infinita: amarre no pescoço, no cabelo, na bolsa ou use como cinto delicado.',
+    details: [
+      'Barra enrolada à mão com acabamento artesanal',
+      'Estamparia digital de altíssima definição',
+      'Medidas: 70cm x 70cm',
+      'Toque macio e refrescante'
+    ],
+    sizes: ['Tamanho Único'],
+    colors: [
+      { name: 'Rosa Quartz', hex: '#E8A598', imageSrc: '/products/02-blusa-tricot-rosa/rosa.jpg' }
+    ],
+    media: [
+      {
+        type: 'image',
+        src: '/products/02-blusa-tricot-rosa/rosa.jpg',
+        label: 'Lenço Seda'
+      }
+    ],
+    thumbnail: '/products/02-blusa-tricot-rosa/rosa.jpg',
+    rating: 4.8,
+    reviewCount: 17
+  },
+  {
+    id: '15-colete-alfaiataria-botoes',
+    name: 'Colete de Alfaiataria Feminino Sem Manga',
+    price: 199.90,
+    formattedPrice: 'R$ 199,90',
+    category: 'Coletes & Cardigãs',
+    subcategory: 'Coletes & Cardigãs',
+    fabric: 'Crepe Alfaiataria',
+    fit: 'Alfaiataria Estruturada',
+    line: 'Trabalho & Alfaiataria',
+    status: ['Novidade', 'Mais Vendido'],
+    isNewArrival: true,
+    isBestSeller: true,
+    badge: 'Tendência Forte',
+    description: 'Colete com decote V e abotoamento frontal em crepe de alfaiataria. A peça queridinha da temporada que pode ser usada fechada como blusa ou aberta em sobreposições chiques.',
+    details: [
+      'Pala traseira com fivela de ajuste para cinturar o corpo',
+      'Forro acetinado macio em toda a extensão',
+      'Botões nobres forrados no mesmo tecido'
+    ],
+    sizes: ['P', 'M', 'G'],
+    colors: [
+      { name: 'Bege Areia Nobre', hex: '#E2D3B8', imageSrc: '/products/04-conjunto-alfaiataria-bege/bege.jpg' }
+    ],
+    media: [
+      {
+        type: 'video',
+        src: '/products/04-conjunto-alfaiataria-bege/video.mp4',
+        label: 'Vídeo no Provador (Leidy)'
+      },
+      {
+        type: 'image',
+        src: '/products/04-conjunto-alfaiataria-bege/bege.jpg',
+        label: 'Colete Bege'
+      }
+    ],
+    thumbnail: '/products/04-conjunto-alfaiataria-bege/bege.jpg',
+    rating: 4.9,
+    reviewCount: 21
+  },
+  {
+    id: '16-sobretudo-la-premium',
+    name: 'Sobretudo Estruturado em Lã Batida Deluxe',
+    price: 699.90,
+    formattedPrice: 'R$ 699,90',
+    category: 'Casacos & Jaquetas',
+    subcategory: 'Casacos & Jaquetas',
+    fabric: 'Lã & Fios Nobres',
+    fit: 'Ampla / Oversized',
+    line: 'Resort & Elegância',
+    status: ['Novidade'],
+    isNewArrival: true,
+    badge: 'Edição Limitada',
+    description: 'Casaco sobretudo longo com gola imponente e cinto faixa para amarração. Confeccionado para quem exige o mais alto padrão térmico e estético nos dias frios.',
+    details: [
+      'Lã batida de toque denso e macio',
+      'Bolsos embutidos profundos para aquecer as mãos',
+      'Fenda traseira que garante liberdade total de movimento',
+      'Acompanha cinto faixa largo no mesmo tecido'
+    ],
+    sizes: ['M', 'G'],
+    colors: [
+      { name: 'Marrom Caramelo', hex: '#8B5A2B', imageSrc: '/products/01-casaco-tricot/marrom.jpg' }
+    ],
+    media: [
+      {
+        type: 'video',
+        src: '/products/01-casaco-tricot/video.mp4',
+        label: 'Vídeo no Provador (Leidy)'
+      },
+      {
+        type: 'image',
+        src: '/products/01-casaco-tricot/marrom.jpg',
+        label: 'Sobretudo Caramelo'
+      }
+    ],
+    thumbnail: '/products/01-casaco-tricot/marrom.jpg',
+    rating: 5.0,
+    reviewCount: 6
   }
+];
+
+export const CATEGORIES_ROUPAS = [
+  'Bermudas & Shorts',
+  'Blazers & Alfaiataria',
+  'Blusas & Tops',
+  'Calças',
+  'Camisas',
+  'Casacos & Jaquetas',
+  'Coletes & Cardigãs',
+  'Conjuntos Exclusivos',
+  'Saias',
+  'Tricots',
+  'Underwear & Loungewear',
+  'Vestidos & Macacões'
+];
+
+export const CATEGORIES_ACESSORIOS = [
+  'Bolsas & Carteiras',
+  'Cintos',
+  'Colares & Joias',
+  'Lenços',
+  'Óculos de Sol'
+];
+
+export const ALL_CATEGORIES = [
+  'Todas as Peças',
+  ...CATEGORIES_ROUPAS,
+  ...CATEGORIES_ACESSORIOS
+];
+
+export const FAIXAS_PRECO = [
+  { label: 'Até R$ 99', min: 0, max: 99 },
+  { label: 'R$ 99 a R$ 199', min: 99, max: 199 },
+  { label: 'R$ 199 a R$ 399', min: 199, max: 399 },
+  { label: 'R$ 399 a R$ 599', min: 399, max: 599 },
+  { label: 'Acima de R$ 599', min: 599, max: 99999 }
+];
+
+export const FILTROS_TECIDO = [
+  'Tricot Biamar',
+  'Cetim de Seda',
+  'Crepe Alfaiataria',
+  'Linho Puro',
+  'Algodão Nobre',
+  'Lã & Fios Nobres',
+  'Couro Premium'
+];
+
+export const FILTROS_MODELAGEM = [
+  'Alfaiataria Estruturada',
+  'Ampla / Oversized',
+  'Reta Clássica',
+  'Fluida / Evasê',
+  'Ajustada / Slim'
+];
+
+export const FILTROS_LINHA = [
+  'Casual Chic',
+  'Trabalho & Alfaiataria',
+  'Festa & Noite',
+  'Resort & Elegância'
+];
+
+export const FILTROS_STATUS = [
+  'Novidades',
+  'Mais Vendidos',
+  'Peças em OUTLET',
+  'Pronta Entrega'
 ];
 
 export const CATEGORIES = [
   'Todos os Modelos',
   'Mais Vendidos',
-  'Casacos & Tricots',
+  'Casacos & Jaquetas',
   'Conjuntos Exclusivos',
-  'Alfaiataria Nobre',
+  'Blazers & Alfaiataria',
   'Blusas & Tops',
   'OUTLET'
 ];
@@ -186,7 +739,8 @@ export const CATEGORIES = [
 export const STORE_INFO = {
   name: 'Leidy Boutique',
   tagline: 'Curadoria Exclusiva em Moda Feminina',
-  whatsapp: '5549999999999', // Leonardo pode ajustar o número real da Leidy a qualquer momento
+  whatsapp: '5549999999999',
   instagram: '@leidyboutique',
   freeShippingThreshold: 350.00
 };
+
