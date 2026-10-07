@@ -13,6 +13,8 @@ interface StoreContextType {
   isSizeGuideOpen: boolean;
   cartCount: number;
   wishlistCount: number;
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
   addToCart: (params: {
     product: Product;
     size: string;
@@ -40,8 +42,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
-  // Carregar do localStorage na montagem
+  // Carregar dados e tema do localStorage na montagem
   useEffect(() => {
     try {
       const savedWishlist = localStorage.getItem('leidy_wishlist');
@@ -52,10 +55,40 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (savedCart) {
         setCartItems(JSON.parse(savedCart));
       }
+      const savedTheme = localStorage.getItem('leidy_theme') as 'light' | 'dark' | null;
+      if (savedTheme) {
+        setTheme(savedTheme);
+        if (savedTheme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // Se o sistema do usuário estiver em dark mode e não houver preferência salva
+        setTheme('dark');
+        document.documentElement.classList.add('dark');
+      }
     } catch (e) {
       console.error(e);
     }
   }, []);
+
+  const toggleTheme = () => {
+    setTheme((prev) => {
+      const nextTheme = prev === 'light' ? 'dark' : 'light';
+      if (nextTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      try {
+        localStorage.setItem('leidy_theme', nextTheme);
+      } catch (e) {
+        console.error(e);
+      }
+      return nextTheme;
+    });
+  };
 
   // Salvar favoritos no localStorage
   useEffect(() => {
@@ -168,6 +201,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         isSizeGuideOpen,
         cartCount,
         wishlistCount,
+        theme,
+        toggleTheme,
         addToCart,
         updateCartQuantity,
         removeFromCart,

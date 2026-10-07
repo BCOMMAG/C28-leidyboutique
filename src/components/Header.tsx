@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Heart, MessageCircle, Menu, X } from 'lucide-react';
-import { STORE_INFO } from '@/data/products';
+import { ShoppingBag, Heart, Menu, X, Sun, Moon } from 'lucide-react';
+import { useStore } from '@/context/StoreContext';
 
 interface HeaderProps {
   cartCount: number;
@@ -21,12 +21,12 @@ export const Header: React.FC<HeaderProps> = ({
   cartCount,
   wishlistCount,
   onOpenCart,
-  onOpenWishlist,
   onSelectCategory,
   activeCategory = 'Todos os Modelos',
   isSubpage = false
 }) => {
   const router = useRouter();
+  const { theme, toggleTheme } = useStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -36,7 +36,8 @@ export const Header: React.FC<HeaderProps> = ({
       return;
     }
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 30);
+      const top = window.scrollY || document.documentElement.scrollTop || window.pageYOffset || 0;
+      setIsScrolled(top > 15);
     };
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -72,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
         isScrolled
-          ? 'bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#C5A059]/20 shadow-xs'
+          ? 'bg-white/95 dark:bg-[#141312]/95 backdrop-blur-md border-b border-[#C5A059]/20 shadow-sm'
           : 'bg-transparent border-b border-transparent'
       }`}
     >
@@ -83,9 +84,9 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center lg:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`p-2 transition-colors ${
+              className={`p-2 transition-colors cursor-pointer ${
                 isScrolled
-                  ? 'text-[#1A1918] hover:text-[#C5A059]'
+                  ? 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059]'
                   : 'text-white hover:text-[#DFBE76] drop-shadow-sm'
               }`}
               aria-label="Abrir menu"
@@ -105,8 +106,8 @@ export const Header: React.FC<HeaderProps> = ({
                   className={`text-sm tracking-wide transition-all relative py-1 cursor-pointer ${
                     isScrolled
                       ? isActive
-                        ? 'text-[#C5A059] font-medium after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-[#C5A059]'
-                        : 'text-[#1A1918]/80 hover:text-[#C5A059]'
+                        ? 'text-[#C5A059] dark:text-[#DFBE76] font-semibold after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-[#C5A059] dark:after:bg-[#DFBE76]'
+                        : 'text-[#1A1918]/85 dark:text-[#FAF8F5]/85 hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
                       : isActive
                       ? 'text-[#DFBE76] font-semibold drop-shadow-sm after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-[#DFBE76]'
                       : 'text-white/90 hover:text-[#DFBE76] drop-shadow-sm font-medium'
@@ -118,13 +119,14 @@ export const Header: React.FC<HeaderProps> = ({
             })}
           </nav>
 
-          {/* Logo Limpa e Sem Fundo (Marca Leidy Boutique) */}
+          {/* Logo Marca Leidy Boutique (Reduzida em 20% no desktop) */}
           <div className="flex-1 flex justify-center lg:flex-initial">
             <Link
               href="/"
               className="flex items-center cursor-pointer transition-transform duration-300 hover:scale-105"
             >
-              <div className="relative w-36 sm:w-44 md:w-52 h-10 sm:h-12 md:h-14">
+              {/* Dimensões reduzidas em 20% no desktop: md:w-40 lg:w-42 md:h-11 */}
+              <div className="relative w-32 sm:w-36 md:w-40 lg:w-42 h-9 sm:h-10 md:h-11">
                 <Image
                   src="/images/logo-transparente.png"
                   alt="Leidy Boutique"
@@ -136,33 +138,37 @@ export const Header: React.FC<HeaderProps> = ({
             </Link>
           </div>
 
-          {/* Ações da Direita (Wishlist, Atendimento, Sacola) */}
-          <div className="flex items-center space-x-3 sm:space-x-4">
+          {/* Ações da Direita: Modo Escuro, Wishlist, Sacola */}
+          <div className="flex items-center space-x-2 sm:space-x-3">
             
-            {/* Botão de Contato WhatsApp Direto */}
-            <a
-              href={`https://wa.me/${STORE_INFO.whatsapp}?text=Ol%C3%A1%20Leidy!%20Estou%20vendo%20as%20pe%C3%A7as%20no%20seu%20site%20e%20gostaria%20de%20tirar%20uma%20d%C3%BAvida.`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`hidden sm:inline-flex items-center gap-2 text-xs uppercase tracking-wider font-medium px-3.5 py-2 rounded-full border transition-all ${
+            {/* Toggle Modo Escuro / Claro */}
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-full transition-colors cursor-pointer ${
                 isScrolled
-                  ? 'text-[#1A1918] hover:text-[#C5A059] border-[#C5A059]/30 hover:border-[#C5A059] bg-[#FAF8F5]'
-                  : 'text-white border-white/40 hover:border-white bg-black/20 hover:bg-black/35 backdrop-blur-xs drop-shadow-sm'
+                  ? 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
+                  : 'text-white hover:text-[#DFBE76] drop-shadow-sm'
               }`}
+              aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
+              title={theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
             >
-              <MessageCircle className="w-4 h-4 text-[#25D366]" />
-              <span>Falar com Leidy</span>
-            </a>
+              {theme === 'dark' ? (
+                <Sun className="w-5 h-5 text-[#DFBE76] transition-transform hover:rotate-45" />
+              ) : (
+                <Moon className="w-5 h-5 transition-transform hover:-rotate-12" />
+              )}
+            </button>
 
-            {/* Favoritos: Leva para a Nova Página de Favoritos */}
+            {/* Favoritos: Leva para a Página de Favoritos */}
             <Link
               href="/favoritos"
-              className={`relative p-2 transition-colors ${
+              className={`relative p-2 transition-colors cursor-pointer ${
                 isScrolled
-                  ? 'text-[#1A1918] hover:text-[#C5A059]'
+                  ? 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
                   : 'text-white hover:text-[#DFBE76] drop-shadow-sm'
               }`}
               aria-label="Ver coleção de favoritos"
+              title="Meus Favoritos"
             >
               <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
               {wishlistCount > 0 && (
@@ -177,27 +183,29 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={onOpenCart}
               className={`relative p-2 transition-transform active:scale-95 cursor-pointer ${
                 isScrolled
-                  ? 'text-[#1A1918] hover:text-[#C5A059]'
+                  ? 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
                   : 'text-white hover:text-[#DFBE76] drop-shadow-sm'
               }`}
               aria-label="Abrir sacola de compras"
+              title="Sacola de Compras"
             >
               <div className="relative">
                 <ShoppingBag className="w-6 h-6 sm:w-7 sm:h-7 stroke-[1.7]" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#C5A059] text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-bold border-2 border-white animate-scale shadow-sm">
+                  <span className="absolute -top-1 -right-1 bg-[#C5A059] text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-bold border-2 border-white dark:border-[#141312] animate-scale shadow-sm">
                     {cartCount}
                   </span>
                 )}
               </div>
             </button>
+
           </div>
         </div>
       </div>
 
       {/* Menu Gaveta Mobile */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#FAF8F5] border-b border-[#C5A059]/20 px-6 py-5 space-y-4 animate-fade-in-down shadow-xl text-[#1A1918]">
+        <div className="lg:hidden bg-white dark:bg-[#181615] border-b border-[#C5A059]/20 px-6 py-5 space-y-4 animate-fade-in-down shadow-xl text-[#1A1918] dark:text-[#FAF8F5]">
           <p className="text-[11px] uppercase tracking-widest text-[#C5A059] font-semibold">
             Categorias da Coleção
           </p>
@@ -206,10 +214,10 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 key={cat.value}
                 onClick={() => handleNavClick(cat.value)}
-                className={`text-left text-base transition-colors py-1 ${
+                className={`text-left text-base transition-colors py-1 cursor-pointer ${
                   activeCategory === cat.value
-                    ? 'text-[#C5A059] font-medium'
-                    : 'text-[#1A1918] hover:text-[#C5A059]'
+                    ? 'text-[#C5A059] dark:text-[#DFBE76] font-semibold'
+                    : 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059]'
                 }`}
               >
                 {cat.label}
@@ -218,7 +226,7 @@ export const Header: React.FC<HeaderProps> = ({
             <Link
               href="/favoritos"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-left text-base text-[#1A1918] hover:text-[#C5A059] py-1 flex items-center justify-between"
+              className="text-left text-base text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] py-1 flex items-center justify-between"
             >
               <span>Ver Meus Favoritos</span>
               <span className="text-xs bg-[#C5A059] text-white px-2 py-0.5 rounded-full font-bold">
@@ -226,16 +234,25 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </Link>
           </div>
-          <div className="pt-4 border-t border-[#C5A059]/20 flex flex-col gap-2">
-            <a
-              href={`https://wa.me/${STORE_INFO.whatsapp}?text=Ol%C3%A1%20Leidy!%20Gostaria%20de%20um%20atendimento%20personalizado.`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-3 bg-[#1A1918] text-white rounded-lg text-xs uppercase tracking-wider font-semibold"
+
+          <div className="pt-4 border-t border-[#C5A059]/20 flex items-center justify-between">
+            <span className="text-xs text-[#78716C] dark:text-[#A8A29E]">Tema Visual</span>
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#C5A059]/40 text-xs font-semibold"
             >
-              <MessageCircle className="w-4 h-4 text-[#25D366]" />
-              Falar com a Leidy no WhatsApp
-            </a>
+              {theme === 'dark' ? (
+                <>
+                  <Sun className="w-4 h-4 text-[#DFBE76]" />
+                  <span>Modo Claro</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-4 h-4 text-[#1A1918]" />
+                  <span>Modo Escuro</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}

@@ -62,7 +62,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F5]">
+    <div className="min-h-screen flex flex-col bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300">
       {/* Header Fixo / Transparente */}
       <Header
         cartCount={cartCount}
@@ -85,14 +85,14 @@ export default function HomePage() {
         <section id="mais-vendidos" className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-[#C5A059]/20">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
             <div>
-              <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] font-semibold block mb-1.5">
+              <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-semibold block mb-1.5">
                 Os Favoritos da Boutique
               </span>
-              <h2 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] font-medium">
+              <h2 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
                 Mais Vendidos
               </h2>
             </div>
-            <p className="text-xs text-[#78716C] max-w-sm hidden sm:block">
+            <p className="text-xs text-[#78716C] dark:text-[#A8A29E] max-w-sm hidden sm:block">
               As peças com maior procura na nossa boutique, reconhecidas pelo caimento impecável e acabamento nobre.
             </p>
           </div>
@@ -122,7 +122,7 @@ export default function HomePage() {
           <div className="mt-8 sm:mt-12 text-center">
             <Link
               href="/catalogo?categoria=Mais%20Vendidos"
-              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-full border border-[#C5A059] bg-white text-[#1A1918] hover:bg-[#1A1918] hover:text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-full border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
             >
               <span>Ver Mais Produtos</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -133,10 +133,10 @@ export default function HomePage() {
         {/* 2. SEÇÃO: COLEÇÃO ATUAL (CATÁLOGO GERAL) */}
         <section id="catalogo" className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
-            <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] font-semibold block mb-2">
+            <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-semibold block mb-2">
               Todas as Peças
             </span>
-            <h2 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] font-medium">
+            <h2 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
               Coleção Atual
             </h2>
 
@@ -151,10 +151,10 @@ export default function HomePage() {
                     onClick={() => handleCategorySelection(category)}
                     className={`px-4 sm:px-5 py-2 rounded-full text-xs font-semibold tracking-wider transition-all duration-300 cursor-pointer ${
                       isActive
-                        ? 'bg-[#1A1918] text-[#FAF8F5] shadow-sm'
+                        ? 'bg-[#1A1918] dark:bg-[#C5A059] text-[#FAF8F5] shadow-sm'
                         : isOutletTab
-                        ? 'bg-white text-[#C5A059] border border-[#C5A059] hover:bg-[#C5A059] hover:text-white font-bold'
-                        : 'bg-white text-[#57534E] border border-[#C5A059]/30 hover:border-[#C5A059] hover:text-[#1A1918]'
+                        ? 'bg-white dark:bg-[#1C1A18] text-[#C5A059] border border-[#C5A059] hover:bg-[#C5A059] hover:text-white font-bold'
+                        : 'bg-white dark:bg-[#1C1A18] text-[#57534E] dark:text-[#D6D3D1] border border-[#C5A059]/30 hover:border-[#C5A059] hover:text-[#1A1918] dark:hover:text-white'
                     }`}
                   >
                     {category}
@@ -189,7 +189,7 @@ export default function HomePage() {
           <div className="mt-8 sm:mt-12 text-center">
             <Link
               href="/catalogo"
-              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 rounded-full bg-[#1A1918] text-white hover:bg-[#C5A059] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 rounded-full bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md cursor-pointer"
             >
               <span>Ver Mais Produtos no Catálogo Completo</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -198,18 +198,18 @@ export default function HomePage() {
         </section>
 
         {/* 3. SEÇÃO: OUTLET */}
-        <section id="outlet" className="py-16 sm:py-24 bg-[#F5EFE6]/70 border-t border-[#C5A059]/25">
+        <section id="outlet" className="py-16 sm:py-24 bg-[#F5EFE6]/70 dark:bg-[#181615] border-t border-[#C5A059]/25">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
               <div>
-                <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] font-bold block mb-1.5">
+                <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-bold block mb-1.5">
                   Oportunidades Especiais
                 </span>
-                <h2 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] font-medium">
+                <h2 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
                   OUTLET & Peças Selecionadas
                 </h2>
               </div>
-              <p className="text-xs text-[#57534E] max-w-sm hidden sm:block">
+              <p className="text-xs text-[#57534E] dark:text-[#A8A29E] max-w-sm hidden sm:block">
                 Peças exclusivas com valores promocionais e últimas unidades disponíveis na boutique.
               </p>
             </div>
@@ -240,7 +240,7 @@ export default function HomePage() {
             <div className="mt-8 sm:mt-12 text-center">
               <Link
                 href="/catalogo?categoria=OUTLET"
-                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-full border border-[#C5A059] bg-white text-[#1A1918] hover:bg-[#C5A059] hover:text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
+                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-full border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#C5A059] hover:text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
               >
                 <span>Ver Mais Peças do OUTLET</span>
                 <ArrowRight className="w-3.5 h-3.5" />

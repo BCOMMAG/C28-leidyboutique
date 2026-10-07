@@ -118,7 +118,7 @@ function CatalogoContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F5]">
+    <div className="min-h-screen flex flex-col bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300">
       {/* Header */}
       <Header
         cartCount={cartCount}
@@ -137,7 +137,7 @@ function CatalogoContent() {
           <div className="mb-6 flex items-center justify-between">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-[#57534E] hover:text-[#C5A059] font-semibold transition-colors"
+              className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-[#57534E] dark:text-[#A8A29E] hover:text-[#C5A059] font-semibold transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Voltar para a Página Inicial</span>
@@ -145,7 +145,7 @@ function CatalogoContent() {
 
             <Link
               href="/favoritos"
-              className="text-xs uppercase tracking-wider text-[#C5A059] hover:underline font-semibold"
+              className="text-xs uppercase tracking-wider text-[#C5A059] dark:text-[#DFBE76] hover:underline font-semibold"
             >
               Ver Favoritos ({wishlistCount}) →
             </Link>
@@ -153,41 +153,41 @@ function CatalogoContent() {
 
           {/* Cabeçalho do Catálogo */}
           <div className="border-b border-[#C5A059]/20 pb-8 mb-8">
-            <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] font-bold block mb-1.5">
+            <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-bold block mb-1.5">
               Curadoria Exclusiva
             </span>
-            <h1 className="font-serif-luxury text-3xl sm:text-4xl lg:text-5xl text-[#1A1918] font-medium">
+            <h1 className="font-serif-luxury text-3xl sm:text-4xl lg:text-5xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
               Catálogo de Produtos
             </h1>
-            <p className="text-xs sm:text-sm text-[#57534E] mt-2">
+            <p className="text-xs sm:text-sm text-[#57534E] dark:text-[#A8A29E] mt-2">
               Todas as peças com modelagem nobre e provador em vídeo disponível.
             </p>
           </div>
 
           {/* BARRA DE FILTROS COMPLETA */}
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#C5A059]/25 shadow-xs mb-8 space-y-4">
+          <div className="bg-white dark:bg-[#1A1918] p-4 sm:p-6 rounded-2xl border border-[#C5A059]/25 shadow-xs mb-8 space-y-4">
             
             {/* Linha 1: Campo de Busca e Ordenação */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               {/* Campo de Busca */}
               <div className="relative flex-1">
-                <Search className="w-4 h-4 text-[#78716C] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-[#78716C] dark:text-[#A8A29E] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Buscar peça por nome ou tecido..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-[#C5A059]/30 bg-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
+                  className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
                 />
               </div>
 
               {/* Ordenar por Preço */}
               <div className="flex items-center gap-2">
-                <span className="text-xs text-[#78716C] whitespace-nowrap">Ordenar por:</span>
+                <span className="text-xs text-[#78716C] dark:text-[#A8A29E] whitespace-nowrap">Ordenar por:</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="px-3 py-2 text-xs rounded-xl border border-[#C5A059]/30 bg-[#FAF8F5] focus:outline-none focus:border-[#C5A059] text-[#1A1918]"
+                  className="px-3 py-2 text-xs rounded-xl border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5]"
                 >
                   <option value="relevance">Destaques da Curadoria</option>
                   <option value="price-asc">Menor Preço</option>
@@ -198,7 +198,7 @@ function CatalogoContent() {
 
             {/* Linha 2: Categorias */}
             <div>
-              <span className="text-[11px] uppercase tracking-wider text-[#78716C] font-semibold block mb-2">
+              <span className="text-[11px] uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E] font-semibold block mb-2">
                 Categoria:
               </span>
               <div className="flex flex-wrap gap-2">
@@ -209,12 +209,12 @@ function CatalogoContent() {
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-[#1A1918] text-[#FAF8F5] shadow-xs'
+                          ? 'bg-[#1A1918] dark:bg-[#C5A059] text-[#FAF8F5] shadow-xs'
                           : isOutlet
-                          ? 'bg-[#FAF8F5] text-[#C5A059] border border-[#C5A059] hover:bg-[#C5A059] hover:text-white'
-                          : 'bg-[#FAF8F5] text-[#57534E] border border-black/10 hover:border-[#C5A059]'
+                          ? 'bg-[#FAF8F5] dark:bg-[#252220] text-[#C5A059] border border-[#C5A059] hover:bg-[#C5A059] hover:text-white'
+                          : 'bg-[#FAF8F5] dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] border border-black/10 dark:border-white/10 hover:border-[#C5A059]'
                       }`}
                     >
                       {cat}
@@ -225,10 +225,10 @@ function CatalogoContent() {
             </div>
 
             {/* Linha 3: Tamanhos & Cores */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-black/5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-black/5 dark:border-white/5">
               {/* Filtro de Tamanho */}
               <div>
-                <span className="text-[11px] uppercase tracking-wider text-[#78716C] font-semibold block mb-2">
+                <span className="text-[11px] uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E] font-semibold block mb-2">
                   Tamanho:
                 </span>
                 <div className="flex flex-wrap gap-1.5">
@@ -236,10 +236,10 @@ function CatalogoContent() {
                     <button
                       key={sz}
                       onClick={() => setSelectedSize(sz)}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                      className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
                         selectedSize === sz
-                          ? 'bg-[#1A1918] text-white border-[#1A1918]'
-                          : 'bg-[#FAF8F5] text-[#57534E] border-[#C5A059]/20 hover:border-[#C5A059]'
+                          ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white border-[#1A1918] dark:border-[#C5A059]'
+                          : 'bg-[#FAF8F5] dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] border-black/10 dark:border-white/10 hover:border-[#C5A059]'
                       }`}
                     >
                       {sz}
@@ -250,56 +250,46 @@ function CatalogoContent() {
 
               {/* Filtro de Cor */}
               <div>
-                <span className="text-[11px] uppercase tracking-wider text-[#78716C] font-semibold block mb-2">
+                <span className="text-[11px] uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E] font-semibold block mb-2">
                   Cor:
                 </span>
-                <select
-                  value={selectedColor}
-                  onChange={(e) => setSelectedColor(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs rounded-xl border border-[#C5A059]/30 bg-[#FAF8F5] focus:outline-none focus:border-[#C5A059] text-[#1A1918]"
-                >
-                  {allColors.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {c.label}
-                    </option>
+                <div className="flex flex-wrap gap-1.5">
+                  {allColors.map((col) => (
+                    <button
+                      key={col.value}
+                      onClick={() => setSelectedColor(col.value)}
+                      className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                        selectedColor === col.value
+                          ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white border-[#1A1918] dark:border-[#C5A059]'
+                          : 'bg-[#FAF8F5] dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] border-black/10 dark:border-white/10 hover:border-[#C5A059]'
+                      }`}
+                    >
+                      {col.label}
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
             </div>
 
-            {/* Linha 4: Limpar Filtros & Contador */}
-            <div className="flex items-center justify-between pt-2 border-t border-black/5 text-xs text-[#78716C]">
-              <span>
-                Exibindo <strong>{filteredProducts.length}</strong> {filteredProducts.length === 1 ? 'peça' : 'peças'}
-              </span>
-
-              {hasActiveFilters && (
+            {/* Linha 4: Limpar Filtros */}
+            {hasActiveFilters && (
+              <div className="pt-2 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
+                <span className="text-xs text-[#78716C] dark:text-[#A8A29E]">
+                  Mostrando <strong>{filteredProducts.length}</strong> de {PRODUCTS.length} peças
+                </span>
                 <button
                   onClick={resetFilters}
-                  className="flex items-center gap-1.5 text-rose-700 hover:underline font-semibold"
+                  className="inline-flex items-center gap-1.5 text-xs text-[#C5A059] dark:text-[#DFBE76] hover:underline font-semibold cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Limpar Filtros</span>
+                  <span>Limpar todos os filtros</span>
                 </button>
-              )}
-            </div>
-
+              </div>
+            )}
           </div>
 
-          {/* GRID DE PRODUTOS: 2 no Mobile, 4 no Desktop */}
-          {filteredProducts.length === 0 ? (
-            <div className="py-16 text-center max-w-md mx-auto space-y-3">
-              <p className="text-sm font-semibold text-[#1A1918]">
-                Nenhuma peça encontrada com os filtros selecionados.
-              </p>
-              <button
-                onClick={resetFilters}
-                className="px-6 py-2.5 bg-[#1A1918] text-white rounded-full text-xs font-semibold hover:bg-[#C5A059] transition-all"
-              >
-                Ver Todas as Peças
-              </button>
-            </div>
-          ) : (
+          {/* GRID DE PRODUTOS: 2 por linha no mobile, 4 no desktop */}
+          {filteredProducts.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {filteredProducts.map((product) => (
                 <ProductCard
@@ -320,12 +310,29 @@ function CatalogoContent() {
                 />
               ))}
             </div>
+          ) : (
+            <div className="bg-white dark:bg-[#1A1918] rounded-3xl p-12 text-center border border-[#C5A059]/20 space-y-4 my-8">
+              <div className="w-16 h-16 rounded-full bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/30 flex items-center justify-center mx-auto">
+                <SlidersHorizontal className="w-7 h-7 text-[#C5A059]" />
+              </div>
+              <h3 className="font-serif-luxury text-xl sm:text-2xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
+                Nenhuma peça encontrada com esses filtros
+              </h3>
+              <p className="text-xs sm:text-sm text-[#78716C] dark:text-[#A8A29E] max-w-md mx-auto">
+                Tente ajustar os critérios de busca, tamanho ou cor para visualizar outros modelos da nossa coleção.
+              </p>
+              <button
+                onClick={resetFilters}
+                className="px-6 py-2.5 bg-[#1A1918] dark:bg-[#C5A059] text-white rounded-full text-xs uppercase tracking-widest font-semibold hover:bg-[#C5A059] transition-all cursor-pointer"
+              >
+                Limpar Filtros e Ver Tudo
+              </button>
+            </div>
           )}
 
         </div>
       </main>
 
-      {/* Footer */}
       <Footer />
 
       {/* Modal de Detalhes do Produto */}
@@ -361,7 +368,7 @@ function CatalogoContent() {
 
 export default function CatalogoPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center text-xs text-[#C5A059]">Carregando catálogo...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#FAF8F5] dark:bg-[#121110] flex items-center justify-center text-xs text-[#78716C]">Carregando catálogo...</div>}>
       <CatalogoContent />
     </Suspense>
   );

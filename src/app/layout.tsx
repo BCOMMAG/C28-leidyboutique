@@ -68,7 +68,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased bg-[#FAF8F5] text-[#1A1918] selection:bg-[#C5A059]/20 selection:text-[#1A1918]">
+      <body className="antialiased bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] selection:bg-[#C5A059]/20 selection:text-[#1A1918] dark:selection:text-[#FAF8F5] transition-colors duration-300">
         <StoreProvider>
           {children}
         </StoreProvider>
