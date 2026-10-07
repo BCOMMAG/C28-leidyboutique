@@ -594,30 +594,20 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 </div>
               )}
 
-              {/* Opção para Mobile / Tablet: Ir para o Catálogo */}
+              {/* Opção para Mobile / Tablet: Ver outras opções no Catálogo */}
               <div className="mt-5 pt-4 border-t border-[#C5A059]/20 xl:hidden">
-                <div className="p-4 rounded-2xl bg-[#F4EFE6]/70 dark:bg-[#252220] border border-[#C5A059]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-bold block">
-                      Outras Opções
-                    </span>
-                    <h5 className="text-xs font-serif font-bold text-[#1A1918] dark:text-[#FAF8F5]">
-                      Deseja ver outras peças da boutique?
-                    </h5>
-                    <p className="text-[11px] text-[#57534E] dark:text-[#D6D3D1]">
-                      Explore mais modelos, alfaiataria e novidades no catálogo completo.
-                    </p>
+                <Link
+                  href="/catalogo"
+                  onClick={onClose}
+                  className="flex items-center justify-between gap-3 p-4 rounded-2xl bg-[#F4EFE6]/70 dark:bg-[#252220] border border-[#C5A059]/30 hover:border-[#C5A059] transition-all text-[#1A1918] dark:text-[#FAF8F5] group shadow-xs cursor-pointer"
+                >
+                  <span className="text-xs sm:text-sm font-semibold font-serif">
+                    Ver outras opções no Catálogo
+                  </span>
+                  <div className="w-8 h-8 rounded-full bg-[#C5A059] text-white dark:text-[#1A1918] flex items-center justify-center shrink-0 group-hover:translate-x-1 transition-transform shadow-sm">
+                    <ArrowRight className="w-4 h-4" />
                   </div>
-                  <Link
-                    href="/catalogo"
-                    onClick={onClose}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#1A1918] dark:bg-[#C5A059] text-white dark:text-[#1A1918] font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity shrink-0 cursor-pointer shadow-xs"
-                  >
-                    <LayoutGrid className="w-3.5 h-3.5" />
-                    <span>Ir para o Catálogo</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </Link>
-                </div>
+                </Link>
               </div>
 
             </div>
@@ -627,81 +617,20 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
       </div>
 
-      {/* Painel Lateral Direito: Ir para o Catálogo / Explorar Outras Opções (Desktop) */}
-      <aside className="hidden xl:flex flex-col justify-between w-72 2xl:w-80 bg-[#FAF8F5] dark:bg-[#1A1918] rounded-3xl p-6 border border-[#C5A059]/40 shadow-2xl text-[#1A1918] dark:text-[#FAF8F5] shrink-0 self-stretch animate-fadeIn">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2.5 pb-3.5 border-b border-[#C5A059]/25">
-            <div className="w-10 h-10 rounded-xl bg-[#C5A059]/15 flex items-center justify-center text-[#C5A059] shrink-0">
-              <LayoutGrid className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-bold block">
-                Outras Opções
-              </span>
-              <h3 className="text-sm font-serif font-bold text-[#1A1918] dark:text-[#FAF8F5] leading-snug">
-                Catálogo da Boutique
-              </h3>
-            </div>
-          </div>
-
-          <p className="text-xs text-[#57534E] dark:text-[#D6D3D1] leading-relaxed">
-            Deseja conferir mais peças exclusivas com caimento impecável e modelagem selecionada pela Leidy?
-          </p>
-
-          {/* CTA Principal de Destaque */}
-          <Link
-            href="/catalogo"
-            onClick={onClose}
-            className="flex items-center justify-between gap-2 w-full px-4 py-3.5 rounded-2xl bg-[#1A1918] dark:bg-[#C5A059] text-white dark:text-[#1A1918] hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] hover:text-[#1A1918] transition-all duration-300 font-semibold text-xs tracking-wider uppercase shadow-md group cursor-pointer"
-          >
-            <span className="flex items-center gap-2">
-              <ShoppingBag className="w-4 h-4" />
-              <span>Ver Todo o Catálogo</span>
-            </span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-
-          {/* Navegação por Categoria */}
-          <div className="pt-2">
-            <span className="text-[10px] uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E] font-semibold block mb-2">
-              Opções por Categoria:
-            </span>
-            <div className="space-y-1.5">
-              {[
-                { label: 'Alfaiataria Premium', href: '/catalogo?categoria=Alfaiataria' },
-                { label: 'Casacos & Tricots', href: '/catalogo?categoria=Casacos' },
-                { label: 'Vestidos & Conjuntos', href: '/catalogo?categoria=Vestidos' },
-                { label: 'Outlet & Últimas Peças', href: '/catalogo?status=outlet' },
-              ].map((item, idx) => (
-                <Link
-                  key={idx}
-                  href={item.href}
-                  onClick={onClose}
-                  className="flex items-center justify-between px-3 py-2 rounded-xl bg-white dark:bg-[#252220] border border-[#C5A059]/20 hover:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] text-xs font-medium transition-all group cursor-pointer shadow-2xs"
-                >
-                  <span>{item.label}</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-[#C5A059] group-hover:translate-x-1 transition-transform" />
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Rodapé do Card Lateral */}
-        <div className="mt-5 pt-4 border-t border-[#C5A059]/25 text-center">
-          <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E] block mb-2">
-            Dúvidas sobre tamanho ou caimento?
+      {/* Opção Lateral Direita: Simples "Ver outras opções no Catálogo" com flecha */}
+      <aside className="hidden xl:flex flex-col justify-center shrink-0 self-center animate-fadeIn">
+        <Link
+          href="/catalogo"
+          onClick={onClose}
+          className="group flex items-center gap-3.5 px-6 py-5 rounded-2xl bg-[#FAF8F5] dark:bg-[#1A1918] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] dark:hover:text-[#1A1918] border border-[#C5A059]/40 hover:border-[#C5A059] shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02]"
+        >
+          <span className="font-serif font-bold text-sm sm:text-base tracking-wide whitespace-nowrap">
+            Ver outras opções no Catálogo
           </span>
-          <a
-            href={`https://wa.me/${STORE_INFO.whatsapp}?text=${encodeURIComponent('Olá Leidy! Estava olhando o site e gostaria de tirar uma dúvida sobre as peças.')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl border border-[#25D366]/40 bg-[#25D366]/10 text-[#128C7E] dark:text-[#25D366] hover:bg-[#25D366] hover:text-white transition-all text-xs font-semibold cursor-pointer"
-          >
-            <MessageCircle className="w-3.5 h-3.5" />
-            <span>Atendimento no WhatsApp</span>
-          </a>
-        </div>
+          <div className="w-9 h-9 rounded-full bg-[#C5A059] text-white dark:text-[#1A1918] group-hover:bg-white group-hover:text-[#1A1918] dark:group-hover:bg-[#1A1918] dark:group-hover:text-[#FAF8F5] flex items-center justify-center transition-all group-hover:translate-x-1 shadow-md shrink-0">
+            <ArrowRight className="w-4 h-4" />
+          </div>
+        </Link>
       </aside>
 
     </div>
