@@ -96,21 +96,21 @@ export const Header: React.FC<HeaderProps> = ({
           : 'bg-transparent border-b border-transparent'
       }`}
     >
-      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
-        <div className="flex items-center justify-between h-16 sm:h-20 transition-all duration-300">
+      <div className="max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-10">
+        <div className="flex items-center justify-between h-14 sm:h-20 transition-all duration-300">
           
           {/* Botão Menu Mobile */}
-          <div className="flex items-center lg:hidden">
+          <div className="flex items-center lg:hidden shrink-0">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`p-2 transition-colors cursor-pointer ${
+              className={`p-1.5 sm:p-2 transition-colors cursor-pointer ${
                 isScrolled
                   ? 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059]'
                   : 'text-white hover:text-[#DFBE76] drop-shadow-sm'
               }`}
               aria-label="Abrir menu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
           </div>
 
@@ -257,21 +257,18 @@ export const Header: React.FC<HeaderProps> = ({
 
           </nav>
 
-          {/* Logo Marca Leidy Boutique (Reduzida em 20% no desktop) */}
-          <div className="flex-1 flex justify-center lg:flex-initial">
+          {/* Logo Marca Leidy Boutique (Responsiva e auto-ajustável) */}
+          <div className="flex justify-center items-center shrink-0 min-w-0 px-1">
             <Link
               href="/"
               className="flex items-center cursor-pointer transition-transform duration-300 hover:scale-105"
             >
-              <div
-                className="relative w-32 sm:w-36 md:w-40 lg:w-42 h-9 sm:h-10 md:h-11 shrink-0 overflow-hidden flex items-center justify-center"
-                style={{ width: '168px', height: '42px', maxWidth: '100%' }}
-              >
+              <div className="relative w-24 sm:w-32 md:w-40 lg:w-44 h-8 sm:h-9 md:h-11 shrink-0 overflow-hidden flex items-center justify-center">
                 <Image
                   src="/images/Logo sem fundo.png"
                   alt="Leidy Boutique"
-                  width={168}
-                  height={42}
+                  width={2752}
+                  height={1536}
                   style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
                   priority
                 />
@@ -280,9 +277,9 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Ações da Direita: Barra de Pesquisa, Modo Escuro, Wishlist, Sacola */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="flex items-center gap-0.5 sm:gap-1.5 md:gap-3 shrink-0">
             
-            {/* Barra de Pesquisa no Topo (Conforme indicado no print) */}
+            {/* Barra de Pesquisa no Topo (Desktop) */}
             <div className="relative hidden md:block">
               <input
                 type="text"
@@ -319,7 +316,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Botão de Pesquisa no Mobile (Abre barra retrátil no topo) */}
             <button
               onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-              className={`p-2 md:hidden transition-colors cursor-pointer ${
+              className={`p-1.5 sm:p-2 md:hidden transition-colors cursor-pointer ${
                 isScrolled
                   ? 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059]'
                   : 'text-white hover:text-[#DFBE76] drop-shadow-sm'
@@ -327,13 +324,13 @@ export const Header: React.FC<HeaderProps> = ({
               aria-label="Pesquisar"
               title="Pesquisar"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </button>
 
             {/* Toggle Modo Escuro / Claro */}
             <button
               onClick={toggleTheme}
-              className={`p-2 rounded-none transition-colors cursor-pointer ${
+              className={`p-1.5 sm:p-2 rounded-none transition-colors cursor-pointer ${
                 isScrolled
                   ? 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
                   : 'text-white hover:text-[#DFBE76] drop-shadow-sm'
@@ -342,16 +339,16 @@ export const Header: React.FC<HeaderProps> = ({
               title={theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
             >
               {theme === 'dark' ? (
-                <Sun className="w-5 h-5 text-[#DFBE76] transition-transform hover:rotate-45" />
+                <Sun className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#DFBE76] transition-transform hover:rotate-45" />
               ) : (
-                <Moon className="w-5 h-5 transition-transform hover:-rotate-12" />
+                <Moon className="w-4.5 h-4.5 sm:w-5 sm:h-5 transition-transform hover:-rotate-12" />
               )}
             </button>
 
             {/* Favoritos */}
             <Link
               href="/favoritos"
-              className={`relative p-2 transition-colors cursor-pointer ${
+              className={`relative p-1.5 sm:p-2 transition-colors cursor-pointer ${
                 isScrolled
                   ? 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
                   : 'text-white hover:text-[#DFBE76] drop-shadow-sm'
@@ -359,9 +356,9 @@ export const Header: React.FC<HeaderProps> = ({
               aria-label="Ver coleção de favoritos"
               title="Meus Favoritos"
             >
-              <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
+              <Heart className="w-4.5 h-4.5 sm:w-6 sm:h-6" />
               {wishlistCount > 0 && (
-                <span className="absolute top-1 right-1 bg-[#C5A059] text-white text-[10px] w-4 h-4 rounded-none flex items-center justify-center font-bold">
+                <span className="absolute top-0.5 right-0.5 bg-[#C5A059] text-white text-[9px] w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-none flex items-center justify-center font-bold">
                   {wishlistCount}
                 </span>
               )}
@@ -370,7 +367,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Sacola de Compras com Contador */}
             <button
               onClick={onOpenCart}
-              className={`relative p-2 transition-transform active:scale-95 cursor-pointer ${
+              className={`relative p-1.5 sm:p-2 transition-transform active:scale-95 cursor-pointer ${
                 isScrolled
                   ? 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
                   : 'text-white hover:text-[#DFBE76] drop-shadow-sm'
@@ -379,9 +376,9 @@ export const Header: React.FC<HeaderProps> = ({
               title="Sacola de Compras"
             >
               <div className="relative">
-                <ShoppingBag className="w-6 h-6 sm:w-7 sm:h-7 stroke-[1.7]" />
+                <ShoppingBag className="w-5 h-5 sm:w-7 sm:h-7 stroke-[1.7]" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#C5A059] text-white text-[11px] w-5 h-5 rounded-none flex items-center justify-center font-bold border-2 border-white dark:border-[#141312] animate-scale shadow-sm">
+                  <span className="absolute -top-1 -right-1 bg-[#C5A059] text-white text-[9px] sm:text-[11px] w-4 h-4 sm:w-5 sm:h-5 rounded-none flex items-center justify-center font-bold border-1.5 sm:border-2 border-white dark:border-[#141312] animate-scale shadow-sm">
                     {cartCount}
                   </span>
                 )}
