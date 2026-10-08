@@ -16,15 +16,15 @@ export const Footer: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div
-                className="relative w-12 h-12 rounded-none overflow-hidden bg-white p-1 border border-[#C5A059] shrink-0"
-                style={{ width: '48px', height: '48px' }}
+                className="relative h-12 w-20 sm:w-24 shrink-0 overflow-hidden flex items-center justify-start"
+                style={{ height: '48px', maxWidth: '100%' }}
               >
                 <Image
-                  src="/images/logo.png"
+                  src="/images/Logo sem fundo.png"
                   alt="Leidy Boutique"
-                  width={48}
-                  height={48}
-                  className="object-contain p-0.5"
+                  width={2752}
+                  height={1536}
+                  style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
                 />
               </div>
               <div>
