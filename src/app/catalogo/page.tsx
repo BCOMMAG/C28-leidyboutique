@@ -526,8 +526,8 @@ function CatalogoContent() {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // Componente Reutilizável da Barra Lateral de Filtros com Seleção Múltipla & Acordeão
-  const FiltersSidebarContent = () => (
+  // Renderizador Direto da Barra Lateral de Filtros (Função direta impede desmonte dos inputs e perda de foco)
+  const renderFiltersSidebarContent = () => (
     <div className="space-y-4 text-[#1A1918] dark:text-[#FAF8F5]">
       
       {/* Botão Superior Rápido para Aplicar Filtros se houver rascunho */}
@@ -724,32 +724,55 @@ function CatalogoContent() {
             </div>
 
             {/* Inputs de Preço Manual */}
-            <div className="pt-2 border-t border-[#C5A059]/10 flex items-center gap-2">
-              <div className="flex-1">
-                <span className="text-[10px] text-[#78716C] block mb-0.5">Mín (R$)</span>
-                <input
-                  type="number"
-                  placeholder="0"
-                  value={draftFilters.customMinPrice}
-                  onChange={(e) => {
-                    setDraftFilters((p) => ({ ...p, priceRangeIndices: [], customMinPrice: e.target.value }));
-                  }}
-                  className="w-full px-2 py-1 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059]"
-                />
+            <div className="pt-2.5 border-t border-[#C5A059]/10 space-y-2">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-[#78716C] dark:text-[#A8A29E] block">
+                Digitar faixa personalizada:
+              </span>
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <span className="text-[10px] text-[#78716C] dark:text-[#A8A29E] block mb-0.5">Mín (R$)</span>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={draftFilters.customMinPrice}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setDraftFilters((p) => ({ ...p, priceRangeIndices: [], customMinPrice: val }));
+                    }}
+                    className="w-full px-2.5 py-1.5 text-xs rounded-none border border-[#C5A059]/30 bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059] transition-all"
+                  />
+                </div>
+                <span className="text-xs text-[#78716C] pt-4 font-bold">-</span>
+                <div className="flex-1">
+                  <span className="text-[10px] text-[#78716C] dark:text-[#A8A29E] block mb-0.5">Máx (R$)</span>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="700"
+                    value={draftFilters.customMaxPrice}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setDraftFilters((p) => ({ ...p, priceRangeIndices: [], customMaxPrice: val }));
+                    }}
+                    className="w-full px-2.5 py-1.5 text-xs rounded-none border border-[#C5A059]/30 bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059] transition-all"
+                  />
+                </div>
               </div>
-              <span className="text-xs text-[#78716C] pt-3">-</span>
-              <div className="flex-1">
-                <span className="text-[10px] text-[#78716C] block mb-0.5">Máx (R$)</span>
-                <input
-                  type="number"
-                  placeholder="700"
-                  value={draftFilters.customMaxPrice}
-                  onChange={(e) => {
-                    setDraftFilters((p) => ({ ...p, priceRangeIndices: [], customMaxPrice: e.target.value }));
-                  }}
-                  className="w-full px-2 py-1 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059]"
-                />
-              </div>
+              {(draftFilters.customMinPrice !== '' || draftFilters.customMaxPrice !== '') && (
+                <div className="flex items-center justify-between pt-0.5">
+                  <span className="text-[10px] text-[#C5A059] font-medium">
+                    Faixa: R$ {draftFilters.customMinPrice || '0'} até R$ {draftFilters.customMaxPrice || '∞'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setDraftFilters((p) => ({ ...p, customMinPrice: '', customMaxPrice: '' }))}
+                    className="text-[10px] text-[#78716C] hover:text-red-500 underline cursor-pointer"
+                  >
+                    Limpar valores
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1278,7 +1301,7 @@ function CatalogoContent() {
                 )}
               </div>
 
-              <FiltersSidebarContent />
+              {renderFiltersSidebarContent()}
             </aside>
 
             {/* ============================================================ */}
@@ -1607,7 +1630,7 @@ function CatalogoContent() {
               </div>
 
               <div className="flex-1 overflow-y-auto p-4">
-                <FiltersSidebarContent />
+                {renderFiltersSidebarContent()}
               </div>
 
               <div className="p-4 border-t border-[#C5A059]/20 bg-[#FAF8F5] dark:bg-[#141312] space-y-2">

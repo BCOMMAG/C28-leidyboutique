@@ -244,10 +244,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 overflow-y-auto overscroll-contain">
-          
-          {/* COLUNA ESQUERDA: GALERIA E VÍDEO (Aparece em destaque no mobile sem cortes) */}
-          <div className="lg:col-span-5 p-2.5 sm:p-5 lg:p-6 bg-[#F4EFE6]/60 dark:bg-[#141312]/60 flex flex-col items-center justify-between border-b lg:border-b-0 lg:border-r border-[#C5A059]/20">
+        {/* Área de Conteúdo Rolável (min-h-0 permite ao flex encolher e rolar corretamente) */}
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain custom-scrollbar">
+          <div className="grid grid-cols-1 lg:grid-cols-12 min-h-full">
+            
+            {/* COLUNA ESQUERDA: GALERIA E VÍDEO (Aparece em destaque no mobile sem cortes) */}
+            <div className="lg:col-span-5 p-2.5 sm:p-5 lg:p-6 bg-[#F4EFE6]/60 dark:bg-[#141312]/60 flex flex-col items-center justify-between border-b lg:border-b-0 lg:border-r border-[#C5A059]/20">
             
             {/* Visualizador Principal com Navegação por Setas e Swipe */}
             <div
@@ -401,7 +403,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           </div>
 
           {/* COLUNA DIREITA: INFORMAÇÕES & PEDIDO */}
-          <div className="lg:col-span-7 p-4 sm:p-6 lg:p-8 flex flex-col justify-between overflow-y-auto max-h-none lg:max-h-[85vh]">
+          <div className="lg:col-span-7 p-4 sm:p-6 lg:p-8 flex flex-col justify-between">
             <div>
               {/* Header de Categoria e Atalho */}
               <div className="flex items-center justify-between pr-4 sm:pr-8">
@@ -779,6 +781,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
             </div>
           </div>
 
+        </div>
         </div>
 
       </div>
