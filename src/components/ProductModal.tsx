@@ -139,6 +139,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const currentMedia = product.media[activeMediaIndex];
   const pairedProduct = PRODUCTS.find((p) => p.id === product.pairedWithId);
 
+  // Cálculo de desconto e economia (conforme o print do usuário)
+  const rawOriginalPrice = product.originalPrice ?? (product.formattedOriginalPrice ? parseFloat(product.formattedOriginalPrice.replace(/[^\d,]/g, '').replace(',', '.')) : null);
+  const rawCurrentPrice = product.price ?? parseFloat(product.formattedPrice.replace(/[^\d,]/g, '').replace(',', '.'));
+
+  const hasDiscount = Boolean(rawOriginalPrice && rawOriginalPrice > rawCurrentPrice);
+  const savingsAmount = hasDiscount && rawOriginalPrice ? rawOriginalPrice - rawCurrentPrice : 0;
+  const discountPercent = hasDiscount && rawOriginalPrice ? Math.round((savingsAmount / rawOriginalPrice) * 100) : 0;
+
   const goToPrevMedia = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     setActiveMediaIndex((prev) => (prev > 0 ? prev - 1 : product.media.length - 1));
@@ -201,24 +209,42 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/65 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 lg:p-6 animate-fadeIn"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-0 sm:p-4 lg:p-6 animate-fadeIn"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       {/* Container Principal do Modal Centralizado */}
-      <div className="relative w-full max-w-5xl bg-[#FAF8F5] dark:bg-[#1A1918] rounded-none shadow-2xl overflow-hidden border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] my-auto">
+      <div className="relative w-full max-w-5xl bg-[#FAF8F5] dark:bg-[#1A1918] rounded-none shadow-2xl overflow-hidden border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] my-auto flex flex-col min-h-screen sm:min-h-0 sm:max-h-[92vh]">
         
-        {/* Botão Fechar Isolado no Topo */}
+        {/* Barra Superior Fina: Voltar e Adicionar à Sacola (Conforme o print) */}
+        <div className="w-full bg-[#FAF8F5] dark:bg-[#1A1918] border-b border-[#C5A059]/25 px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between z-30 shrink-0 sticky top-0 shadow-2xs">
+          <button
+            onClick={onClose}
+            className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] transition-colors cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
+            <span>Voltar</span>
+          </button>
+
+          <button
+            onClick={handleAdd}
+            className="bg-[#1A1918] dark:bg-white text-white dark:text-[#1A1918] hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] text-[11px] sm:text-xs font-bold uppercase tracking-wider px-3.5 sm:px-5 py-2 transition-all duration-300 shadow-sm cursor-pointer"
+          >
+            {addedAnimation ? 'ADICIONADO!' : 'ADICIONAR À SACOLA'}
+          </button>
+        </div>
+
+        {/* Botão Fechar Rápido Isolado no Topo */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 z-40 p-2 sm:p-2.5 rounded-none bg-[#1A1918]/85 dark:bg-black/85 text-white hover:bg-[#C5A059] transition-all shadow-xl cursor-pointer border border-[#C5A059]/40"
+          className="hidden sm:flex absolute top-14 right-3 z-40 p-2 sm:p-2.5 rounded-none bg-[#1A1918]/85 dark:bg-black/85 text-white hover:bg-[#C5A059] transition-all shadow-xl cursor-pointer border border-[#C5A059]/40"
           aria-label="Fechar"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 max-h-[92vh] overflow-y-auto lg:overflow-visible">
+        <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 overflow-y-auto">
           
           {/* COLUNA ESQUERDA: GALERIA E VÍDEO (Aparece em destaque no mobile sem cortes) */}
           <div className="lg:col-span-5 p-2.5 sm:p-5 lg:p-6 bg-[#F4EFE6]/60 dark:bg-[#141312]/60 flex flex-col items-center justify-between border-b lg:border-b-0 lg:border-r border-[#C5A059]/20">
@@ -378,8 +404,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           <div className="lg:col-span-7 p-4 sm:p-6 lg:p-8 flex flex-col justify-between overflow-y-auto max-h-none lg:max-h-[85vh]">
             <div>
               {/* Header de Categoria e Atalho */}
-              <div className="flex items-center justify-between pr-10 sm:pr-12">
-                <span className="text-xs uppercase tracking-widest text-[#C5A059] dark:text-[#DFBE76] font-semibold">
+              <div className="flex items-center justify-between pr-4 sm:pr-8">
+                <span className="text-xs uppercase tracking-widest text-[#C5A059] dark:text-[#DFBE76] font-bold">
                   {product.category}
                 </span>
 
@@ -395,54 +421,61 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 )}
               </div>
 
-              {/* Título */}
+              {/* Título do Produto */}
               <h2 className="font-serif-luxury text-xl sm:text-3xl font-medium text-[#1A1918] dark:text-[#FAF8F5] mt-1.5">
                 {product.name}
               </h2>
 
-              {/* Valor do Produto & Favoritar (Logo abaixo do título) */}
-              <div className="mt-3.5 pt-3 pb-3 border-y border-[#C5A059]/20 flex items-center justify-between gap-4">
+              {/* Valor do Produto & Desconto & Salvo (Fiel ao print do usuário) */}
+              <div className="mt-3.5 pt-3 pb-3 border-y border-[#C5A059]/20 flex items-start justify-between gap-3">
                 <div>
-                  <span className="text-[10px] uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E] block mb-0.5 font-medium">
-                    Valor da Peça
+                  <span className="text-[11px] uppercase tracking-widest text-[#57534E] dark:text-[#A8A29E] block mb-1 font-bold">
+                    VALOR DA PEÇA
                   </span>
-                  <div className="flex items-baseline gap-2.5">
-                    <span className="text-2xl sm:text-3xl font-bold text-[#1A1918] dark:text-[#FAF8F5] tracking-tight">
-                      {product.formattedPrice}
-                    </span>
-                    {product.formattedOriginalPrice && (
-                      <span className="text-sm text-[#A8A29E] line-through font-normal">
-                        {product.formattedOriginalPrice}
+
+                  <div className="flex items-baseline gap-2.5 flex-wrap">
+                    {/* Valor Original em Cinza com Risco à Esquerda (quando houver desconto) */}
+                    {hasDiscount && (
+                      <span className="text-base sm:text-lg text-[#78716C] dark:text-[#A8A29E] line-through font-normal">
+                        {product.formattedOriginalPrice || `R$ ${rawOriginalPrice?.toFixed(2).replace('.', ',')}`}
                       </span>
                     )}
+                    {/* Valor Atual em Negrito de Destaque */}
+                    <span className="text-2xl sm:text-3xl font-extrabold text-[#1A1918] dark:text-[#FAF8F5] tracking-tight">
+                      {product.formattedPrice}
+                    </span>
                   </div>
-                  <span className="text-[11px] text-[#C5A059] dark:text-[#DFBE76] font-medium block mt-0.5">
-                    Peça Exclusiva &bull; Em até 3x sem juros
-                  </span>
+
+                  {/* Mensagem em Verde de Economia quando houver desconto */}
+                  {hasDiscount && (
+                    <div className="text-[#16A34A] dark:text-[#22C55E] text-xs font-bold uppercase tracking-wide mt-1">
+                      ECONOMIA DE R$ {savingsAmount.toFixed(2).replace('.', ',')}! ({discountPercent}% OFF)
+                    </div>
+                  )}
+
+                  {!hasDiscount && (
+                    <span className="text-[11px] text-[#C5A059] dark:text-[#DFBE76] font-medium block mt-0.5">
+                      Peça Exclusiva &bull; Em até 3x sem juros
+                    </span>
+                  )}
                 </div>
 
-                {/* Botão de Salvar nos Favoritos com Coração integrado ao Preço */}
+                {/* Botão Dourado de Salvar nos Favoritos com Ícone de Coração */}
                 <button
                   onClick={() => onToggleWishlist(product.id)}
-                  className={`flex items-center gap-2 px-3.5 py-2.5 rounded-none border text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
-                    isWishlisted
-                      ? 'bg-[#C5A059] text-white border-[#C5A059] shadow-sm'
-                      : 'border-[#C5A059]/40 bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:border-[#C5A059] hover:bg-[#FAF8F5]'
-                  }`}
-                  title={isWishlisted ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+                  className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-none bg-[#C5A059] hover:bg-[#A9833E] text-white text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shrink-0 shadow-xs"
+                  title={isWishlisted ? 'Peça salva nos favoritos' : 'Salvar nos favoritos'}
                 >
-                  <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current text-white' : 'text-[#C5A059]'}`} />
-                  <span className="text-xs">
-                    {isWishlisted ? 'Salvo' : 'Favoritar'}
-                  </span>
+                  <Heart className={`w-3.5 h-3.5 ${isWishlisted ? 'fill-current text-white' : 'fill-white text-white'}`} />
+                  <span>{isWishlisted ? 'SALVO' : 'SALVAR'}</span>
                 </button>
               </div>
 
               {/* Seletor de Cores */}
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[#1A1918] dark:text-[#FAF8F5]">
-                    Cor Escolhida: <span className="text-[#C5A059] dark:text-[#DFBE76] font-bold">{selectedColor}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#1A1918] dark:text-[#FAF8F5]">
+                    COR ESCOLHIDA: <span className="text-[#C5A059] dark:text-[#DFBE76]">{selectedColor.toUpperCase()}</span>
                   </span>
                 </div>
                 <div className="flex items-center gap-2.5 flex-wrap">
@@ -460,8 +493,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         }}
                         className={`flex items-center gap-2 px-3 py-1.5 rounded-none border text-xs transition-all cursor-pointer ${
                           isColorSelected
-                            ? 'border-[#C5A059] bg-[#C5A059]/10 font-semibold text-[#1A1918] dark:text-white ring-1 ring-[#C5A059]'
-                            : 'border-black/15 dark:border-white/20 bg-white dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] hover:border-[#C5A059]'
+                            ? 'border-[#C5A059] bg-[#C5A059]/10 font-bold text-[#1A1918] dark:text-white ring-1 ring-[#C5A059]'
+                            : 'border-black/20 dark:border-white/20 bg-white dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] hover:border-[#C5A059]'
                         }`}
                       >
                         <span
@@ -473,18 +506,27 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     );
                   })}
                 </div>
+
+                {/* Frase de Estoque Limitado (Conforme o print) */}
+                <p className="text-[11px] font-bold text-[#1A1918] dark:text-[#FAF8F5] mt-2 mb-2">
+                  {product.remainingPieces && product.remainingPieces <= 5
+                    ? `Últimas ${product.remainingPieces} unidades em estoque com este preço!`
+                    : (product.isOutlet || hasDiscount)
+                    ? 'Últimas 3 unidades em estoque com este preço!'
+                    : 'Peça exclusiva com poucas unidades no estoque!'}
+                </p>
               </div>
 
               {/* Seletor de Tamanhos com Guia de Medidas */}
-              <div className="mt-4">
+              <div className="mt-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[#1A1918] dark:text-[#FAF8F5]">
-                    Tamanho: <span className="text-[#C5A059] dark:text-[#DFBE76] font-bold">{selectedSize}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#1A1918] dark:text-[#FAF8F5]">
+                    TAMANHO: <span className="text-[#C5A059] dark:text-[#DFBE76]">{selectedSize.toUpperCase()}</span>
                   </span>
 
                   <button
                     onClick={onOpenSizeGuide}
-                    className="text-xs text-[#C5A059] dark:text-[#DFBE76] hover:underline flex items-center gap-1 font-medium cursor-pointer"
+                    className="text-xs text-[#C5A059] dark:text-[#DFBE76] hover:underline flex items-center gap-1 font-semibold cursor-pointer"
                   >
                     <Ruler className="w-3.5 h-3.5" />
                     <span>Guia de Medidas</span>
@@ -498,9 +540,9 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       <button
                         key={idx}
                         onClick={() => setSelectedSize(size)}
-                        className={`px-4 py-2 rounded-none text-xs font-semibold transition-all border cursor-pointer ${
+                        className={`px-4 py-2.5 rounded-none text-xs font-bold transition-all border cursor-pointer ${
                           isSizeSelected
-                            ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white border-[#1A1918] dark:border-[#C5A059] shadow-sm'
+                            ? 'bg-[#1A1918] dark:bg-white text-white dark:text-[#1A1918] border-[#1A1918] dark:border-white shadow-xs'
                             : 'bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] border-[#C5A059]/30 hover:border-[#C5A059]'
                         }`}
                       >
@@ -513,9 +555,9 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
               {/* Seletor de Quantidade & Ações Principais */}
               <div className="mt-5 space-y-2.5">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   {/* Contador de Quantidade */}
-                  <div className="flex items-center border border-[#C5A059]/40 rounded-none bg-white dark:bg-[#252220] px-3 py-1.5">
+                  <div className="flex items-center border border-black/25 dark:border-white/25 rounded-none bg-white dark:bg-[#252220] px-2.5 py-2.5">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       className="text-sm font-bold text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] px-2 cursor-pointer"
@@ -536,7 +578,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   {/* Botão Adicionar à Sacola */}
                   <button
                     onClick={handleAdd}
-                    className={`flex-1 py-3 px-6 rounded-none text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-md cursor-pointer ${
+                    className={`flex-1 py-3 px-5 rounded-none text-xs uppercase tracking-widest font-bold flex items-center justify-center gap-2 transition-all duration-300 shadow-md cursor-pointer ${
                       addedAnimation
                         ? 'bg-[#25D366] text-white'
                         : 'bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] active:scale-95'
@@ -545,12 +587,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     {addedAnimation ? (
                       <>
                         <Check className="w-4 h-4 stroke-[3]" />
-                        <span>Adicionado à Sacola!</span>
+                        <span>ADICIONADO À SACOLA!</span>
                       </>
                     ) : (
                       <>
                         <ShoppingBag className="w-4 h-4" />
-                        <span>Adicionar à Sacola</span>
+                        <span>ADICIONAR À SACOLA</span>
                       </>
                     )}
                   </button>
@@ -561,18 +603,18 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   href={generateWhatsAppDirectLink()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3 px-6 rounded-none text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 border border-[#C5A059] bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FBF7EE] dark:hover:bg-[#2E2A27] transition-all duration-300 shadow-sm cursor-pointer"
+                  className="w-full py-3 px-5 rounded-none text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2.5 border border-[#C5A059] bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FAF8F5] dark:hover:bg-[#2E2A27] transition-all duration-300 shadow-xs cursor-pointer"
                 >
                   <MessageCircle className="w-4 h-4 text-[#25D366]" />
-                  <span>Pedir Esta Peça no WhatsApp da Leidy</span>
+                  <span>PEDIR ESTA PEÇA NO WHATSAPP DA LEIDY</span>
                 </a>
               </div>
 
               {/* Simulador de Envio e Frete */}
-              <div className="mt-5 pt-4 border-t border-[#C5A059]/20">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#1A1918] dark:text-[#FAF8F5] mb-2">
+              <div className="mt-4 pt-3.5 border-t border-[#C5A059]/20">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1A1918] dark:text-[#FAF8F5] mb-2">
                   <Truck className="w-4 h-4 text-[#C5A059]" />
-                  <span>Calcular Prazo de Entrega</span>
+                  <span>CALCULAR PRAZO DE ENTREGA</span>
                 </div>
                 <div className="flex gap-2">
                   <input

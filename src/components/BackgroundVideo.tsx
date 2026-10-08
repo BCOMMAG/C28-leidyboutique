@@ -10,16 +10,36 @@ export const BackgroundVideo: React.FC = () => {
     const video = videoRef.current;
     if (!video) return;
 
+    // Configura velocidade 0.5x (câmera lenta suave e elegante)
+    const setSlowMotion = () => {
+      try {
+        video.playbackRate = 0.5;
+      } catch {}
+    };
+
+    setSlowMotion();
+
     // Reprodução suave e otimizada (sem travar a inicialização da thread)
     const startPlayback = () => {
+      setSlowMotion();
       video
         .play()
-        .then(() => setIsReady(true))
+        .then(() => {
+          setSlowMotion();
+          setIsReady(true);
+        })
         .catch(() => {
           // Fallback para navegadores móveis com restrições rígidas de autoplay:
           // Inicia suavemente no primeiro toque ou rolagem
           const onInteraction = () => {
-            video.play().then(() => setIsReady(true)).catch(() => {});
+            setSlowMotion();
+            video
+              .play()
+              .then(() => {
+                setSlowMotion();
+                setIsReady(true);
+              })
+              .catch(() => {});
             window.removeEventListener('touchstart', onInteraction);
             window.removeEventListener('scroll', onInteraction);
             window.removeEventListener('click', onInteraction);
@@ -39,6 +59,7 @@ export const BackgroundVideo: React.FC = () => {
       if (document.hidden) {
         video.pause();
       } else {
+        setSlowMotion();
         video.play().catch(() => {});
       }
     };
@@ -54,7 +75,7 @@ export const BackgroundVideo: React.FC = () => {
       aria-hidden="true"
       className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden select-none bg-[#121110]"
     >
-      {/* Vídeo em Loop Fixo com Aceleração de Hardware GPU */}
+      {/* Vídeo em Loop Fixo com Aceleração de Hardware GPU na velocidade 0.5x */}
       <video
         ref={videoRef}
         src="/video/plano-de-fundo.mp4"
@@ -63,7 +84,16 @@ export const BackgroundVideo: React.FC = () => {
         muted
         playsInline
         preload="auto"
-        onCanPlay={() => setIsReady(true)}
+        onCanPlay={(e) => {
+          e.currentTarget.playbackRate = 0.5;
+          setIsReady(true);
+        }}
+        onLoadedMetadata={(e) => {
+          e.currentTarget.playbackRate = 0.5;
+        }}
+        onPlay={(e) => {
+          e.currentTarget.playbackRate = 0.5;
+        }}
         className={`w-full h-full object-cover object-center will-change-transform transform-gpu transition-opacity duration-1000 ${
           isReady ? 'opacity-100' : 'opacity-0'
         }`}

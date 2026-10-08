@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Heart, Menu, X, Sun, Moon, ChevronDown, Tag, Search } from 'lucide-react';
+import { ShoppingBag, Heart, Menu, X, Sun, Moon, ChevronDown, Tag, Search, ArrowRight } from 'lucide-react';
 import { useStore } from '@/context/StoreContext';
 import { CATEGORIES_ROUPAS, CATEGORIES_ACESSORIOS, FAIXAS_PRECO } from '@/data/products';
 
@@ -28,9 +28,25 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const router = useRouter();
   const { theme, toggleTheme, searchQuery, setSearchQuery } = useStore();
+  const [headerSearchInput, setHeaderSearchInput] = useState(searchQuery || '');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Sincroniza estado de busca se alterado externamente
+  useEffect(() => {
+    setHeaderSearchInput(searchQuery || '');
+  }, [searchQuery]);
+
+  // Executa busca somente quando clicar na flexa verde ou pressionar Enter
+  const executeHeaderSearch = (textToSearch?: string) => {
+    const term = (textToSearch !== undefined ? textToSearch : headerSearchInput).trim();
+    if (!term) return;
+    setSearchQuery(term);
+    setMobileSearchOpen(false);
+    setMobileMenuOpen(false);
+    router.push(`/catalogo?q=${encodeURIComponent(term)}`);
+  };
 
   // Estados dos dropdowns desktop
   const [activeDropdown, setActiveDropdown] = useState<'roupas' | 'acessorios' | 'precos' | null>(null);
@@ -279,38 +295,52 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Ações da Direita: Barra de Pesquisa, Modo Escuro, Wishlist, Sacola */}
           <div className="flex items-center gap-0.5 sm:gap-1.5 md:gap-3 shrink-0 z-20">
             
-            {/* Barra de Pesquisa no Topo (Desktop) */}
+            {/* Barra de Pesquisa no Topo (Desktop) - Com Flexa Verde para Executar */}
             <div className="relative hidden md:block">
               <input
                 type="text"
                 placeholder="Pesquisar..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  if (typeof window !== 'undefined' && !window.location.pathname.includes('/catalogo') && e.target.value.trim().length > 0) {
-                    router.push(`/catalogo?q=${encodeURIComponent(e.target.value)}`);
-                  }
-                }}
+                value={headerSearchInput}
+                onChange={(e) => setHeaderSearchInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    router.push(`/catalogo?q=${encodeURIComponent(searchQuery)}`);
+                    executeHeaderSearch();
                   }
                 }}
-                className={`w-32 lg:w-44 xl:w-56 pl-8 pr-7 py-1.5 text-xs rounded-none border transition-all duration-300 focus:w-44 lg:focus:w-56 xl:focus:w-64 focus:outline-none ${
+                className={`w-36 lg:w-48 xl:w-60 pl-8 pr-16 py-1.5 text-xs rounded-none border transition-all duration-300 focus:w-48 lg:focus:w-60 xl:focus:w-72 focus:outline-none ${
                   isScrolled
                     ? 'bg-[#FAF8F5] dark:bg-[#201D1B] text-[#1A1918] dark:text-[#FAF8F5] border-[#C5A059]/30 focus:border-[#C5A059]'
                     : 'bg-black/25 text-white placeholder-white/70 border-white/30 focus:border-white focus:bg-black/40'
                 }`}
               />
               <Search className={`w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 ${isScrolled ? 'text-[#78716C] dark:text-[#A8A29E]' : 'text-white/80'}`} />
-              {searchQuery && (
+              
+              {/* Controles Internos: Limpar e Flexa Verde para Pesquisar */}
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 z-10">
+                {headerSearchInput && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHeaderSearchInput('');
+                      setSearchQuery('');
+                    }}
+                    className={`p-0.5 cursor-pointer ${isScrolled ? 'text-[#78716C] hover:text-[#1A1918] dark:hover:text-white' : 'text-white/80 hover:text-white'}`}
+                    title="Limpar texto"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+                {/* Flexa Verde Clicável para Ir ao Catálogo */}
                 <button
-                  onClick={() => setSearchQuery('')}
-                  className={`absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer ${isScrolled ? 'text-[#78716C]' : 'text-white/80'}`}
+                  type="button"
+                  onClick={() => executeHeaderSearch()}
+                  className="p-1 rounded-none bg-[#22C55E] hover:bg-[#16A34A] text-white shadow-xs transition-transform hover:scale-110 active:scale-95 cursor-pointer flex items-center justify-center shrink-0"
+                  title="Ir para o catálogo e pesquisar"
+                  aria-label="Ir para o catálogo e pesquisar"
                 >
-                  <X className="w-3 h-3" />
+                  <ArrowRight className="w-3 h-3 stroke-[3]" />
                 </button>
-              )}
+              </div>
             </div>
 
             {/* Botão de Pesquisa no Mobile (Abre barra retrátil no topo) */}
@@ -389,39 +419,51 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Barra de Pesquisa Retrátil no Mobile (Topo da tela) */}
+      {/* Barra de Pesquisa Retrátil no Mobile (Topo da tela) - Com Flexa Verde para Executar */}
       {mobileSearchOpen && (
         <div className="md:hidden bg-white/98 dark:bg-[#141312]/98 border-t border-b border-[#C5A059]/20 px-4 py-2.5 shadow-md">
           <div className="relative">
             <input
               type="text"
               placeholder="Pesquisar por modelo, tecido ou cor..."
-              value={searchQuery}
+              value={headerSearchInput}
               autoFocus
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                if (typeof window !== 'undefined' && !window.location.pathname.includes('/catalogo') && e.target.value.trim().length > 0) {
-                  router.push(`/catalogo?q=${encodeURIComponent(e.target.value)}`);
-                }
-              }}
+              onChange={(e) => setHeaderSearchInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  router.push(`/catalogo?q=${encodeURIComponent(searchQuery)}`);
-                  setMobileSearchOpen(false);
+                  executeHeaderSearch();
                 }
               }}
-              className="w-full pl-9 pr-8 py-2 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#201D1B] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
+              className="w-full pl-9 pr-16 py-2 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#201D1B] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
             />
             <Search className="w-4 h-4 text-[#C5A059] absolute left-3 top-1/2 -translate-y-1/2" />
-            <button
-              onClick={() => {
-                if (searchQuery) setSearchQuery('');
-                else setMobileSearchOpen(false);
-              }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#78716C] hover:text-[#1A1918] dark:hover:text-white p-1 cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+            
+            {/* Controles Internos: Limpar e Flexa Verde Clicável */}
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 z-10">
+              {headerSearchInput && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHeaderSearchInput('');
+                    setSearchQuery('');
+                  }}
+                  className="text-[#78716C] hover:text-[#1A1918] dark:hover:text-white p-1 cursor-pointer"
+                  title="Limpar texto"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {/* Flexa Verde Clicável no Mobile */}
+              <button
+                type="button"
+                onClick={() => executeHeaderSearch()}
+                className="p-1 rounded-none bg-[#22C55E] hover:bg-[#16A34A] text-white shadow-xs transition-transform hover:scale-110 active:scale-95 cursor-pointer flex items-center justify-center shrink-0"
+                title="Ir para o catálogo e pesquisar"
+                aria-label="Ir para o catálogo e pesquisar"
+              >
+                <ArrowRight className="w-3.5 h-3.5 stroke-[3]" />
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -430,22 +472,46 @@ export const Header: React.FC<HeaderProps> = ({
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white dark:bg-[#181615] border-b border-[#C5A059]/20 px-6 py-5 space-y-4 animate-fade-in-down shadow-xl text-[#1A1918] dark:text-[#FAF8F5] max-h-[85vh] overflow-y-auto">
           
-          {/* Pesquisa no Mobile */}
+          {/* Pesquisa no Mobile - Com Flexa Verde para Executar */}
           <div className="relative mb-2">
             <input
               type="text"
               placeholder="Pesquisar no catálogo..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={headerSearchInput}
+              onChange={(e) => setHeaderSearchInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  setMobileMenuOpen(false);
-                  router.push(`/catalogo?q=${encodeURIComponent(searchQuery)}`);
+                  executeHeaderSearch();
                 }
               }}
-              className="w-full pl-9 pr-4 py-2 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#201D1B] focus:outline-none focus:border-[#C5A059]"
+              className="w-full pl-9 pr-14 py-2 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#201D1B] focus:outline-none focus:border-[#C5A059]"
             />
             <Search className="w-4 h-4 text-[#78716C] absolute left-3 top-1/2 -translate-y-1/2" />
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 z-10">
+              {headerSearchInput && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHeaderSearchInput('');
+                    setSearchQuery('');
+                  }}
+                  className="text-[#78716C] hover:text-[#1A1918] dark:hover:text-white p-1 cursor-pointer"
+                  title="Limpar texto"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {/* Flexa Verde Clicável */}
+              <button
+                type="button"
+                onClick={() => executeHeaderSearch()}
+                className="p-1 rounded-none bg-[#22C55E] hover:bg-[#16A34A] text-white shadow-xs transition-transform hover:scale-110 active:scale-95 cursor-pointer flex items-center justify-center shrink-0"
+                title="Ir para o catálogo e pesquisar"
+                aria-label="Ir para o catálogo e pesquisar"
+              >
+                <ArrowRight className="w-3.5 h-3.5 stroke-[3]" />
+              </button>
+            </div>
           </div>
 
           {/* Seção 1: Roupas */}
