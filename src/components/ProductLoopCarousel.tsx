@@ -41,6 +41,32 @@ export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
   const loopList = [...items, ...items, ...items, ...items];
   const [currentIndex, setCurrentIndex] = useState<number>(baseCount);
 
+  // Manipuladores de deslize por toque (Swipe no Mobile)
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchEndX.current = null;
+    setIsPaused(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX.current === null || touchEndX.current === null) return;
+    const diff = touchStartX.current - touchEndX.current;
+    if (diff > 35) {
+      handleNext();
+    } else if (diff < -35) {
+      handlePrev();
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
   // Detectar resolução para calcular itens visíveis na tela
   useEffect(() => {
     const handleResize = () => {
@@ -159,10 +185,13 @@ export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
 
   return (
     <div
-      className="relative w-full group/carousel"
+      className="relative w-full group/carousel select-none touch-pan-y"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onClick={() => setIsPaused(true)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Container com máscara de corte */}
       <div className="overflow-hidden w-full -mx-1.5 sm:-mx-2.5 px-0 py-2">
@@ -205,32 +234,69 @@ export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
         </div>
       </div>
 
-      {/* Botões de Navegação Lateral (Surgem no hover ou toque) */}
+      {/* Botões de Navegação Lateral (Sempre visíveis no Mobile, surgem no hover no Desktop) */}
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
+          setIsPaused(true);
           handlePrev();
         }}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-none bg-white/95 dark:bg-[#1A1918]/95 border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] flex items-center justify-center shadow-lg transition-all opacity-0 group-hover/carousel:opacity-100 hover:scale-105 active:scale-95 cursor-pointer -translate-x-2 sm:-translate-x-4"
-        aria-label="Peça anterior"
-        title="Ver peça anterior"
+        className="absolute left-1 sm:left-0 top-[38%] -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-none bg-white/95 dark:bg-[#1A1918]/95 border border-[#C5A059]/50 text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] flex items-center justify-center shadow-lg transition-all opacity-100 sm:opacity-0 sm:group-hover/carousel:opacity-100 hover:scale-105 active:scale-90 cursor-pointer sm:-translate-x-4"
+        aria-label="Voltar peça anterior"
+        title="Voltar peça anterior"
       >
-        <ChevronLeft className="w-5 h-5 text-[#C5A059] hover:text-inherit" />
+        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-[#C5A059] hover:text-inherit" />
       </button>
 
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
+          setIsPaused(true);
           handleNext();
         }}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-none bg-white/95 dark:bg-[#1A1918]/95 border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] flex items-center justify-center shadow-lg transition-all opacity-0 group-hover/carousel:opacity-100 hover:scale-105 active:scale-95 cursor-pointer translate-x-2 sm:translate-x-4"
-        aria-label="Próxima peça"
-        title="Ver próxima peça"
+        className="absolute right-1 sm:right-0 top-[38%] -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-none bg-white/95 dark:bg-[#1A1918]/95 border border-[#C5A059]/50 text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] flex items-center justify-center shadow-lg transition-all opacity-100 sm:opacity-0 sm:group-hover/carousel:opacity-100 hover:scale-105 active:scale-90 cursor-pointer sm:translate-x-4"
+        aria-label="Avançar próxima peça"
+        title="Avançar próxima peça"
       >
-        <ChevronRight className="w-5 h-5 text-[#C5A059] hover:text-inherit" />
+        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#C5A059] hover:text-inherit" />
       </button>
+
+      {/* Controles de Navegação no Mobile: Botão Voltar & Próxima Peça */}
+      <div className="flex sm:hidden items-center justify-between px-1 pt-3.5">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsPaused(true);
+            handlePrev();
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white dark:bg-[#1A1918] border border-[#C5A059]/40 text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] active:scale-95 shadow-xs cursor-pointer"
+          aria-label="Voltar peça anterior"
+        >
+          <ChevronLeft className="w-3.5 h-3.5 text-[#C5A059]" />
+          <span>Voltar</span>
+        </button>
+
+        <span className="text-[10px] uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E] font-medium">
+          Toque para navegar
+        </span>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsPaused(true);
+            handleNext();
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white dark:bg-[#1A1918] border border-[#C5A059]/40 text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] active:scale-95 shadow-xs cursor-pointer"
+          aria-label="Avançar próxima peça"
+        >
+          <span>Próxima</span>
+          <ChevronRight className="w-3.5 h-3.5 text-[#C5A059]" />
+        </button>
+      </div>
     </div>
   );
 };
