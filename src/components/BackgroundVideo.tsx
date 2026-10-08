@@ -10,10 +10,10 @@ export const BackgroundVideo: React.FC = () => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Configura velocidade 0.5x (câmera lenta suave e elegante)
+    // Configura velocidade lenta 0.25x (câmera lenta ultra suave e elegante)
     const setSlowMotion = () => {
       try {
-        video.playbackRate = 0.5;
+        video.playbackRate = 0.25;
       } catch {}
     };
 
@@ -75,7 +75,7 @@ export const BackgroundVideo: React.FC = () => {
       aria-hidden="true"
       className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden select-none bg-[#121110]"
     >
-      {/* Vídeo em Loop Fixo com Aceleração de Hardware GPU na velocidade 0.5x */}
+      {/* Vídeo em Loop Fixo com Aceleração de Hardware GPU na velocidade lenta 0.25x */}
       <video
         ref={videoRef}
         src="/video/plano-de-fundo.mp4"
@@ -85,14 +85,14 @@ export const BackgroundVideo: React.FC = () => {
         playsInline
         preload="auto"
         onCanPlay={(e) => {
-          e.currentTarget.playbackRate = 0.5;
+          e.currentTarget.playbackRate = 0.25;
           setIsReady(true);
         }}
         onLoadedMetadata={(e) => {
-          e.currentTarget.playbackRate = 0.5;
+          e.currentTarget.playbackRate = 0.25;
         }}
         onPlay={(e) => {
-          e.currentTarget.playbackRate = 0.5;
+          e.currentTarget.playbackRate = 0.25;
         }}
         className={`w-full h-full object-cover object-center will-change-transform transform-gpu transition-opacity duration-1000 ${
           isReady ? 'opacity-100' : 'opacity-0'
@@ -107,9 +107,9 @@ export const BackgroundVideo: React.FC = () => {
       </video>
 
       {/* Camada de Filtro Atmosférico e Contraste Nobre:
-          Garante leitura nítida e contraste requintado para textos, cartões e fotos,
-          mantendo o mesmo plano de fundo contínuo e sem emendas ao rolar a página! */}
-      <div className="absolute inset-0 bg-[#FAF8F5]/80 dark:bg-black/65 backdrop-blur-[0.5px] transition-colors duration-500" />
+          Idêntica tanto no modo claro quanto no modo escuro (bg-black/65),
+          garantindo que o fundo nunca altere e eliminando qualquer névoa branca! */}
+      <div className="absolute inset-0 bg-black/65 backdrop-blur-[0.5px] transition-colors duration-500" />
     </div>
   );
 };

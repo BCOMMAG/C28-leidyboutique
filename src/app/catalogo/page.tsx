@@ -1228,7 +1228,7 @@ function CatalogoContent() {
           <div className="mb-4 flex items-center justify-between">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-[#57534E] dark:text-[#A8A29E] hover:text-[#C5A059] font-semibold transition-colors"
+              className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-white/90 hover:text-[#DFBE76] font-semibold transition-colors drop-shadow-xs"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Voltar para a Página Inicial</span>
@@ -1237,7 +1237,7 @@ function CatalogoContent() {
             {wishlistCount > 0 && (
               <Link
                 href="/favoritos"
-                className="text-xs uppercase tracking-wider text-[#C5A059] dark:text-[#DFBE76] hover:underline font-semibold"
+                className="text-xs uppercase tracking-wider text-[#DFBE76] hover:underline font-semibold drop-shadow-xs"
               >
                 Ver Favoritos ({wishlistCount}) →
               </Link>
@@ -1245,14 +1245,14 @@ function CatalogoContent() {
           </div>
 
           {/* Cabeçalho do Catálogo */}
-          <div className="border-b border-[#C5A059]/20 pb-4 mb-6">
+          <div className="border-b border-[#C5A059]/30 pb-4 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
-              <h1 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
+              <h1 className="font-serif-luxury text-2xl sm:text-4xl text-white font-medium drop-shadow-sm">
                 {appliedFilters.categories.length === 0
                   ? 'Catálogo Completo'
                   : appliedFilters.categories.join(', ')}
               </h1>
-              <span className="text-xs text-[#78716C] dark:text-[#A8A29E]">
+              <span className="text-xs text-white/80">
                 Mostrando <strong>{filteredProducts.length}</strong> de {PRODUCTS.length} modelos
               </span>
             </div>

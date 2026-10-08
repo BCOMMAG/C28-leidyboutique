@@ -104,14 +104,14 @@ export default function HomePage() {
         <section id="lancamentos" className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-[#C5A059]/20">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
             <div>
-              <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-semibold block mb-1.5">
+              <span className="text-xs uppercase tracking-[0.25em] text-[#DFBE76] font-semibold block mb-1.5 drop-shadow-xs">
                 Novidades da Temporada
               </span>
-              <h2 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
+              <h2 className="font-serif-luxury text-2xl sm:text-4xl text-white font-medium drop-shadow-sm">
                 Lançamentos Exclusivos
               </h2>
             </div>
-            <p className="text-xs text-[#78716C] dark:text-[#A8A29E] max-w-sm hidden sm:block">
+            <p className="text-xs text-white/85 max-w-sm hidden sm:block">
               As últimas novidades que acabaram de chegar na boutique, com tecidos nobres e acabamento impecável.
             </p>
           </div>
@@ -149,14 +149,14 @@ export default function HomePage() {
         <section id="mais-vendidos" className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-[#C5A059]/20">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
             <div>
-              <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-semibold block mb-1.5">
+              <span className="text-xs uppercase tracking-[0.25em] text-[#DFBE76] font-semibold block mb-1.5 drop-shadow-xs">
                 Os Favoritos da Boutique
               </span>
-              <h2 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
+              <h2 className="font-serif-luxury text-2xl sm:text-4xl text-white font-medium drop-shadow-sm">
                 Mais Vendidos
               </h2>
             </div>
-            <p className="text-xs text-[#78716C] dark:text-[#A8A29E] max-w-sm hidden sm:block">
+            <p className="text-xs text-white/85 max-w-sm hidden sm:block">
               As peças com maior procura na nossa boutique, reconhecidas pelo caimento impecável e acabamento nobre.
             </p>
           </div>
@@ -194,14 +194,14 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
               <div>
-                <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-bold block mb-1.5">
+                <span className="text-xs uppercase tracking-[0.25em] text-[#DFBE76] font-bold block mb-1.5 drop-shadow-xs">
                   Oportunidades Especiais
                 </span>
-                <h2 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
+                <h2 className="font-serif-luxury text-2xl sm:text-4xl text-white font-medium drop-shadow-sm">
                   OUTLET & Peças Selecionadas
                 </h2>
               </div>
-              <p className="text-xs text-[#57534E] dark:text-[#A8A29E] max-w-sm hidden sm:block">
+              <p className="text-xs text-white/85 max-w-sm hidden sm:block">
                 Peças exclusivas com valores promocionais e últimas unidades disponíveis na boutique.
               </p>
             </div>
@@ -241,14 +241,14 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
               <div>
-                <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-bold block mb-1.5">
+                <span className="text-xs uppercase tracking-[0.25em] text-[#DFBE76] font-bold block mb-1.5 drop-shadow-xs">
                   Estoque Limitado &bull; Restam Poucas Unidades
                 </span>
-                <h2 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
+                <h2 className="font-serif-luxury text-2xl sm:text-4xl text-white font-medium drop-shadow-sm">
                   Últimas Peças
                 </h2>
               </div>
-              <p className="text-xs text-[#78716C] dark:text-[#A8A29E] max-w-sm hidden sm:block">
+              <p className="text-xs text-white/85 max-w-sm hidden sm:block">
                 Modelos exclusivos prestes a esgotar definitivamente na boutique. Peças com apenas 5 unidades ou menos restantes no estoque.
               </p>
             </div>
