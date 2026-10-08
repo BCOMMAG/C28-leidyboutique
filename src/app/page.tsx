@@ -81,7 +81,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300">
+    <div className="min-h-screen flex flex-col bg-transparent relative z-10 text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300">
       {/* Header Fixo / Transparente */}
       <Header
         cartCount={cartCount}
@@ -190,7 +190,7 @@ export default function HomePage() {
         </section>
 
         {/* 3. SEÇÃO: OUTLET */}
-        <section id="outlet" className="py-16 sm:py-24 bg-[#F5EFE6]/70 dark:bg-[#181615] border-t border-[#C5A059]/25">
+        <section id="outlet" className="py-16 sm:py-24 bg-transparent border-t border-[#C5A059]/25">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
               <div>
@@ -237,7 +237,7 @@ export default function HomePage() {
         </section>
 
         {/* 4. SEÇÃO: ÚLTIMAS PEÇAS */}
-        <section id="ultimas-pecas" className="py-16 sm:py-24 bg-[#FAF8F5] dark:bg-[#121110] border-t border-[#C5A059]/25">
+        <section id="ultimas-pecas" className="py-16 sm:py-24 bg-transparent border-t border-[#C5A059]/25">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
               <div>

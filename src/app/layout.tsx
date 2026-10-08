@@ -3,6 +3,7 @@ import { Montserrat, Playfair_Display } from 'next/font/google';
 import './globals.css';
 import { StoreProvider } from '@/context/StoreContext';
 import { BottomCartBar } from '@/components/BottomCartBar';
+import { BackgroundVideo } from '@/components/BackgroundVideo';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -78,7 +79,8 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon-apple-touch-icon180x180.png" />
         <link rel="manifest" href="/site.webmanifest" />
       </head>
-      <body className={`${montserrat.className} ${playfair.variable} antialiased bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] selection:bg-[#C5A059]/20 selection:text-[#1A1918] dark:selection:text-[#FAF8F5] transition-colors duration-300`}>
+      <body className={`${montserrat.className} ${playfair.variable} antialiased text-[#1A1918] dark:text-[#FAF8F5] selection:bg-[#C5A059]/20 selection:text-[#1A1918] dark:selection:text-[#FAF8F5] transition-colors duration-300 relative`}>
+        <BackgroundVideo />
         <StoreProvider>
           {children}
           <BottomCartBar />
