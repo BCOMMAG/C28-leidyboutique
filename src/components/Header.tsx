@@ -268,7 +268,7 @@ export const Header: React.FC<HeaderProps> = ({
                 style={{ width: '168px', height: '42px', maxWidth: '100%' }}
               >
                 <Image
-                  src="/images/logo-transparente.png"
+                  src="/images/Logo sem fundo.png"
                   alt="Leidy Boutique"
                   width={168}
                   height={42}

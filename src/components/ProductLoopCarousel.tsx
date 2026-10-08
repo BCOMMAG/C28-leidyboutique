@@ -58,13 +58,23 @@ export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
   const handleNext = useCallback(() => {
     if (baseCount === 0) return;
     setIsTransitioning(true);
-    setCurrentIndex((prev) => prev + 1);
+    setCurrentIndex((prev) => {
+      if (prev >= baseCount * 2) {
+        return baseCount + 1;
+      }
+      return prev + 1;
+    });
   }, [baseCount]);
 
   const handlePrev = useCallback(() => {
     if (baseCount === 0) return;
     setIsTransitioning(true);
-    setCurrentIndex((prev) => prev - 1);
+    setCurrentIndex((prev) => {
+      if (prev <= baseCount - 1) {
+        return baseCount * 2 - 1;
+      }
+      return prev - 1;
+    });
   }, [baseCount]);
 
   // Autoplay contínuo: avança a cada intervalo se não estiver pausado
@@ -79,8 +89,10 @@ export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
   }, [isPaused, baseCount, autoPlayInterval, handleNext]);
 
   // Ao terminar a transição CSS, normaliza o índice para o bloco central sem transição perceptível
-  const handleTransitionEnd = () => {
+  const handleTransitionEnd = (e?: React.TransitionEvent<HTMLDivElement>) => {
     if (baseCount === 0) return;
+    // Ignorar eventos borbulhados de elementos filhos (como transição de cor de cards ao mudar de tema)
+    if (e && (e.target !== e.currentTarget || e.propertyName !== 'transform')) return;
 
     if (currentIndex >= baseCount * 2) {
       setIsTransitioning(false);
@@ -90,6 +102,35 @@ export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
       setCurrentIndex((prev) => prev + baseCount);
     }
   };
+
+  // Trava de segurança 1: Fallback com timeout caso a transição CSS seja interrompida
+  // (por exemplo, cliques rápidos e repetidos no botão de tema claro/escuro no mobile)
+  useEffect(() => {
+    if (baseCount === 0) return;
+
+    if (currentIndex >= baseCount * 2) {
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+        setCurrentIndex((prev) => (prev >= baseCount * 2 ? prev - baseCount : prev));
+      }, 700);
+      return () => clearTimeout(timer);
+    } else if (currentIndex < baseCount) {
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+        setCurrentIndex((prev) => (prev < baseCount ? prev + baseCount : prev));
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, [currentIndex, baseCount]);
+
+  // Trava de segurança 2: Impede categoricamente que o índice escape do limite de dados
+  useEffect(() => {
+    if (baseCount === 0) return;
+    if (currentIndex >= baseCount * 3 || currentIndex < 0) {
+      setIsTransitioning(false);
+      setCurrentIndex(baseCount);
+    }
+  }, [currentIndex, baseCount]);
 
   // Reativa a transição caso tenha sido desligada no snap
   useEffect(() => {
@@ -107,7 +148,10 @@ export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
 
   // Deslocamento em porcentagem de acordo com o número de itens visíveis
   const stepPercentage = 100 / visibleCount;
-  const translateX = -(currentIndex * stepPercentage);
+  // Garantia matemática: o índice visual nunca pode ultrapassar o último produto da lista
+  const maxSafeIndex = Math.max(0, loopList.length - visibleCount);
+  const safeIndex = Math.min(Math.max(currentIndex, 0), maxSafeIndex);
+  const translateX = -(safeIndex * stepPercentage);
 
   return (
     <div
@@ -127,6 +171,7 @@ export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
               : 'none'
           }}
           onTransitionEnd={handleTransitionEnd}
+          onTransitionCancel={handleTransitionEnd}
         >
           {loopList.map((product, idx) => (
             <div

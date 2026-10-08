@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { HeroBanner } from '@/components/HeroBanner';
@@ -38,12 +38,22 @@ export default function HomePage() {
     isCartOpen
   } = useStore();
 
-  // Produtos organizados para cada vitrine temática da Home
-  const newReleasesProducts = PRODUCTS.filter(
-    (p) => p.status?.includes('Lançamento') || p.id === '04-conjunto-alfaiataria-bege' || p.id === '03-conjunto-alfaiataria-terracota' || p.id === '07-t-shirt-algodao-egipcio' || p.id === '01-casaco-tricot'
+  // Produtos organizados para cada vitrine temática da Home (estáveis com useMemo)
+  const newReleasesProducts = useMemo(
+    () =>
+      PRODUCTS.filter(
+        (p) =>
+          p.status?.includes('Lançamento') ||
+          p.status?.includes('Novidade') ||
+          p.id === '04-conjunto-alfaiataria-bege' ||
+          p.id === '03-conjunto-alfaiataria-terracota' ||
+          p.id === '07-t-shirt-algodao-egipcio' ||
+          p.id === '01-casaco-tricot'
+      ),
+    []
   );
-  const bestSellerProducts = PRODUCTS.filter((p) => p.isBestSeller);
-  const outletProducts = PRODUCTS.filter((p) => p.isOutlet);
+  const bestSellerProducts = useMemo(() => PRODUCTS.filter((p) => p.isBestSeller), []);
+  const outletProducts = useMemo(() => PRODUCTS.filter((p) => p.isOutlet), []);
 
   const handleCategorySelection = (category: string) => {
     setActiveCategory(category);
