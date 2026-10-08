@@ -9,6 +9,7 @@ import { ProductLoopCarousel } from '@/components/ProductLoopCarousel';
 import { ProductModal } from '@/components/ProductModal';
 import { CartDrawer } from '@/components/CartDrawer';
 import { SizeGuideModal } from '@/components/SizeGuideModal';
+import { RecentlyViewedSection } from '@/components/RecentlyViewedSection';
 import { Footer } from '@/components/Footer';
 import { PRODUCTS, CATEGORIES, STORE_INFO } from '@/data/products';
 import { useStore } from '@/context/StoreContext';
@@ -322,6 +323,21 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* 5. SEÇÃO: VISTOS RECENTEMENTE (Histórico Pessoal do Cliente) */}
+        <RecentlyViewedSection
+          onOpenDetails={openProduct}
+          onQuickAdd={(p) => {
+            addToCart({
+              product: p,
+              size: p.sizes[0],
+              color: p.colors[0].name,
+              quantity: 1
+            });
+          }}
+          isWishlisted={(id) => wishlistIds.includes(id)}
+          onToggleWishlist={toggleWishlist}
+        />
 
       </main>
 

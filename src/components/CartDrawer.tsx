@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { X, Trash2, ShoppingBag, MessageCircle, ShieldCheck } from 'lucide-react';
+import { X, Trash2, ShoppingBag, MessageCircle, ShieldCheck, Truck, MapPin } from 'lucide-react';
 import { CartItem } from '@/types';
 import { STORE_INFO, PRODUCTS } from '@/data/products';
 import { useStore } from '@/context/StoreContext';
+import { fetchAddressByCep, calculateShippingOptions, formatCep } from '@/utils/shipping';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -26,7 +27,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   onQuickAddItem
 }) => {
   const router = useRouter();
-  const { setSearchQuery } = useStore();
+  const { setSearchQuery, savedCep, savedAddress, setSavedAddressInfo } = useStore();
+  const [cepInput, setCepInput] = useState(savedCep ? formatCep(savedCep) : '');
+  const [isCepOpen, setIsCepOpen] = useState(false);
+  const [isCepLoading, setIsCepLoading] = useState(false);
+  const [cepError, setCepError] = useState('');
 
   // Trava a rolagem da página quando a sacola está aberta
   useEffect(() => {
@@ -75,6 +80,41 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   // Sugestão de Upsell (peça que ainda não está no carrinho)
   const upsellProduct = PRODUCTS.find((p) => !items.some((i) => i.productId === p.id));
 
+  // Sincroniza o input com o CEP salvo no contexto
+  useEffect(() => {
+    if (savedCep) {
+      setCepInput(formatCep(savedCep));
+    }
+  }, [savedCep]);
+
+  const handleCalculateDrawerCep = async () => {
+    const clean = cepInput.replace(/\D/g, '');
+    if (clean.length !== 8) {
+      setCepError('Digite os 8 dígitos do CEP');
+      return;
+    }
+    setIsCepLoading(true);
+    setCepError('');
+    try {
+      const addr = await fetchAddressByCep(clean);
+      if (addr) {
+        setSavedAddressInfo(clean, addr);
+        setIsCepOpen(false);
+      } else {
+        setCepError('CEP não localizado');
+      }
+    } catch {
+      setCepError('Erro ao consultar CEP');
+    } finally {
+      setIsCepLoading(false);
+    }
+  };
+
+  const drawerShippingOptions = savedAddress ? calculateShippingOptions(savedAddress.uf, subtotal) : [];
+  const lowestShipping = drawerShippingOptions.length > 0 ? drawerShippingOptions[0] : null;
+  const shippingCost = subtotal >= freeShippingGoal ? 0 : (lowestShipping ? lowestShipping.price : 0);
+  const finalTotal = subtotal + shippingCost;
+
   const generateWhatsAppOrderLink = () => {
     let message = `Olá Leidy! Gostaria de finalizar meu pedido pelo site da *Leidy Boutique*:\n\n`;
     items.forEach((item, index) => {
@@ -83,7 +123,22 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       message += `   - Tamanho: ${item.size}\n`;
       message += `   - Qtd: ${item.quantity}x (R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')})\n\n`;
     });
-    message += `💰 *Subtotal das Peças:* R$ ${subtotal.toFixed(2).replace('.', ',')}\n\n`;
+    if (savedAddress) {
+      message += `📍 *Endereço de Entrega:* ${savedAddress.bairro ? savedAddress.bairro + ', ' : ''}${savedAddress.localidade} - ${savedAddress.uf} (CEP: ${savedAddress.cep})\n`;
+      if (subtotal >= freeShippingGoal) {
+        message += `🚚 *Frete:* Cortesia VIP (Grátis)\n\n`;
+      } else if (lowestShipping) {
+        message += `🚚 *Opção de Frete:* ${lowestShipping.name} (${lowestShipping.formattedPrice} - ${lowestShipping.deliveryDays})\n\n`;
+      } else {
+        message += `\n`;
+      }
+    }
+    message += `💰 *Subtotal das Peças:* R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+    if (savedAddress && shippingCost > 0) {
+      message += `💰 *Total Previsto com Frete:* R$ ${finalTotal.toFixed(2).replace('.', ',')}\n\n`;
+    } else {
+      message += `\n`;
+    }
     message += `Poderia me confirmar a disponibilidade e passar as opções de pagamento?`;
 
     return `https://wa.me/${STORE_INFO.whatsapp}?text=${encodeURIComponent(message)}`;
@@ -272,6 +327,95 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           {/* Rodapé da Sacola com Total e Finalização WhatsApp */}
           {items.length > 0 && (
             <div className="p-4 sm:p-5 border-t border-[#C5A059]/20 bg-white dark:bg-[#1A1918] space-y-2.5 sm:space-y-3 shrink-0 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-5">
+              {/* Consulta Real de Frete via CEP na Sacola */}
+              {savedAddress ? (
+                <div className="p-2 sm:p-2.5 rounded-none bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/30 text-xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 truncate">
+                      <MapPin className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
+                      <span className="truncate text-[#1A1918] dark:text-[#FAF8F5] font-medium text-[11px] sm:text-xs">
+                        {savedAddress.bairro ? `${savedAddress.bairro}, ` : ''}{savedAddress.localidade} - {savedAddress.uf}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsCepOpen(!isCepOpen)}
+                      className="text-[10px] text-[#C5A059] hover:underline font-bold uppercase tracking-wider ml-2 shrink-0 cursor-pointer"
+                    >
+                      {isCepOpen ? 'Fechar' : 'Alterar'}
+                    </button>
+                  </div>
+                  {isCepOpen && (
+                    <div className="pt-2 mt-2 border-t border-[#C5A059]/15 space-y-1.5">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={cepInput}
+                          onChange={(e) => setCepInput(formatCep(e.target.value))}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleCalculateDrawerCep();
+                            }
+                          }}
+                          placeholder="00000-000"
+                          maxLength={9}
+                          className="flex-1 px-2.5 py-1.5 text-xs bg-white dark:bg-[#1A1918] border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleCalculateDrawerCep}
+                          disabled={isCepLoading}
+                          className="px-3 py-1.5 bg-[#1A1918] dark:bg-[#C5A059] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#C5A059] transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
+                        >
+                          {isCepLoading ? '...' : 'OK'}
+                        </button>
+                      </div>
+                      {cepError && (
+                        <p className="text-[10px] text-red-500 font-medium">{cepError}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-2 sm:p-2.5 rounded-none bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/30 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-[#1A1918] dark:text-[#FAF8F5] flex items-center gap-1.5">
+                      <Truck className="w-3.5 h-3.5 text-[#C5A059]" />
+                      Calcular Frete & Prazo:
+                    </span>
+                    <span className="text-[10px] text-[#A8A29E]">via Correios</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={cepInput}
+                      onChange={(e) => setCepInput(formatCep(e.target.value))}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleCalculateDrawerCep();
+                        }
+                      }}
+                      placeholder="Digite seu CEP (00000-000)"
+                      maxLength={9}
+                      className="flex-1 px-2.5 py-1.5 text-xs bg-white dark:bg-[#1A1918] border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCalculateDrawerCep}
+                      disabled={isCepLoading}
+                      className="px-3 py-1.5 bg-[#1A1918] dark:bg-[#C5A059] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#C5A059] transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
+                    >
+                      {isCepLoading ? '...' : 'Calcular'}
+                    </button>
+                  </div>
+                  {cepError && (
+                    <p className="text-[10px] text-red-500 font-medium">{cepError}</p>
+                  )}
+                </div>
+              )}
+
               {/* Resumo do Pedido */}
               <div className="space-y-1.5 text-xs text-[#57534E] dark:text-[#D6D3D1]">
                 <div className="flex justify-between items-center">
@@ -282,12 +426,20 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Envio / Entrega:</span>
-                  <span className="text-[#C5A059] dark:text-[#DFBE76] font-medium">Combinado no WhatsApp</span>
+                  <span className="text-[#C5A059] dark:text-[#DFBE76] font-medium">
+                    {subtotal >= freeShippingGoal ? (
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Grátis (VIP)</span>
+                    ) : lowestShipping ? (
+                      `${lowestShipping.name} (${lowestShipping.formattedPrice})`
+                    ) : (
+                      'A consultar'
+                    )}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center text-sm sm:text-base font-bold text-[#1A1918] dark:text-[#FAF8F5] pt-2 border-t border-dashed border-[#C5A059]/20">
                   <span>Total Previsto:</span>
                   <span className="text-[#C5A059] dark:text-[#DFBE76]">
-                    R$ {subtotal.toFixed(2).replace('.', ',')}
+                    R$ {finalTotal.toFixed(2).replace('.', ',')}
                   </span>
                 </div>
               </div>

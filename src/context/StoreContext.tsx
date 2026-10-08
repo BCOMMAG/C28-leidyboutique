@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
 import { Product, CartItem } from '@/types';
 import { PRODUCTS } from '@/data/products';
+import { ViaCepResponse } from '@/utils/shipping';
 
 interface StoreContextType {
   cartItems: CartItem[];
@@ -17,6 +18,13 @@ interface StoreContextType {
   toggleTheme: () => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
+  recentlyViewedIds: string[];
+  recentlyViewedProducts: Product[];
+  addToRecentlyViewed: (productId: string) => void;
+  clearRecentlyViewed: () => void;
+  savedCep: string;
+  savedAddress: ViaCepResponse | null;
+  setSavedAddressInfo: (cep: string, address: ViaCepResponse | null) => void;
   addToCart: (params: {
     product: Product;
     size: string;
@@ -47,6 +55,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>([]);
+  const [savedCep, setSavedCep] = useState<string>('');
+  const [savedAddress, setSavedAddress] = useState<ViaCepResponse | null>(null);
 
   // Carregar dados e tema do localStorage na montagem
   useEffect(() => {
@@ -58,6 +69,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const savedCart = localStorage.getItem('leidy_cart');
       if (savedCart) {
         setCartItems(JSON.parse(savedCart));
+      }
+      const savedRecent = localStorage.getItem('leidy_recently_viewed');
+      if (savedRecent) {
+        setRecentlyViewedIds(JSON.parse(savedRecent));
+      }
+      const savedCepStorage = localStorage.getItem('leidy_saved_cep');
+      if (savedCepStorage) {
+        setSavedCep(savedCepStorage);
+      }
+      const savedAddressStorage = localStorage.getItem('leidy_saved_address');
+      if (savedAddressStorage) {
+        setSavedAddress(JSON.parse(savedAddressStorage));
       }
       const savedTheme = localStorage.getItem('leidy_theme') as 'light' | 'dark' | null;
       if (savedTheme) {
@@ -183,9 +206,50 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const productModalHistoryPushedRef = useRef(false);
   const cartDrawerHistoryPushedRef = useRef(false);
 
+  const addToRecentlyViewed = (productId: string) => {
+    setRecentlyViewedIds((prev) => {
+      const updated = [productId, ...prev.filter((id) => id !== productId)].slice(0, 8);
+      try {
+        localStorage.setItem('leidy_recently_viewed', JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+  };
+
+  const clearRecentlyViewed = () => {
+    setRecentlyViewedIds([]);
+    try {
+      localStorage.removeItem('leidy_recently_viewed');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const setSavedAddressInfo = (cep: string, address: ViaCepResponse | null) => {
+    setSavedCep(cep);
+    setSavedAddress(address);
+    try {
+      if (cep) localStorage.setItem('leidy_saved_cep', cep);
+      else localStorage.removeItem('leidy_saved_cep');
+      if (address) localStorage.setItem('leidy_saved_address', JSON.stringify(address));
+      else localStorage.removeItem('leidy_saved_address');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const recentlyViewedProducts = useMemo(() => {
+    return recentlyViewedIds
+      .map((id) => PRODUCTS.find((p) => p.id === id))
+      .filter(Boolean) as Product[];
+  }, [recentlyViewedIds]);
+
   const openProduct = (product: Product) => {
     setSelectedProduct(product);
     setIsProductModalOpen(true);
+    addToRecentlyViewed(product.id);
 
     if (typeof window !== 'undefined') {
       try {
@@ -273,6 +337,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toggleTheme,
         searchQuery,
         setSearchQuery,
+        recentlyViewedIds,
+        recentlyViewedProducts,
+        addToRecentlyViewed,
+        clearRecentlyViewed,
+        savedCep,
+        savedAddress,
+        setSavedAddressInfo,
         addToCart,
         updateCartQuantity,
         removeFromCart,

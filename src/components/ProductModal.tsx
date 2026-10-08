@@ -20,10 +20,23 @@ import {
   ChevronLeft,
   ShieldCheck,
   LayoutGrid,
-  ArrowRight
+  ArrowRight,
+  Share2,
+  Copy,
+  MapPin,
+  Clock,
+  Sparkles
 } from 'lucide-react';
 import { Product } from '@/types';
 import { PRODUCTS, STORE_INFO } from '@/data/products';
+import { useStore } from '@/context/StoreContext';
+import {
+  fetchAddressByCep,
+  calculateShippingOptions,
+  formatCep,
+  ViaCepResponse,
+  ShippingOption
+} from '@/utils/shipping';
 
 interface ProductModalProps {
   product: Product | null;
@@ -52,7 +65,13 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   onSelectPairedProduct
 }) => {
   const pathname = usePathname();
-  const isAlreadyInCatalog = pathname?.includes('/catalogo');
+  const isAlreadyInCatalog = Boolean(pathname?.startsWith('/catalogo'));
+  const {
+    recentlyViewedProducts,
+    savedCep,
+    savedAddress,
+    setSavedAddressInfo
+  } = useStore();
 
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string>('');
@@ -63,6 +82,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [cepInput, setCepInput] = useState<string>('');
   const [shippingResult, setShippingResult] = useState<boolean>(false);
   const [shippingLoading, setShippingLoading] = useState<boolean>(false);
+  const [shippingAddress, setShippingAddress] = useState<ViaCepResponse | null>(null);
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [shippingError, setShippingError] = useState<string>('');
+  const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [addedAnimation, setAddedAnimation] = useState<boolean>(false);
   const [isVideoBuffering, setIsVideoBuffering] = useState<boolean>(true);
   const [pairedAddedId, setPairedAddedId] = useState<string | null>(null);
@@ -118,10 +141,21 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       setIsPlaying(true);
       setIsMuted(true);
       setIsVideoBuffering(true);
-      setShippingResult(false);
-      setCepInput('');
+      setShippingError('');
+
+      // Recupera CEP e endereço já consultados pelo usuário anteriormente
+      if (savedCep && savedAddress) {
+        setCepInput(formatCep(savedCep));
+        setShippingAddress(savedAddress);
+        setShippingOptions(calculateShippingOptions(savedAddress.uf, product.price));
+        setShippingResult(true);
+      } else {
+        setShippingResult(false);
+        setShippingAddress(null);
+        setCepInput('');
+      }
     }
-  }, [product]);
+  }, [product, savedCep, savedAddress]);
 
   // Controle de reprodução do vídeo
   useEffect(() => {
@@ -192,18 +226,79 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     setTimeout(() => setAddedAnimation(false), 1500);
   };
 
-  const handleCalculateShipping = () => {
-    if (cepInput.trim().length >= 8) {
-      setShippingLoading(true);
-      setTimeout(() => {
-        setShippingLoading(false);
+  // Consulta Real de Endereço via ViaCEP
+  const handleCalculateShipping = async () => {
+    const cleanCep = cepInput.replace(/\D/g, '');
+    if (cleanCep.length !== 8) {
+      setShippingError('Digite um CEP válido com 8 números.');
+      setShippingResult(false);
+      return;
+    }
+
+    setShippingLoading(true);
+    setShippingError('');
+
+    try {
+      const address = await fetchAddressByCep(cleanCep);
+      if (address) {
+        setShippingAddress(address);
+        setSavedAddressInfo(cleanCep, address);
+        setShippingOptions(calculateShippingOptions(address.uf, product.price));
         setShippingResult(true);
-      }, 600);
+      } else {
+        setShippingError('CEP não encontrado. Por favor, confira os números digitados.');
+        setShippingResult(false);
+      }
+    } catch {
+      setShippingError('Não foi possível consultar o CEP no momento.');
+      setShippingResult(false);
+    } finally {
+      setShippingLoading(false);
     }
   };
 
+  // Compartilhar Look (Web Share API nativa + Copiar link fallback)
+  const handleShare = async () => {
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const shareData = {
+      title: `${product.name} | Leidy Boutique`,
+      text: `Olha que look deslumbrante da Leidy Boutique: *${product.name}* (${product.formattedPrice})! ✨`,
+      url: shareUrl
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch {
+        // Fallback para cópia se cancelado
+      }
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(`${shareData.text}\n${shareUrl}`);
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 3000);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const shareOnWhatsApp = () => {
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const msg = `Meninas, olhem que look perfeito da Leidy Boutique: *${product.name}* (${product.formattedPrice})! ✨\n\nDá uma olhadinha aqui: ${shareUrl}`;
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  };
+
   const generateWhatsAppDirectLink = () => {
-    const text = `Olá Leidy! Tenho interesse no *${product.name}*.\n- Cor: *${selectedColor}*\n- Tamanho: *${selectedSize}*\n- Quantidade: *${quantity}*\n- Valor da peça: *${product.formattedPrice}*\n\nPoderia me confirmar a disponibilidade?`;
+    let text = `Olá Leidy! Tenho interesse no *${product.name}*.\n- Cor: *${selectedColor}*\n- Tamanho: *${selectedSize}*\n- Quantidade: *${quantity}*\n- Valor da peça: *${product.formattedPrice}*`;
+    if (shippingAddress) {
+      text += `\n- Entrega em: *${shippingAddress.localidade}/${shippingAddress.uf}* (CEP: ${shippingAddress.cep})`;
+    }
+    text += `\n\nPoderia me confirmar a disponibilidade?`;
     return `https://wa.me/${STORE_INFO.whatsapp}?text=${encodeURIComponent(text)}`;
   };
 
@@ -610,20 +705,63 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   <MessageCircle className="w-4 h-4 text-[#25D366]" />
                   <span>PEDIR ESTA PEÇA NO WHATSAPP DA LEIDY</span>
                 </a>
+
+                {/* Botões de Compartilhar Look (Social Share) */}
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    className="flex-1 py-2.5 px-3 rounded-none border border-[#C5A059]/40 bg-white dark:bg-[#252220] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] text-[11px] uppercase tracking-wider font-semibold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer group"
+                    title="Compartilhar este look com amigas"
+                  >
+                    {copiedLink ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-[#25D366]" />
+                        <span className="text-[#25D366] font-bold">LINK COPIADO! ✨</span>
+                      </>
+                    ) : (
+                      <>
+                        <Share2 className="w-3.5 h-3.5 text-[#C5A059] group-hover:text-current transition-colors" />
+                        <span>COMPARTILHAR LOOK</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={shareOnWhatsApp}
+                    className="py-2.5 px-3 rounded-none border border-[#25D366]/40 bg-[#25D366]/10 hover:bg-[#25D366] text-[#1A1918] dark:text-[#FAF8F5] hover:text-white text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                    title="Enviar este look para amigas no WhatsApp"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5 text-[#25D366] hover:text-white" />
+                    <span>WhatsApp</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Simulador de Envio e Frete */}
+              {/* Simulador de Envio e Frete com Consulta Real de Endereço via ViaCEP */}
               <div className="mt-4 pt-3.5 border-t border-[#C5A059]/20">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1A1918] dark:text-[#FAF8F5] mb-2">
-                  <Truck className="w-4 h-4 text-[#C5A059]" />
-                  <span>CALCULAR PRAZO DE ENTREGA</span>
+                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[#1A1918] dark:text-[#FAF8F5] mb-2">
+                  <div className="flex items-center gap-2">
+                    <Truck className="w-4 h-4 text-[#C5A059]" />
+                    <span>CALCULAR PRAZO DE ENTREGA</span>
+                  </div>
+                  <span className="text-[10px] text-[#C5A059] font-normal lowercase">via correios</span>
                 </div>
+
                 <div className="flex gap-2">
                   <input
                     type="text"
                     placeholder="Digite seu CEP (Ex: 01310-100)"
                     value={cepInput}
-                    onChange={(e) => setCepInput(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                    onChange={(e) => setCepInput(formatCep(e.target.value))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleCalculateShipping();
+                      }
+                    }}
+                    maxLength={9}
                     className="flex-1 px-3.5 py-2 text-xs rounded-none border border-[#C5A059]/30 bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
                   />
                   <button
@@ -631,23 +769,51 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     disabled={shippingLoading}
                     className="px-4 py-2 bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white rounded-none text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer"
                   >
-                    {shippingLoading ? 'Calculando...' : 'Calcular'}
+                    {shippingLoading ? 'Consultando...' : 'Calcular'}
                   </button>
                 </div>
 
-                {shippingResult && (
-                  <div className="mt-3 p-3 rounded-none bg-white dark:bg-[#252220] border border-[#C5A059]/30 space-y-2 text-xs">
-                    <div className="flex justify-between items-center text-[#1A1918] dark:text-[#FAF8F5]">
-                      <span>📦 <strong>Sedex Express / Correios</strong> (1 a 3 dias úteis)</span>
-                      <span className="font-bold text-[#C5A059]">R$ 18,90</span>
+                {/* Feedback de erro */}
+                {shippingError && (
+                  <p className="mt-2 text-[11px] text-red-500 font-medium">
+                    {shippingError}
+                  </p>
+                )}
+
+                {/* Resultado Real do Endereço e Opções */}
+                {shippingResult && shippingAddress && (
+                  <div className="mt-3 p-3.5 rounded-none bg-white dark:bg-[#252220] border border-[#C5A059]/30 space-y-2.5 text-xs animate-fadeIn">
+                    {/* Endereço Identificado via ViaCEP */}
+                    <div className="flex items-start gap-2 pb-2 border-b border-[#C5A059]/15">
+                      <MapPin className="w-3.5 h-3.5 text-[#C5A059] shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
+                          Entrega para: {shippingAddress.bairro ? `${shippingAddress.bairro}, ` : ''}{shippingAddress.localidade} - {shippingAddress.uf}
+                        </p>
+                        {shippingAddress.logradouro && (
+                          <p className="text-[11px] text-[#78716C] dark:text-[#A8A29E]">
+                            {shippingAddress.logradouro} (CEP: {shippingAddress.cep})
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center text-[#1A1918] dark:text-[#FAF8F5]">
-                      <span>🚚 <strong>PAC Padrão</strong> (4 a 7 dias úteis)</span>
-                      <span className="font-bold text-[#C5A059]">R$ 14,50</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[#1A1918] dark:text-[#FAF8F5] border-t border-dashed pt-1 mt-1 border-[#C5A059]/20">
-                      <span><strong>Retirada VIP na Boutique</strong></span>
-                      <span className="font-bold text-[#25D366]">Grátis</span>
+
+                    {/* Lista de Opções de Envio */}
+                    <div className="space-y-2 pt-0.5">
+                      {shippingOptions.map((opt) => (
+                        <div key={opt.id} className="flex justify-between items-center text-[#1A1918] dark:text-[#FAF8F5]">
+                          <div className="flex items-center gap-2">
+                            <span>{opt.iconType === 'sedex' ? '📦' : opt.iconType === 'pac' ? '🚚' : '✨'}</span>
+                            <div>
+                              <strong className="block">{opt.name}</strong>
+                              <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E]">{opt.description}</span>
+                            </div>
+                          </div>
+                          <span className={`font-bold ${opt.price === 0 ? 'text-[#25D366]' : 'text-[#C5A059]'}`}>
+                            {opt.formattedPrice}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -760,6 +926,49 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         </div>
                       );
                     })}
+                  </div>
+                </div>
+              )}
+
+              {/* 10. VISTOS RECENTEMENTE (Outras peças que a cliente já visualizou) */}
+              {recentlyViewedProducts.filter((p) => p.id !== product.id).length > 0 && (
+                <div className="mt-6 pt-5 border-t border-[#C5A059]/25">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-[#C5A059]" />
+                      <h4 className="text-xs uppercase tracking-widest font-bold text-[#1A1918] dark:text-[#FAF8F5]">
+                        Vistos Recentemente por Você
+                      </h4>
+                    </div>
+                    <span className="text-[10px] text-[#A8A29E] uppercase tracking-wider">Histórico</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    {recentlyViewedProducts
+                      .filter((p) => p.id !== product.id)
+                      .slice(0, 4)
+                      .map((recentItem) => (
+                        <div
+                          key={recentItem.id}
+                          onClick={() => onSelectPairedProduct(recentItem)}
+                          className="group cursor-pointer p-2 rounded-none bg-white dark:bg-[#252220] border border-[#C5A059]/20 hover:border-[#C5A059] transition-all shadow-xs"
+                        >
+                          <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#F4F2EE] mb-1.5">
+                            <Image
+                              src={recentItem.thumbnail}
+                              alt={recentItem.name}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                          <p className="text-[11px] font-medium text-[#1A1918] dark:text-[#FAF8F5] truncate group-hover:text-[#C5A059] transition-colors">
+                            {recentItem.name}
+                          </p>
+                          <p className="text-xs font-bold text-[#C5A059] dark:text-[#DFBE76] mt-0.5">
+                            {recentItem.formattedPrice}
+                          </p>
+                        </div>
+                      ))}
                   </div>
                 </div>
               )}

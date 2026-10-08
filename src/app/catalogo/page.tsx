@@ -8,6 +8,7 @@ import { ProductCard } from '@/components/ProductCard';
 import { ProductModal } from '@/components/ProductModal';
 import { CartDrawer } from '@/components/CartDrawer';
 import { SizeGuideModal } from '@/components/SizeGuideModal';
+import { RecentlyViewedSection } from '@/components/RecentlyViewedSection';
 import { Footer } from '@/components/Footer';
 import {
   PRODUCTS,
@@ -1652,6 +1653,21 @@ function CatalogoContent() {
 
         </div>
       </main>
+
+      {/* Vistos Recentemente no Catálogo */}
+      <RecentlyViewedSection
+        onOpenDetails={openProduct}
+        onQuickAdd={(p) => {
+          addToCart({
+            product: p,
+            size: p.sizes[0],
+            color: p.colors[0].name,
+            quantity: 1
+          });
+        }}
+        isWishlisted={(id) => wishlistIds.includes(id)}
+        onToggleWishlist={toggleWishlist}
+      />
 
       <Footer />
 
