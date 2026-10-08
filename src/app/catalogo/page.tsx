@@ -114,18 +114,20 @@ function CatalogoContent() {
   // Sincronizar parâmetros de URL quando mudarem
   useEffect(() => {
     const q = searchParams.get('q');
-    if (q) setSearchQuery(q);
+    if (q) {
+      setSearchQuery(q);
+    } else {
+      setSearchQuery('');
+    }
 
     const cat = searchParams.get('categoria');
     const st = searchParams.get('status');
     const min = searchParams.get('precoMin') ? Number(searchParams.get('precoMin')) : null;
     const max = searchParams.get('precoMax') ? Number(searchParams.get('precoMax')) : null;
 
-    if (cat || st || min !== null || max !== null) {
-      const updated = createDefaultFilters(cat || undefined, st || undefined, min, max);
-      setAppliedFilters(updated);
-      setDraftFilters(updated);
-    }
+    const updated = createDefaultFilters(cat || undefined, st || undefined, min, max);
+    setAppliedFilters(updated);
+    setDraftFilters(updated);
   }, [searchParams, setSearchQuery]);
 
   const allSizes = ['PP', 'P', 'M', 'G', 'GG', 'Tamanho Único'];
@@ -227,7 +229,20 @@ function CatalogoContent() {
     setAppliedFilters(empty);
     setSearchQuery('');
     setMobileFilterDrawerOpen(false);
+    if (typeof window !== 'undefined' && window.location.search) {
+      router.replace('/catalogo', { scroll: false });
+    }
   };
+
+  // Ouvir evento global para resetar todos os filtros (ex: ao clicar em "Explorar Catálogo" na sacola)
+  useEffect(() => {
+    const handleResetEvent = () => {
+      resetAllFilters();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    window.addEventListener('leidy:reset-catalog-filters', handleResetEvent);
+    return () => window.removeEventListener('leidy:reset-catalog-filters', handleResetEvent);
+  }, []);
 
   // Remoção de filtros individuais diretamente nas tags ativas
   const removeAppliedCategory = (cat: string) => {

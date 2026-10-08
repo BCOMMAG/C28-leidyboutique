@@ -2,9 +2,11 @@
 
 import React, { useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { X, Trash2, ShoppingBag, MessageCircle, ShieldCheck } from 'lucide-react';
 import { CartItem } from '@/types';
 import { STORE_INFO, PRODUCTS } from '@/data/products';
+import { useStore } from '@/context/StoreContext';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -23,6 +25,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   onRemoveItem,
   onQuickAddItem
 }) => {
+  const router = useRouter();
+  const { setSearchQuery } = useStore();
+
   // Trava a rolagem da página quando a sacola está aberta
   useEffect(() => {
     if (isOpen) {
@@ -44,6 +49,21 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
+
+  const handleExploreCatalog = () => {
+    setSearchQuery('');
+    onClose();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('leidy:reset-catalog-filters'));
+      if (window.location.pathname === '/catalogo' && !window.location.search) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        router.push('/catalogo');
+      }
+    } else {
+      router.push('/catalogo');
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -139,8 +159,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   </p>
                 </div>
                 <button
-                  onClick={onClose}
-                  className="px-6 py-2.5 bg-[#1A1918] dark:bg-[#C5A059] text-white rounded-none text-xs uppercase tracking-widest font-semibold hover:bg-[#C5A059] transition-all cursor-pointer"
+                  type="button"
+                  onClick={handleExploreCatalog}
+                  className="px-6 py-2.5 bg-[#1A1918] dark:bg-[#C5A059] text-white rounded-none text-xs uppercase tracking-widest font-semibold hover:bg-[#C5A059] transition-all cursor-pointer active:scale-95 shadow-xs"
                 >
                   Explorar Catálogo
                 </button>
