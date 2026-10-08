@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -65,10 +65,49 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [shippingLoading, setShippingLoading] = useState<boolean>(false);
   const [addedAnimation, setAddedAnimation] = useState<boolean>(false);
   const [isVideoBuffering, setIsVideoBuffering] = useState<boolean>(true);
+  const [pairedAddedId, setPairedAddedId] = useState<string | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+
+  // Produtos que combinam para "Compre o Look"
+  const matchingProducts = useMemo(() => {
+    if (!product) return [];
+    const matches: Product[] = [];
+
+    // 1. Sugestão emparelhada direta da peça
+    if (product.pairedWithId) {
+      const directPair = PRODUCTS.find((p) => p.id === product.pairedWithId && p.id !== product.id);
+      if (directPair) matches.push(directPair);
+    }
+
+    // 2. Se houver menos de 2 sugestões, complementar com produtos de categorias distintas
+    const others = PRODUCTS.filter(
+      (p) => p.id !== product.id && !matches.some((m) => m.id === p.id)
+    );
+
+    const complementary = others.filter((p) => p.category !== product.category);
+    const candidates = complementary.length > 0 ? complementary : others;
+
+    for (const cand of candidates) {
+      if (matches.length >= 2) break;
+      matches.push(cand);
+    }
+
+    return matches;
+  }, [product]);
+
+  const handleAddPaired = (item: Product) => {
+    onAddToCart({
+      product: item,
+      size: item.sizes[0] || 'Tamanho Único',
+      color: item.colors[0]?.name || 'Padrão',
+      quantity: 1
+    });
+    setPairedAddedId(item.id);
+    setTimeout(() => setPairedAddedId(null), 1800);
+  };
 
   useEffect(() => {
     if (product) {
@@ -173,23 +212,23 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         {/* Botão Fechar Isolado no Topo */}
         <button
           onClick={onClose}
-          className="absolute top-3.5 right-3.5 z-30 p-2 sm:p-2.5 rounded-none bg-white/90 dark:bg-[#252220]/90 text-[#1A1918] dark:text-white hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all shadow-md cursor-pointer"
+          className="absolute top-3 right-3 z-40 p-2 sm:p-2.5 rounded-none bg-[#1A1918]/85 dark:bg-black/85 text-white hover:bg-[#C5A059] transition-all shadow-xl cursor-pointer border border-[#C5A059]/40"
           aria-label="Fechar"
         >
           <X className="w-5 h-5" />
         </button>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 max-h-[92vh] overflow-y-auto lg:overflow-visible">
+        <div className="grid grid-cols-1 lg:grid-cols-12 max-h-[92vh] overflow-y-auto lg:overflow-visible">
           
-          {/* COLUNA ESQUERDA: GALERIA E VÍDEO (Espaço reduzido em 30% no mobile) */}
-          <div className="lg:col-span-5 p-3.5 sm:p-6 bg-[#F4EFE6]/60 dark:bg-[#141312]/60 flex flex-col items-center justify-between border-b lg:border-b-0 lg:border-r border-[#C5A059]/20">
+          {/* COLUNA ESQUERDA: GALERIA E VÍDEO (Aparece em destaque no mobile sem cortes) */}
+          <div className="lg:col-span-5 p-2.5 sm:p-5 lg:p-6 bg-[#F4EFE6]/60 dark:bg-[#141312]/60 flex flex-col items-center justify-between border-b lg:border-b-0 lg:border-r border-[#C5A059]/20">
             
             {/* Visualizador Principal com Navegação por Setas e Swipe */}
             <div
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              className="relative w-full max-w-[290px] sm:max-w-[360px] lg:max-w-none h-[260px] sm:h-[340px] lg:h-[480px] rounded-none overflow-hidden bg-black shadow-lg mx-auto select-none touch-pan-y"
+              className="relative w-full aspect-[3/4] sm:aspect-auto sm:h-[380px] lg:h-[500px] rounded-none overflow-hidden bg-black shadow-lg mx-auto select-none touch-pan-y"
             >
               {currentMedia.type === 'video' ? (
                 <div className="relative w-full h-full">
@@ -336,10 +375,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           </div>
 
           {/* COLUNA DIREITA: INFORMAÇÕES & PEDIDO */}
-          <div className="lg:col-span-7 p-5 sm:p-8 flex flex-col justify-between overflow-y-auto max-h-[85vh]">
+          <div className="lg:col-span-7 p-4 sm:p-6 lg:p-8 flex flex-col justify-between overflow-y-auto max-h-none lg:max-h-[85vh]">
             <div>
               {/* Header de Categoria e Atalho */}
-              <div className="flex items-center justify-between pr-12">
+              <div className="flex items-center justify-between pr-10 sm:pr-12">
                 <span className="text-xs uppercase tracking-widest text-[#C5A059] dark:text-[#DFBE76] font-semibold">
                   {product.category}
                 </span>
@@ -361,13 +400,46 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 {product.name}
               </h2>
 
-              {/* Descrição */}
-              <p className="mt-3 text-sm text-[#57534E] dark:text-[#D6D3D1] leading-relaxed">
-                {product.description}
-              </p>
+              {/* Valor do Produto & Favoritar (Logo abaixo do título) */}
+              <div className="mt-3.5 pt-3 pb-3 border-y border-[#C5A059]/20 flex items-center justify-between gap-4">
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E] block mb-0.5 font-medium">
+                    Valor da Peça
+                  </span>
+                  <div className="flex items-baseline gap-2.5">
+                    <span className="text-2xl sm:text-3xl font-bold text-[#1A1918] dark:text-[#FAF8F5] tracking-tight">
+                      {product.formattedPrice}
+                    </span>
+                    {product.formattedOriginalPrice && (
+                      <span className="text-sm text-[#A8A29E] line-through font-normal">
+                        {product.formattedOriginalPrice}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-[#C5A059] dark:text-[#DFBE76] font-medium block mt-0.5">
+                    Peça Exclusiva &bull; Em até 3x sem juros
+                  </span>
+                </div>
+
+                {/* Botão de Salvar nos Favoritos com Coração integrado ao Preço */}
+                <button
+                  onClick={() => onToggleWishlist(product.id)}
+                  className={`flex items-center gap-2 px-3.5 py-2.5 rounded-none border text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+                    isWishlisted
+                      ? 'bg-[#C5A059] text-white border-[#C5A059] shadow-sm'
+                      : 'border-[#C5A059]/40 bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:border-[#C5A059] hover:bg-[#FAF8F5]'
+                  }`}
+                  title={isWishlisted ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+                >
+                  <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current text-white' : 'text-[#C5A059]'}`} />
+                  <span className="text-xs">
+                    {isWishlisted ? 'Salvo' : 'Favoritar'}
+                  </span>
+                </button>
+              </div>
 
               {/* Seletor de Cores */}
-              <div className="mt-5">
+              <div className="mt-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#1A1918] dark:text-[#FAF8F5]">
                     Cor Escolhida: <span className="text-[#C5A059] dark:text-[#DFBE76] font-bold">{selectedColor}</span>
@@ -404,7 +476,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               </div>
 
               {/* Seletor de Tamanhos com Guia de Medidas */}
-              <div className="mt-5">
+              <div className="mt-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#1A1918] dark:text-[#FAF8F5]">
                     Tamanho: <span className="text-[#C5A059] dark:text-[#DFBE76] font-bold">{selectedSize}</span>
@@ -439,46 +511,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 </div>
               </div>
 
-              {/* Valor do Produto & Favoritar (Estrategicamente posicionado acima dos botões de ação) */}
-              <div className="mt-6 pt-5 border-t border-[#C5A059]/20 flex items-center justify-between gap-4">
-                <div>
-                  <span className="text-[10px] uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E] block mb-0.5 font-medium">
-                    Valor da Peça
-                  </span>
-                  <div className="flex items-baseline gap-2.5">
-                    <span className="text-2xl sm:text-3xl font-bold text-[#1A1918] dark:text-[#FAF8F5] tracking-tight">
-                      {product.formattedPrice}
-                    </span>
-                    {product.formattedOriginalPrice && (
-                      <span className="text-sm text-[#A8A29E] line-through font-normal">
-                        {product.formattedOriginalPrice}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[11px] text-[#C5A059] dark:text-[#DFBE76] font-medium block mt-0.5">
-                    Peça Exclusiva &bull; Em até 3x sem juros
-                  </span>
-                </div>
-
-                {/* Botão de Salvar nos Favoritos com Coração integrado ao Preço */}
-                <button
-                  onClick={() => onToggleWishlist(product.id)}
-                  className={`flex items-center gap-2 px-3.5 py-2.5 rounded-none border text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
-                    isWishlisted
-                      ? 'bg-[#C5A059] text-white border-[#C5A059] shadow-sm'
-                      : 'border-[#C5A059]/40 bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:border-[#C5A059] hover:bg-[#FAF8F5]'
-                  }`}
-                  title={isWishlisted ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
-                >
-                  <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current text-white' : 'text-[#C5A059]'}`} />
-                  <span className="hidden sm:inline">
-                    {isWishlisted ? 'Salvo' : 'Favoritar'}
-                  </span>
-                </button>
-              </div>
-
               {/* Seletor de Quantidade & Ações Principais */}
-              <div className="mt-6 space-y-3">
+              <div className="mt-5 space-y-2.5">
                 <div className="flex items-center gap-3">
                   {/* Contador de Quantidade */}
                   <div className="flex items-center border border-[#C5A059]/40 rounded-none bg-white dark:bg-[#252220] px-3 py-1.5">
@@ -527,7 +561,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   href={generateWhatsAppDirectLink()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3.5 px-6 rounded-none text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 border border-[#C5A059] bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FBF7EE] dark:hover:bg-[#2E2A27] transition-all duration-300 shadow-sm cursor-pointer"
+                  className="w-full py-3 px-6 rounded-none text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 border border-[#C5A059] bg-white dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FBF7EE] dark:hover:bg-[#2E2A27] transition-all duration-300 shadow-sm cursor-pointer"
                 >
                   <MessageCircle className="w-4 h-4 text-[#25D366]" />
                   <span>Pedir Esta Peça no WhatsApp da Leidy</span>
@@ -535,7 +569,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               </div>
 
               {/* Simulador de Envio e Frete */}
-              <div className="mt-6 pt-4 border-t border-[#C5A059]/20">
+              <div className="mt-5 pt-4 border-t border-[#C5A059]/20">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#1A1918] dark:text-[#FAF8F5] mb-2">
                   <Truck className="w-4 h-4 text-[#C5A059]" />
                   <span>Calcular Prazo de Entrega</span>
@@ -575,49 +609,113 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 )}
               </div>
 
-              {/* Detalhes Técnicos e Cuidados */}
-              <div className="mt-5 pt-4 border-t border-[#C5A059]/20">
-                <h4 className="text-xs uppercase tracking-widest font-bold text-[#1A1918] dark:text-[#FAF8F5] mb-2 flex items-center gap-1.5">
+              {/* Descrição & Destaques de Tecido (Agora posicionado após o Frete) */}
+              <div className="mt-5 pt-4 border-t border-[#C5A059]/20 space-y-3">
+                <h4 className="text-xs uppercase tracking-widest font-bold text-[#1A1918] dark:text-[#FAF8F5] flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-[#C5A059]" />
-                  <span>Destaques & Composição do Tecido</span>
+                  <span>Sobre a Peça & Detalhes</span>
                 </h4>
-                <ul className="text-xs text-[#57534E] dark:text-[#D6D3D1] space-y-1.5">
-                  {product.details.map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059] mt-1 shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
+
+                <p className="text-xs sm:text-sm text-[#57534E] dark:text-[#D6D3D1] leading-relaxed">
+                  {product.description}
+                </p>
+
+                {product.details && product.details.length > 0 && (
+                  <div className="pt-1">
+                    <span className="text-[11px] uppercase tracking-wider font-semibold text-[#78716C] dark:text-[#A8A29E] block mb-2">
+                      Composição & Cuidados:
+                    </span>
+                    <ul className="text-xs text-[#57534E] dark:text-[#D6D3D1] space-y-1.5">
+                      {product.details.map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059] mt-1 shrink-0" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
-              {/* Upsell / Combine com seu Look */}
-              {pairedProduct && (
-                <div className="mt-5 pt-4 border-t border-[#C5A059]/20">
-                  <span className="text-[11px] uppercase tracking-widest text-[#C5A059] dark:text-[#DFBE76] font-bold block mb-2">
-                    Combine com seu look:
-                  </span>
-                  <div
-                    onClick={() => onSelectPairedProduct(pairedProduct)}
-                    className="flex items-center gap-3 p-3 rounded-none bg-white dark:bg-[#252220] border border-[#C5A059]/30 hover:border-[#C5A059] transition-all cursor-pointer group shadow-xs"
-                  >
-                    <div className="relative w-12 h-14 rounded-none overflow-hidden bg-[#F4F2EE] shrink-0">
-                      <Image
-                        src={pairedProduct.thumbnail}
-                        alt={pairedProduct.name}
-                        fill
-                        className="object-cover"
-                      />
+              {/* Compre o Look - Peças que combinam com adição rápida ao carrinho */}
+              {matchingProducts.length > 0 && (
+                <div className="mt-6 pt-5 border-t border-[#C5A059]/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <span className="text-[10px] uppercase tracking-widest text-[#C5A059] dark:text-[#DFBE76] font-bold block">
+                        Sugestão de Estilo
+                      </span>
+                      <h4 className="font-serif-luxury text-base font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
+                        Compre o Look
+                      </h4>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h5 className="text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] group-hover:text-[#C5A059] truncate transition-colors">
-                        {pairedProduct.name}
-                      </h5>
-                      <p className="text-xs font-bold text-[#1A1918] dark:text-[#FAF8F5] mt-0.5">
-                        {pairedProduct.formattedPrice}
-                      </p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-[#C5A059] group-hover:translate-x-1 transition-transform" />
+                    <span className="text-[10px] text-[#78716C] dark:text-[#A8A29E]">
+                      Combine e monte seu visual
+                    </span>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {matchingProducts.map((item) => {
+                      const isItemAdded = pairedAddedId === item.id;
+                      return (
+                        <div
+                          key={item.id}
+                          className="flex items-center gap-3 p-2.5 sm:p-3 rounded-none bg-white dark:bg-[#252220] border border-[#C5A059]/30 hover:border-[#C5A059] transition-all group shadow-xs"
+                        >
+                          <div
+                            onClick={() => onSelectPairedProduct(item)}
+                            className="relative w-14 h-16 sm:w-16 sm:h-20 rounded-none overflow-hidden bg-[#F4F2EE] shrink-0 cursor-pointer"
+                          >
+                            <Image
+                              src={item.thumbnail}
+                              alt={item.name}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+
+                          <div
+                            onClick={() => onSelectPairedProduct(item)}
+                            className="flex-1 min-w-0 cursor-pointer"
+                          >
+                            <span className="text-[10px] uppercase tracking-wider text-[#C5A059] dark:text-[#DFBE76] font-semibold block truncate">
+                              {item.category}
+                            </span>
+                            <h5 className="text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] group-hover:text-[#C5A059] truncate transition-colors">
+                              {item.name}
+                            </h5>
+                            <p className="text-xs font-bold text-[#1A1918] dark:text-[#FAF8F5] mt-0.5">
+                              {item.formattedPrice}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleAddPaired(item)}
+                              className={`px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-all flex items-center gap-1.5 rounded-none cursor-pointer ${
+                                isItemAdded
+                                  ? 'bg-[#25D366] text-white'
+                                  : 'bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76]'
+                              }`}
+                              title="Adicionar esta peça combinada à sacola"
+                            >
+                              {isItemAdded ? (
+                                <>
+                                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                  <span>Adicionado</span>
+                                </>
+                              ) : (
+                                <>
+                                  <ShoppingBag className="w-3.5 h-3.5" />
+                                  <span>+ Look</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
