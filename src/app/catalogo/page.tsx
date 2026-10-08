@@ -1193,7 +1193,7 @@ function CatalogoContent() {
           className="w-full py-3 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] rounded-none text-xs uppercase tracking-widest font-bold flex items-center justify-center gap-2 transition-all duration-300 shadow-md cursor-pointer"
         >
           <Check className="w-4 h-4 stroke-[2.5]" />
-          <span>APLICAR FILTROS ({draftMatchesCount})</span>
+          <span>APLICAR FILTROS</span>
         </button>
 
         {(draftFiltersCount > 0 || activeFiltersCount > 0) && (
@@ -1327,7 +1327,7 @@ function CatalogoContent() {
                   className="w-full py-2.5 px-3 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] rounded-none text-xs uppercase tracking-widest font-bold flex items-center justify-center gap-2 transition-all duration-300 shadow-md cursor-pointer active:scale-95"
                 >
                   <Check className="w-4 h-4 stroke-[2.5]" />
-                  <span>APLICAR FILTROS ({draftMatchesCount})</span>
+                  <span>APLICAR FILTROS</span>
                 </button>
 
                 <div className="flex items-center justify-between text-[11px] text-[#78716C] dark:text-[#A8A29E] pt-0.5">
@@ -1690,7 +1690,7 @@ function CatalogoContent() {
                   className="w-full py-3 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] rounded-none text-xs uppercase tracking-widest font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
                 >
                   <Check className="w-4 h-4 stroke-[2.5]" />
-                  <span>APLICAR FILTROS ({draftMatchesCount} PEÇAS)</span>
+                  <span>APLICAR FILTROS</span>
                 </button>
 
                 {(draftFiltersCount > 0 || activeFiltersCount > 0) && (
