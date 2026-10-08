@@ -54,6 +54,16 @@ export default function HomePage() {
   );
   const bestSellerProducts = useMemo(() => PRODUCTS.filter((p) => p.isBestSeller), []);
   const outletProducts = useMemo(() => PRODUCTS.filter((p) => p.isOutlet), []);
+  const lastPiecesProducts = useMemo(
+    () =>
+      PRODUCTS.filter(
+        (p) =>
+          p.isLastPieces ||
+          (p.remainingPieces !== undefined && p.remainingPieces <= 5) ||
+          p.badge?.includes('peça')
+      ),
+    []
+  );
 
   const handleCategorySelection = (category: string) => {
     setActiveCategory(category);
@@ -63,6 +73,8 @@ export default function HomePage() {
       document.getElementById('mais-vendidos')?.scrollIntoView({ behavior: 'smooth' });
     } else if (category === 'OUTLET') {
       document.getElementById('outlet')?.scrollIntoView({ behavior: 'smooth' });
+    } else if (category === 'Últimas Peças') {
+      document.getElementById('ultimas-pecas')?.scrollIntoView({ behavior: 'smooth' });
     } else {
       document.getElementById('lancamentos')?.scrollIntoView({ behavior: 'smooth' });
     }
@@ -218,6 +230,53 @@ export default function HomePage() {
                 className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#C5A059] hover:text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
               >
                 <span>Ver Mais Peças do OUTLET</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* 4. SEÇÃO: ÚLTIMAS PEÇAS */}
+        <section id="ultimas-pecas" className="py-16 sm:py-24 bg-[#FAF8F5] dark:bg-[#121110] border-t border-[#C5A059]/25">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
+              <div>
+                <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-bold block mb-1.5">
+                  Estoque Limitado &bull; Restam Poucas Unidades
+                </span>
+                <h2 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
+                  Últimas Peças
+                </h2>
+              </div>
+              <p className="text-xs text-[#78716C] dark:text-[#A8A29E] max-w-sm hidden sm:block">
+                Modelos exclusivos prestes a esgotar definitivamente na boutique. Peças com apenas 5 unidades ou menos restantes no estoque.
+              </p>
+            </div>
+
+            {/* Carrossel em looping automático com 4 cards (pausa no hover/clique) */}
+            <ProductLoopCarousel
+              products={lastPiecesProducts}
+              isLastPiecesSection={true}
+              onOpenDetails={openProduct}
+              onQuickAdd={(p) => {
+                addToCart({
+                  product: p,
+                  size: p.sizes[0],
+                  color: p.colors[0].name,
+                  quantity: 1
+                });
+              }}
+              isWishlisted={(id) => wishlistIds.includes(id)}
+              onToggleWishlist={toggleWishlist}
+            />
+
+            {/* Botão Ver Todas as Últimas Peças */}
+            <div className="mt-8 sm:mt-12 text-center">
+              <Link
+                href="/catalogo?status=Últimas%20Peças"
+                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
+              >
+                <span>Explorar Todas as Peças Restantes no Catálogo</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>

@@ -14,6 +14,7 @@ interface ProductCardProps {
   onToggleWishlist: (productId: string) => void;
   isOutletSection?: boolean;
   isNewReleasesSection?: boolean;
+  isLastPiecesSection?: boolean;
   columnsCount?: 2 | 3 | 4 | 5;
 }
 
@@ -25,6 +26,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onToggleWishlist,
   isOutletSection = false,
   isNewReleasesSection = false,
+  isLastPiecesSection = false,
   columnsCount = 4
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -107,31 +109,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Badge de Destaque com Regras de Exibição */}
         {(() => {
           // 1. Regra para Seção de Lançamentos Exclusivos:
-          // PROIBIDO exibir "Outlet" ou ofertas/descontos (% OFF). Apenas escassez: "Faltam 2 peças", "Faltam 5 peças", "Últimas 3 peças", etc.
+          // O usuário pediu explicitamente: DEIXAR SEM CARDS EM CIMA DOS PRODUTOS!
           if (isNewReleasesSection) {
-            const scarcityMap: Record<string, string> = {
-              '01-casaco-tricot': 'Últimas 3 peças',
-              '02-blusa-tricot-rosa': 'Faltam 2 peças',
-              '03-conjunto-alfaiataria-terracota': 'Restam apenas 5 peças',
-              '04-conjunto-alfaiataria-bege': 'Faltam 2 peças',
-              '05-vestido-viscolinho': 'Últimas 3 peças',
-              '07-t-shirt-algodao-egipcio': 'Restam apenas 4 peças'
-            };
+            return null;
+          }
 
-            const isExistingScarcity =
-              product.badge &&
-              (product.badge.includes('peça') ||
-                product.badge.includes('Restam') ||
-                product.badge.includes('Faltam') ||
-                product.badge.includes('Última')) &&
-              !product.badge.toUpperCase().includes('OUTLET') &&
-              !product.badge.toUpperCase().includes('OFF');
-
-            const label = isExistingScarcity ? product.badge : scarcityMap[product.id] || 'Faltam 3 peças';
+          // 2. Seção "Últimas Peças" (somente entram quando restam 5 peças ou menos)
+          if (isLastPiecesSection || product.isLastPieces || (product.remainingPieces && product.remainingPieces <= 5)) {
+            const count = product.remainingPieces || 5;
+            const label =
+              product.badge && product.badge.includes('peça')
+                ? product.badge
+                : count === 1
+                ? 'Última peça'
+                : `Restam ${count} peças`;
 
             return (
               <div
-                className={`absolute top-2.5 left-2.5 bg-[#8B5A2B]/90 dark:bg-black/90 text-[#FAF8F5] uppercase tracking-wider font-semibold rounded-none backdrop-blur-sm border border-[#C5A059]/40 ${
+                className={`absolute top-2.5 left-2.5 bg-[#8B5A2B]/95 dark:bg-black/95 text-[#FAF8F5] uppercase tracking-wider font-semibold rounded-none backdrop-blur-sm border border-[#C5A059]/40 shadow-xs ${
                   isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2.5 py-1'
                 }`}
               >
@@ -140,7 +135,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             );
           }
 
-          // 2. Seção OUTLET ou produtos com desconto fora de lançamentos
+          // 3. Seção OUTLET ou produtos com desconto fora de lançamentos
           if (product.discountBadge) {
             return (
               <div
@@ -153,7 +148,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             );
           }
 
-          // 3. Badges de escassez padrão para outros cards
+          // 4. Badges de escassez padrão para outros cards
           if (
             product.badge?.includes('Restam') ||
             product.badge?.includes('peça') ||

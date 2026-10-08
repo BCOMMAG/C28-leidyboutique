@@ -200,7 +200,9 @@ export const PRODUCTS: Product[] = [
     line: 'Trabalho & Alfaiataria',
     status: ['Novidade', 'Pronta Entrega'],
     isNewArrival: true,
-    badge: 'Restam apenas 5 peças',
+    badge: 'Restam 5 peças',
+    remainingPieces: 5,
+    isLastPieces: true,
     description: 'Blazer confeccionado em crepe de alfaiataria nobre com forro em cetim puro. Lapela alongada, botões frontais em banho ouro fosco e caimento que impõe presença em qualquer reunião ou evento especial.',
     details: [
       'Forro 100% acetato com costura embutida de alto padrão',
@@ -241,6 +243,9 @@ export const PRODUCTS: Product[] = [
     line: 'Trabalho & Alfaiataria',
     status: ['Pronta Entrega', 'Mais Vendido'],
     isBestSeller: true,
+    badge: 'Restam 2 peças',
+    remainingPieces: 2,
+    isLastPieces: true,
     description: 'Pantalona em modelagem impecável com cintura alta e cós limpo. Possui pregas frontais que criam uma linha vertical alongadora e fluidez em cada passo.',
     details: [
       'Cós entretelado firme que valoriza a cintura',
@@ -359,6 +364,9 @@ export const PRODUCTS: Product[] = [
     line: 'Casual Chic',
     status: ['Novidade', 'Pronta Entrega'],
     isNewArrival: true,
+    badge: 'Restam 4 peças',
+    remainingPieces: 4,
+    isLastPieces: true,
     description: 'Saia em malharia fina plissada com elástico confortável na cintura. Cria um movimento belíssimo ao caminhar, perfeita para transitar do dia para a noite.',
     details: [
       'Plissado permanente que não deforma com a lavagem',
@@ -398,7 +406,9 @@ export const PRODUCTS: Product[] = [
     fit: 'Reta Clássica',
     line: 'Casual Chic',
     status: ['Pronta Entrega'],
-    badge: 'Restam apenas 5 peças',
+    badge: 'Restam 3 peças',
+    remainingPieces: 3,
+    isLastPieces: true,
     description: 'Bermuda de corte reto em alfaiataria premium com comprimento meia-coxa elegante. Traz pregas frontais bem definidas e bolsos laterais funcionais.',
     details: [
       'Acabamento de alfaiataria masculina adaptado ao corpo feminino',
@@ -579,6 +589,9 @@ export const PRODUCTS: Product[] = [
     status: ['Novidade', 'Mais Vendido'],
     isNewArrival: true,
     isBestSeller: true,
+    badge: 'Última peça',
+    remainingPieces: 1,
+    isLastPieces: true,
     description: 'Colete com decote V e abotoamento frontal em crepe de alfaiataria. A peça queridinha da temporada que pode ser usada fechada como blusa ou aberta em sobreposições chiques.',
     details: [
       'Pala traseira com fivela de ajuste para cinturar o corpo',
@@ -617,7 +630,9 @@ export const PRODUCTS: Product[] = [
     line: 'Resort & Elegância',
     status: ['Novidade'],
     isNewArrival: true,
-    badge: 'Restam apenas 5 peças',
+    badge: 'Restam 2 peças',
+    remainingPieces: 2,
+    isLastPieces: true,
     description: 'Casaco sobretudo longo com gola imponente e cinto faixa para amarração. Confeccionado para quem exige o mais alto padrão térmico e estético nos dias frios.',
     details: [
       'Lã batida de toque denso e macio',

@@ -161,6 +161,8 @@ function CatalogoContent() {
         result = result.filter((p) => p.isOutlet);
       } else if (selectedStatus === 'Novidades') {
         result = result.filter((p) => p.isNewArrival);
+      } else if (selectedStatus === 'Últimas Peças') {
+        result = result.filter((p) => p.isLastPieces || (p.remainingPieces !== undefined && p.remainingPieces <= 5) || p.badge?.includes('peça'));
       } else {
         result = result.filter((p) => p.status?.includes(selectedStatus));
       }
