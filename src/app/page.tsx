@@ -12,7 +12,7 @@ import { SizeGuideModal } from '@/components/SizeGuideModal';
 import { Footer } from '@/components/Footer';
 import { PRODUCTS, CATEGORIES, STORE_INFO } from '@/data/products';
 import { useStore } from '@/context/StoreContext';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowDown, ArrowUp } from 'lucide-react';
 
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState<string>('Todos os Modelos');
@@ -80,6 +80,10 @@ export default function HomePage() {
     }
   };
 
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-transparent relative z-10 text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300">
       {/* Header Fixo / Transparente */}
@@ -133,15 +137,24 @@ export default function HomePage() {
             onToggleWishlist={toggleWishlist}
           />
 
-          {/* Botão Ver Todos os Lançamentos */}
-          <div className="mt-8 sm:mt-12 text-center">
+          {/* Botões de Ação da Seção Lançamentos */}
+          <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <Link
               href="/catalogo?status=Lançamento"
-              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
             >
               <span>Ver Todos os Lançamentos no Catálogo</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
+
+            <button
+              type="button"
+              onClick={() => scrollToSection('mais-vendidos')}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white/95 dark:bg-[#201D1B] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer group"
+            >
+              <span>Ir para Mais Vendidos</span>
+              <ArrowDown className="w-3.5 h-3.5 text-[#C5A059] group-hover:text-current group-hover:translate-y-0.5 transition-transform" />
+            </button>
           </div>
         </section>
 
@@ -177,15 +190,24 @@ export default function HomePage() {
             onToggleWishlist={toggleWishlist}
           />
 
-          {/* Botão Ver Mais Produtos */}
-          <div className="mt-8 sm:mt-12 text-center">
+          {/* Botões de Ação da Seção Mais Vendidos */}
+          <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <Link
               href="/catalogo?categoria=Mais%20Vendidos"
-              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
             >
               <span>Ver Mais Produtos Mais Vendidos</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
+
+            <button
+              type="button"
+              onClick={() => scrollToSection('outlet')}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white/95 dark:bg-[#201D1B] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer group"
+            >
+              <span>Próxima Seção: OUTLET</span>
+              <ArrowDown className="w-3.5 h-3.5 text-[#C5A059] group-hover:text-current group-hover:translate-y-0.5 transition-transform" />
+            </button>
           </div>
         </section>
 
@@ -223,15 +245,24 @@ export default function HomePage() {
               onToggleWishlist={toggleWishlist}
             />
 
-            {/* Botão Ver Mais Produtos do Outlet */}
-            <div className="mt-8 sm:mt-12 text-center">
+            {/* Botões de Ação da Seção OUTLET */}
+            <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               <Link
                 href="/catalogo?categoria=OUTLET"
-                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#C5A059] hover:text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#C5A059] hover:text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
               >
                 <span>Ver Mais Peças do OUTLET</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
+
+              <button
+                type="button"
+                onClick={() => scrollToSection('ultimas-pecas')}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white/95 dark:bg-[#201D1B] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer group"
+              >
+                <span>Próxima Seção: Últimas Peças</span>
+                <ArrowDown className="w-3.5 h-3.5 text-[#C5A059] group-hover:text-current group-hover:translate-y-0.5 transition-transform" />
+              </button>
             </div>
           </div>
         </section>
@@ -270,15 +301,24 @@ export default function HomePage() {
               onToggleWishlist={toggleWishlist}
             />
 
-            {/* Botão Ver Todas as Últimas Peças */}
-            <div className="mt-8 sm:mt-12 text-center">
+            {/* Botões de Ação da Seção Últimas Peças */}
+            <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               <Link
                 href="/catalogo?status=Últimas%20Peças"
-                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white dark:bg-[#1C1A18] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer"
               >
                 <span>Explorar Todas as Peças Restantes no Catálogo</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
+
+              <button
+                type="button"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 rounded-none border border-[#C5A059] bg-white/95 dark:bg-[#201D1B] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs cursor-pointer group"
+              >
+                <span>Voltar ao Topo da Página</span>
+                <ArrowUp className="w-3.5 h-3.5 text-[#C5A059] group-hover:text-current group-hover:-translate-y-0.5 transition-transform" />
+              </button>
             </div>
           </div>
         </section>
