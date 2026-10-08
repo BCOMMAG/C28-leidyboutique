@@ -209,42 +209,42 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-0 sm:p-4 lg:p-6 animate-fadeIn"
+      className="fixed inset-0 z-50 overflow-hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-0 sm:p-4 lg:p-6 animate-fadeIn"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       {/* Container Principal do Modal Centralizado */}
-      <div className="relative w-full max-w-5xl bg-[#FAF8F5] dark:bg-[#1A1918] rounded-none shadow-2xl overflow-hidden border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] my-auto flex flex-col min-h-screen sm:min-h-0 sm:max-h-[92vh]">
+      <div className="relative w-full max-w-5xl bg-[#FAF8F5] dark:bg-[#1A1918] rounded-none shadow-2xl overflow-hidden border border-[#C5A059]/40 text-[#1A1918] dark:text-[#FAF8F5] my-auto flex flex-col h-[100dvh] sm:h-[92vh] max-h-[100dvh] sm:max-h-[92vh]">
         
-        {/* Barra Superior Fina: Voltar e Adicionar à Sacola (Conforme o print) */}
-        <div className="w-full bg-[#FAF8F5] dark:bg-[#1A1918] border-b border-[#C5A059]/25 px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between z-30 shrink-0 sticky top-0 shadow-2xs">
+        {/* Barra Superior Fina Fixa: Voltar e Adicionar à Sacola (Nunca some durante o scroll) */}
+        <div className="w-full bg-[#FAF8F5] dark:bg-[#1A1918] border-b border-[#C5A059]/25 px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between z-30 shrink-0 shadow-2xs">
           <button
             onClick={onClose}
-            className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] transition-colors cursor-pointer select-none py-1"
           >
-            <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
-            <span>Voltar</span>
+            <span>&lt;&lt; Voltar</span>
           </button>
 
-          <button
-            onClick={handleAdd}
-            className="bg-[#1A1918] dark:bg-white text-white dark:text-[#1A1918] hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] text-[11px] sm:text-xs font-bold uppercase tracking-wider px-3.5 sm:px-5 py-2 transition-all duration-300 shadow-sm cursor-pointer"
-          >
-            {addedAnimation ? 'ADICIONADO!' : 'ADICIONAR À SACOLA'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleAdd}
+              className="bg-[#1A1918] dark:bg-white text-white dark:text-[#1A1918] hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] text-[11px] sm:text-xs font-bold uppercase tracking-wider px-3.5 sm:px-5 py-2 transition-all duration-300 shadow-sm cursor-pointer"
+            >
+              {addedAnimation ? 'ADICIONADO!' : 'ADICIONAR À SACOLA'}
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1.5 text-[#78716C] hover:text-[#1A1918] dark:hover:text-white transition-colors cursor-pointer"
+              title="Fechar"
+              aria-label="Fechar"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Botão Fechar Rápido Isolado no Topo */}
-        <button
-          onClick={onClose}
-          className="hidden sm:flex absolute top-14 right-3 z-40 p-2 sm:p-2.5 rounded-none bg-[#1A1918]/85 dark:bg-black/85 text-white hover:bg-[#C5A059] transition-all shadow-xl cursor-pointer border border-[#C5A059]/40"
-          aria-label="Fechar"
-        >
-          <X className="w-4 h-4" />
-        </button>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 overflow-y-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 overflow-y-auto overscroll-contain">
           
           {/* COLUNA ESQUERDA: GALERIA E VÍDEO (Aparece em destaque no mobile sem cortes) */}
           <div className="lg:col-span-5 p-2.5 sm:p-5 lg:p-6 bg-[#F4EFE6]/60 dark:bg-[#141312]/60 flex flex-col items-center justify-between border-b lg:border-b-0 lg:border-r border-[#C5A059]/20">
