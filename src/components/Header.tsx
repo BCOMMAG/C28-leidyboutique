@@ -97,10 +97,10 @@ export const Header: React.FC<HeaderProps> = ({
       }`}
     >
       <div className="max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-10">
-        <div className="flex items-center justify-between h-14 sm:h-20 transition-all duration-300">
+        <div className="relative flex items-center justify-between h-14 sm:h-20 transition-all duration-300">
           
           {/* Botão Menu Mobile */}
-          <div className="flex items-center lg:hidden shrink-0">
+          <div className="flex items-center lg:hidden shrink-0 z-20">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={`p-1.5 sm:p-2 transition-colors cursor-pointer ${
@@ -257,8 +257,8 @@ export const Header: React.FC<HeaderProps> = ({
 
           </nav>
 
-          {/* Logo Marca Leidy Boutique (Responsiva e auto-ajustável) */}
-          <div className="flex justify-center items-center shrink-0 min-w-0 px-1">
+          {/* Logo Marca Leidy Boutique (Centralizada com perfeição no Mobile, estática no Desktop) */}
+          <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:transform-none flex justify-center items-center shrink-0 min-w-0 px-1 pointer-events-auto z-10">
             <Link
               href="/"
               className="flex items-center cursor-pointer transition-transform duration-300 hover:scale-105"
@@ -277,7 +277,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Ações da Direita: Barra de Pesquisa, Modo Escuro, Wishlist, Sacola */}
-          <div className="flex items-center gap-0.5 sm:gap-1.5 md:gap-3 shrink-0">
+          <div className="flex items-center gap-0.5 sm:gap-1.5 md:gap-3 shrink-0 z-20">
             
             {/* Barra de Pesquisa no Topo (Desktop) */}
             <div className="relative hidden md:block">
@@ -327,10 +327,10 @@ export const Header: React.FC<HeaderProps> = ({
               <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </button>
 
-            {/* Toggle Modo Escuro / Claro */}
+            {/* Toggle Modo Escuro / Claro (Exibido apenas em Desktop; no Mobile fica exclusivamente no Menu) */}
             <button
               onClick={toggleTheme}
-              className={`p-1.5 sm:p-2 rounded-none transition-colors cursor-pointer ${
+              className={`hidden md:flex p-1.5 sm:p-2 rounded-none transition-colors cursor-pointer ${
                 isScrolled
                   ? 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
                   : 'text-white hover:text-[#DFBE76] drop-shadow-sm'
@@ -555,24 +555,23 @@ export const Header: React.FC<HeaderProps> = ({
             </Link>
           </div>
 
-          {/* Alternador de Tema no Mobile */}
-          <div className="pt-4 border-t border-[#C5A059]/20 flex items-center justify-between">
-            <span className="text-xs text-[#78716C] dark:text-[#A8A29E]">Tema Visual</span>
+          {/* Alternador de Tema no Mobile - Exclusivo dentro do Menu */}
+          <div className="pt-4 border-t border-[#C5A059]/20">
             <button
               onClick={toggleTheme}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-none border border-[#C5A059]/40 text-xs font-semibold cursor-pointer"
+              className="w-full flex items-center justify-between py-2.5 px-3 rounded-none bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/30 text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] hover:border-[#C5A059] transition-all cursor-pointer shadow-xs"
             >
-              {theme === 'dark' ? (
-                <>
+              <div className="flex items-center gap-2">
+                {theme === 'dark' ? (
                   <Sun className="w-4 h-4 text-[#DFBE76]" />
-                  <span>Modo Claro</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="w-4 h-4 text-[#1A1918]" />
-                  <span>Modo Escuro</span>
-                </>
-              )}
+                ) : (
+                  <Moon className="w-4 h-4 text-[#C5A059]" />
+                )}
+                <span>Modo Visual: {theme === 'dark' ? 'Escuro' : 'Claro'}</span>
+              </div>
+              <span className="text-[11px] text-[#C5A059] font-medium underline">
+                {theme === 'dark' ? 'Mudar para Claro' : 'Mudar para Escuro'}
+              </span>
             </button>
           </div>
         </div>

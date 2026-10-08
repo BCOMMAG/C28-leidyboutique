@@ -13,6 +13,7 @@ interface ProductCardProps {
   isWishlisted: boolean;
   onToggleWishlist: (productId: string) => void;
   isOutletSection?: boolean;
+  isNewReleasesSection?: boolean;
   columnsCount?: 2 | 3 | 4 | 5;
 }
 
@@ -23,6 +24,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   isWishlisted,
   onToggleWishlist,
   isOutletSection = false,
+  isNewReleasesSection = false,
   columnsCount = 4
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -102,20 +104,74 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Gradiente sutil inferior */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        {/* Badge de Destaque: Somente OUTLET com % de OFF ou 'Restam apenas 5 peças' */}
-        {product.discountBadge ? (
-          <div className={`absolute top-2.5 left-2.5 bg-[#C5A059] text-white uppercase tracking-wider font-bold rounded-none backdrop-blur-sm shadow-xs ${
-            isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2.5 py-1'
-          }`}>
-            {product.discountBadge}
-          </div>
-        ) : product.badge?.includes('Restam') ? (
-          <div className={`absolute top-2.5 left-2.5 bg-[#8B5A2B]/90 dark:bg-black/90 text-[#FAF8F5] uppercase tracking-wider font-semibold rounded-none backdrop-blur-sm border border-[#C5A059]/40 ${
-            isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2.5 py-1'
-          }`}>
-            {product.badge}
-          </div>
-        ) : null}
+        {/* Badge de Destaque com Regras de Exibição */}
+        {(() => {
+          // 1. Regra para Seção de Lançamentos Exclusivos:
+          // PROIBIDO exibir "Outlet" ou ofertas/descontos (% OFF). Apenas escassez: "Faltam 2 peças", "Faltam 5 peças", "Últimas 3 peças", etc.
+          if (isNewReleasesSection) {
+            const scarcityMap: Record<string, string> = {
+              '01-casaco-tricot': 'Últimas 3 peças',
+              '02-blusa-tricot-rosa': 'Faltam 2 peças',
+              '03-conjunto-alfaiataria-terracota': 'Restam apenas 5 peças',
+              '04-conjunto-alfaiataria-bege': 'Faltam 2 peças',
+              '05-vestido-viscolinho': 'Últimas 3 peças',
+              '07-t-shirt-algodao-egipcio': 'Restam apenas 4 peças'
+            };
+
+            const isExistingScarcity =
+              product.badge &&
+              (product.badge.includes('peça') ||
+                product.badge.includes('Restam') ||
+                product.badge.includes('Faltam') ||
+                product.badge.includes('Última')) &&
+              !product.badge.toUpperCase().includes('OUTLET') &&
+              !product.badge.toUpperCase().includes('OFF');
+
+            const label = isExistingScarcity ? product.badge : scarcityMap[product.id] || 'Faltam 3 peças';
+
+            return (
+              <div
+                className={`absolute top-2.5 left-2.5 bg-[#8B5A2B]/90 dark:bg-black/90 text-[#FAF8F5] uppercase tracking-wider font-semibold rounded-none backdrop-blur-sm border border-[#C5A059]/40 ${
+                  isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2.5 py-1'
+                }`}
+              >
+                {label}
+              </div>
+            );
+          }
+
+          // 2. Seção OUTLET ou produtos com desconto fora de lançamentos
+          if (product.discountBadge) {
+            return (
+              <div
+                className={`absolute top-2.5 left-2.5 bg-[#C5A059] text-white uppercase tracking-wider font-bold rounded-none backdrop-blur-sm shadow-xs ${
+                  isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2.5 py-1'
+                }`}
+              >
+                {product.discountBadge}
+              </div>
+            );
+          }
+
+          // 3. Badges de escassez padrão para outros cards
+          if (
+            product.badge?.includes('Restam') ||
+            product.badge?.includes('peça') ||
+            product.badge?.includes('Faltam')
+          ) {
+            return (
+              <div
+                className={`absolute top-2.5 left-2.5 bg-[#8B5A2B]/90 dark:bg-black/90 text-[#FAF8F5] uppercase tracking-wider font-semibold rounded-none backdrop-blur-sm border border-[#C5A059]/40 ${
+                  isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2.5 py-1'
+                }`}
+              >
+                {product.badge}
+              </div>
+            );
+          }
+
+          return null;
+        })()}
 
         {/* Botão de Favoritar */}
         <button

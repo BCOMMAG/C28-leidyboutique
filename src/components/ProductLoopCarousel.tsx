@@ -12,6 +12,7 @@ interface ProductLoopCarouselProps {
   isWishlisted: (productId: string) => boolean;
   onToggleWishlist: (productId: string) => void;
   isOutletSection?: boolean;
+  isNewReleasesSection?: boolean;
   autoPlayInterval?: number; // Milissegundos entre cada avanço (padrão 3500ms)
 }
 
@@ -22,6 +23,7 @@ export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
   isWishlisted,
   onToggleWishlist,
   isOutletSection = false,
+  isNewReleasesSection = false,
   autoPlayInterval = 3600
 }) => {
   // Quantidade de itens visíveis por breakpoint
@@ -183,6 +185,7 @@ export const ProductLoopCarousel: React.FC<ProductLoopCarouselProps> = ({
                 product={product}
                 columnsCount={visibleCount === 4 ? 4 : 2}
                 isOutletSection={isOutletSection}
+                isNewReleasesSection={isNewReleasesSection}
                 onOpenDetails={(p) => {
                   setIsPaused(true);
                   onOpenDetails(p);

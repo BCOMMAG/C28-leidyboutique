@@ -107,6 +107,7 @@ export default function HomePage() {
           {/* Carrossel em looping automático com 4 cards (pausa no hover/clique) */}
           <ProductLoopCarousel
             products={newReleasesProducts}
+            isNewReleasesSection={true}
             onOpenDetails={openProduct}
             onQuickAdd={(p) => {
               addToCart({
