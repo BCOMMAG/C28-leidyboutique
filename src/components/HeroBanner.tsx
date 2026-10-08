@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Volume2, VolumeX, ChevronDown } from 'lucide-react';
 
 interface HeroBannerProps {
@@ -11,6 +11,14 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onExploreClick }) => {
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {
+        // Fallback de política de autoplay móvel
+      });
+    }
+  }, []);
+
   const toggleSound = () => {
     if (videoRef.current) {
       videoRef.current.muted = !isMuted;
@@ -20,8 +28,8 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onExploreClick }) => {
 
   return (
     <section className="relative w-full overflow-hidden bg-[#1A1918]">
-      {/* Container do Banner de Vídeo Grande (Velocidade Normal 1x) */}
-      <div className="relative w-full h-[55vh] sm:h-[65vh] md:h-auto md:aspect-[16/9] md:max-h-[calc(100vh)] min-h-[420px] overflow-hidden">
+      {/* Container do Banner de Vídeo: 100% da tela (100dvh) no Mobile para Imersão Total e 16/9 no Desktop */}
+      <div className="relative w-full h-screen h-[100dvh] min-h-[100dvh] md:h-auto md:min-h-0 md:aspect-[16/9] md:max-h-[calc(100vh)] overflow-hidden">
         <video
           ref={videoRef}
           src="/video/header_video.mp4"
@@ -35,15 +43,15 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onExploreClick }) => {
         />
 
         {/* Gradiente Superior para Legibilidade do Menu Transparente */}
-        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 via-black/25 to-transparent pointer-events-none z-10" />
+        <div className="absolute inset-x-0 top-0 h-32 sm:h-36 bg-gradient-to-b from-black/60 via-black/25 to-transparent pointer-events-none z-10" />
 
         {/* Gradiente Inferior para Transição Harmoniosa */}
-        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none z-10" />
+        <div className="absolute inset-x-0 bottom-0 h-32 sm:h-28 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none z-10" />
 
         {/* Botão de Controle de Áudio Discreto */}
         <button
           onClick={toggleSound}
-          className="absolute bottom-5 right-5 z-20 p-2.5 rounded-none bg-black/60 text-white hover:bg-black/85 backdrop-blur-md transition-all shadow-lg border border-white/20 cursor-pointer"
+          className="absolute bottom-6 md:bottom-5 right-4 sm:right-5 z-20 p-2.5 rounded-none bg-black/60 text-white hover:bg-black/85 backdrop-blur-md transition-all shadow-lg border border-white/20 cursor-pointer"
           title={isMuted ? 'Ativar Áudio' : 'Silenciar'}
           aria-label={isMuted ? 'Ativar Áudio' : 'Silenciar'}
         >
@@ -55,7 +63,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onExploreClick }) => {
         </button>
 
         {/* Chamada Sutil para Rolar até os Produtos */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
+        <div className="absolute bottom-8 md:bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
           <button
             onClick={onExploreClick}
             className="px-6 py-2.5 rounded-none bg-white/90 text-[#1A1918] hover:bg-[#FAF8F5] text-[11px] uppercase tracking-[0.2em] font-semibold transition-all duration-300 shadow-md backdrop-blur-xs flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95 border border-[#C5A059]/40"
