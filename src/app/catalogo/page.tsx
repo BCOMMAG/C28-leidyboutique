@@ -63,27 +63,46 @@ function CatalogoContent() {
   } = useStore();
 
   // Parâmetros de URL iniciais
-  const urlCategory = searchParams.get('categoria') || 'Todas as Peças';
+  const urlCategory = searchParams.get('categoria') || '';
   const urlStatus = searchParams.get('status') || '';
   const urlMinPrice = searchParams.get('precoMin') ? Number(searchParams.get('precoMin')) : null;
   const urlMaxPrice = searchParams.get('precoMax') ? Number(searchParams.get('precoMax')) : null;
   const urlSearch = searchParams.get('q') || '';
 
-  // Estados dos Filtros da Barra Lateral Esquerda
-  const [selectedCategory, setSelectedCategory] = useState(urlCategory);
-  const [selectedSize, setSelectedSize] = useState('Todos');
-  const [selectedColor, setSelectedColor] = useState('Todas');
-  const [selectedFabric, setSelectedFabric] = useState('Todos');
-  const [selectedFit, setSelectedFit] = useState('Todos');
-  const [selectedLine, setSelectedLine] = useState('Todas');
-  const [selectedStatus, setSelectedStatus] = useState(urlStatus || 'Todos');
-  const [selectedPriceRangeIndex, setSelectedPriceRangeIndex] = useState<number | null>(
-    urlMinPrice !== null || urlMaxPrice !== null
-      ? FAIXAS_PRECO.findIndex((f) => f.min === (urlMinPrice ?? 0) && f.max === (urlMaxPrice ?? 99999))
-      : null
+  // Função para criar o estado padrão dos filtros com seleção múltipla
+  const createDefaultFilters = (cat?: string, st?: string, minP?: number | null, maxP?: number | null) => {
+    const categories: string[] = cat && cat !== 'Todas as Peças' ? [cat] : [];
+    const statuses: string[] = st && st !== 'Todos' ? [st] : [];
+    let priceRangeIndices: number[] = [];
+
+    if (minP !== null || maxP !== null) {
+      const idx = FAIXAS_PRECO.findIndex((f) => f.min === (minP ?? 0) && f.max === (maxP ?? 99999));
+      if (idx !== -1) priceRangeIndices = [idx];
+    }
+
+    return {
+      categories,
+      priceRangeIndices,
+      customMinPrice: minP !== null && priceRangeIndices.length === 0 ? String(minP) : '',
+      customMaxPrice: maxP !== null && priceRangeIndices.length === 0 ? String(maxP) : '',
+      sizes: [] as string[],
+      colors: [] as string[],
+      fabrics: [] as string[],
+      fits: [] as string[],
+      lines: [] as string[],
+      statuses
+    };
+  };
+
+  // 1. Filtros Efetivamente Aplicados na Listagem de Produtos
+  const [appliedFilters, setAppliedFilters] = useState(() =>
+    createDefaultFilters(urlCategory, urlStatus, urlMinPrice, urlMaxPrice)
   );
-  const [customMinPrice, setCustomMinPrice] = useState<string>(urlMinPrice !== null ? String(urlMinPrice) : '');
-  const [customMaxPrice, setCustomMaxPrice] = useState<string>(urlMaxPrice !== null ? String(urlMaxPrice) : '');
+
+  // 2. Filtros em Edição / Rascunho (o usuário pode mexer à vontade e depois clicar em APLICAR FILTROS)
+  const [draftFilters, setDraftFilters] = useState(() =>
+    createDefaultFilters(urlCategory, urlStatus, urlMinPrice, urlMaxPrice)
+  );
 
   // Estados da Barra Superior
   const [sortBy, setSortBy] = useState<'relevance' | 'price-asc' | 'price-desc' | 'newest'>('relevance');
@@ -98,26 +117,19 @@ function CatalogoContent() {
     if (q) setSearchQuery(q);
 
     const cat = searchParams.get('categoria');
-    if (cat) setSelectedCategory(cat);
-
     const st = searchParams.get('status');
-    if (st) setSelectedStatus(st);
+    const min = searchParams.get('precoMin') ? Number(searchParams.get('precoMin')) : null;
+    const max = searchParams.get('precoMax') ? Number(searchParams.get('precoMax')) : null;
 
-    const min = searchParams.get('precoMin');
-    const max = searchParams.get('precoMax');
-    if (min !== null || max !== null) {
-      const minVal = min ? Number(min) : 0;
-      const maxVal = max ? Number(max) : 99999;
-      const idx = FAIXAS_PRECO.findIndex((f) => f.min === minVal && f.max === maxVal);
-      setSelectedPriceRangeIndex(idx !== -1 ? idx : null);
-      setCustomMinPrice(min || '');
-      setCustomMaxPrice(max || '');
+    if (cat || st || min !== null || max !== null) {
+      const updated = createDefaultFilters(cat || undefined, st || undefined, min, max);
+      setAppliedFilters(updated);
+      setDraftFilters(updated);
     }
   }, [searchParams, setSearchQuery]);
 
-  const allSizes = ['Todos', 'PP', 'P', 'M', 'G', 'GG', 'Tamanho Único'];
+  const allSizes = ['PP', 'P', 'M', 'G', 'GG', 'Tamanho Único'];
   const allColors = [
-    { label: 'Todas', value: 'Todas', hex: '#FAF8F5' },
     { label: 'Marrom Caramelo', value: 'Marrom Caramelo', hex: '#8B5A2B' },
     { label: 'Branco Off-White', value: 'Branco Off-White', hex: '#FAF9F6' },
     { label: 'Rosa Quartz', value: 'Rosa Quartz', hex: '#E8A598' },
@@ -127,11 +139,155 @@ function CatalogoContent() {
     { label: 'Dourado Champagne', value: 'Dourado Champagne', hex: '#DFBE76' }
   ];
 
-  // Cálculo da Filtragem e Ordenação
+  // Alternadores de Seleção Múltipla para o Rascunho de Filtros
+  const toggleDraftCategory = (cat: string) => {
+    setDraftFilters((prev) => ({
+      ...prev,
+      categories: prev.categories.includes(cat)
+        ? prev.categories.filter((c) => c !== cat)
+        : [...prev.categories, cat]
+    }));
+  };
+
+  const toggleDraftPriceRange = (idx: number) => {
+    setDraftFilters((prev) => ({
+      ...prev,
+      priceRangeIndices: prev.priceRangeIndices.includes(idx)
+        ? prev.priceRangeIndices.filter((i) => i !== idx)
+        : [...prev.priceRangeIndices, idx],
+      customMinPrice: '',
+      customMaxPrice: ''
+    }));
+  };
+
+  const toggleDraftSize = (sz: string) => {
+    setDraftFilters((prev) => ({
+      ...prev,
+      sizes: prev.sizes.includes(sz)
+        ? prev.sizes.filter((s) => s !== sz)
+        : [...prev.sizes, sz]
+    }));
+  };
+
+  const toggleDraftColor = (colVal: string) => {
+    setDraftFilters((prev) => ({
+      ...prev,
+      colors: prev.colors.includes(colVal)
+        ? prev.colors.filter((c) => c !== colVal)
+        : [...prev.colors, colVal]
+    }));
+  };
+
+  const toggleDraftFabric = (fab: string) => {
+    setDraftFilters((prev) => ({
+      ...prev,
+      fabrics: prev.fabrics.includes(fab)
+        ? prev.fabrics.filter((f) => f !== fab)
+        : [...prev.fabrics, fab]
+    }));
+  };
+
+  const toggleDraftFit = (fit: string) => {
+    setDraftFilters((prev) => ({
+      ...prev,
+      fits: prev.fits.includes(fit)
+        ? prev.fits.filter((f) => f !== fit)
+        : [...prev.fits, fit]
+    }));
+  };
+
+  const toggleDraftLine = (lin: string) => {
+    setDraftFilters((prev) => ({
+      ...prev,
+      lines: prev.lines.includes(lin)
+        ? prev.lines.filter((l) => l !== lin)
+        : [...prev.lines, lin]
+    }));
+  };
+
+  const toggleDraftStatus = (st: string) => {
+    setDraftFilters((prev) => ({
+      ...prev,
+      statuses: prev.statuses.includes(st)
+        ? prev.statuses.filter((s) => s !== st)
+        : [...prev.statuses, st]
+    }));
+  };
+
+  // AÇÃO 1: APLICAR FILTROS (Efetiva os filtros selecionados)
+  const applyFilters = () => {
+    setAppliedFilters({ ...draftFilters });
+    setMobileFilterDrawerOpen(false);
+  };
+
+  // AÇÃO 2: REVERTER FILTROS AO NORMAL (Retira todos os filtros aplicados)
+  const resetAllFilters = () => {
+    const empty = createDefaultFilters();
+    setDraftFilters(empty);
+    setAppliedFilters(empty);
+    setSearchQuery('');
+    setMobileFilterDrawerOpen(false);
+  };
+
+  // Remoção de filtros individuais diretamente nas tags ativas
+  const removeAppliedCategory = (cat: string) => {
+    const updated = appliedFilters.categories.filter((c) => c !== cat);
+    setAppliedFilters((prev) => ({ ...prev, categories: updated }));
+    setDraftFilters((prev) => ({ ...prev, categories: updated }));
+  };
+
+  const removeAppliedStatus = (st: string) => {
+    const updated = appliedFilters.statuses.filter((s) => s !== st);
+    setAppliedFilters((prev) => ({ ...prev, statuses: updated }));
+    setDraftFilters((prev) => ({ ...prev, statuses: updated }));
+  };
+
+  const removeAppliedPriceRange = (idx: number) => {
+    const updated = appliedFilters.priceRangeIndices.filter((i) => i !== idx);
+    setAppliedFilters((prev) => ({ ...prev, priceRangeIndices: updated }));
+    setDraftFilters((prev) => ({ ...prev, priceRangeIndices: updated }));
+  };
+
+  const clearAppliedCustomPrice = () => {
+    setAppliedFilters((prev) => ({ ...prev, customMinPrice: '', customMaxPrice: '' }));
+    setDraftFilters((prev) => ({ ...prev, customMinPrice: '', customMaxPrice: '' }));
+  };
+
+  const removeAppliedSize = (sz: string) => {
+    const updated = appliedFilters.sizes.filter((s) => s !== sz);
+    setAppliedFilters((prev) => ({ ...prev, sizes: updated }));
+    setDraftFilters((prev) => ({ ...prev, sizes: updated }));
+  };
+
+  const removeAppliedColor = (col: string) => {
+    const updated = appliedFilters.colors.filter((c) => c !== col);
+    setAppliedFilters((prev) => ({ ...prev, colors: updated }));
+    setDraftFilters((prev) => ({ ...prev, colors: updated }));
+  };
+
+  const removeAppliedFabric = (fab: string) => {
+    const updated = appliedFilters.fabrics.filter((f) => f !== fab);
+    setAppliedFilters((prev) => ({ ...prev, fabrics: updated }));
+    setDraftFilters((prev) => ({ ...prev, fabrics: updated }));
+  };
+
+  const removeAppliedFit = (fit: string) => {
+    const updated = appliedFilters.fits.filter((f) => f !== fit);
+    setAppliedFilters((prev) => ({ ...prev, fits: updated }));
+    setDraftFilters((prev) => ({ ...prev, fits: updated }));
+  };
+
+  const removeAppliedLine = (lin: string) => {
+    const updated = appliedFilters.lines.filter((l) => l !== lin);
+    setAppliedFilters((prev) => ({ ...prev, lines: updated }));
+    setDraftFilters((prev) => ({ ...prev, lines: updated }));
+  };
+
+  // Cálculo da Filtragem Efetiva (baseado em appliedFilters)
   const filteredProducts = useMemo(() => {
     let result = [...PRODUCTS];
 
-    // 1. Busca textual (sincronizada com o header)
+    // 1. Busca textual
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -144,68 +300,82 @@ function CatalogoContent() {
       );
     }
 
-    // 2. Categoria
-    if (selectedCategory && selectedCategory !== 'Todas as Peças') {
-      result = result.filter(
-        (p) =>
-          p.category.toLowerCase() === selectedCategory.toLowerCase() ||
-          (p.subcategory && p.subcategory.toLowerCase() === selectedCategory.toLowerCase())
+    // 2. Categorias (Seleção Múltipla)
+    if (appliedFilters.categories.length > 0) {
+      result = result.filter((p) =>
+        appliedFilters.categories.some(
+          (cat) =>
+            p.category.toLowerCase() === cat.toLowerCase() ||
+            (p.subcategory && p.subcategory.toLowerCase() === cat.toLowerCase())
+        )
       );
     }
 
-    // 3. Status (Novidades, Mais Vendidos, OUTLET, Pronta Entrega)
-    if (selectedStatus && selectedStatus !== 'Todos') {
-      if (selectedStatus === 'Mais Vendidos') {
-        result = result.filter((p) => p.isBestSeller);
-      } else if (selectedStatus === 'OUTLET' || selectedStatus === 'Peças em OUTLET') {
-        result = result.filter((p) => p.isOutlet);
-      } else if (selectedStatus === 'Novidades') {
-        result = result.filter((p) => p.isNewArrival);
-      } else if (selectedStatus === 'Últimas Peças') {
-        result = result.filter((p) => p.isLastPieces || (p.remainingPieces !== undefined && p.remainingPieces <= 5) || p.badge?.includes('peça'));
-      } else {
-        result = result.filter((p) => p.status?.includes(selectedStatus));
-      }
+    // 3. Status & Destaques (Seleção Múltipla)
+    if (appliedFilters.statuses.length > 0) {
+      result = result.filter((p) =>
+        appliedFilters.statuses.some((st) => {
+          if (st === 'Mais Vendidos') return p.isBestSeller;
+          if (st === 'OUTLET' || st === 'Peças em OUTLET') return p.isOutlet;
+          if (st === 'Novidades' || st === 'Lançamento') return p.isNewArrival || p.status?.includes('Lançamento');
+          if (st === 'Últimas Peças') return p.isLastPieces || (p.remainingPieces !== undefined && p.remainingPieces <= 5) || p.badge?.includes('peça');
+          return p.status?.some((s) => s.toLowerCase() === st.toLowerCase());
+        })
+      );
     }
 
-    // 4. Faixa de Preço
-    if (selectedPriceRangeIndex !== null && FAIXAS_PRECO[selectedPriceRangeIndex]) {
-      const range = FAIXAS_PRECO[selectedPriceRangeIndex];
-      result = result.filter((p) => p.price >= range.min && p.price <= range.max);
+    // 4. Faixas de Preço (Seleção Múltipla / Manual)
+    if (appliedFilters.priceRangeIndices.length > 0) {
+      result = result.filter((p) =>
+        appliedFilters.priceRangeIndices.some((idx) => {
+          const range = FAIXAS_PRECO[idx];
+          return range && p.price >= range.min && p.price <= range.max;
+        })
+      );
     } else {
-      const min = customMinPrice ? parseFloat(customMinPrice) : null;
-      const max = customMaxPrice ? parseFloat(customMaxPrice) : null;
+      const min = appliedFilters.customMinPrice ? parseFloat(appliedFilters.customMinPrice) : null;
+      const max = appliedFilters.customMaxPrice ? parseFloat(appliedFilters.customMaxPrice) : null;
       if (min !== null) result = result.filter((p) => p.price >= min);
       if (max !== null) result = result.filter((p) => p.price <= max);
     }
 
-    // 5. Tamanho
-    if (selectedSize !== 'Todos') {
+    // 5. Tamanho (Seleção Múltipla)
+    if (appliedFilters.sizes.length > 0) {
       result = result.filter((p) =>
-        p.sizes.some((s) => s.toLowerCase().includes(selectedSize.toLowerCase()))
+        appliedFilters.sizes.some((sz) =>
+          p.sizes.some((s) => s.toLowerCase().includes(sz.toLowerCase()))
+        )
       );
     }
 
-    // 6. Cor
-    if (selectedColor !== 'Todas') {
+    // 6. Cor (Seleção Múltipla)
+    if (appliedFilters.colors.length > 0) {
       result = result.filter((p) =>
-        p.colors.some((c) => c.name.toLowerCase() === selectedColor.toLowerCase())
+        appliedFilters.colors.some((col) =>
+          p.colors.some((c) => c.name.toLowerCase() === col.toLowerCase())
+        )
       );
     }
 
-    // 7. Tecido
-    if (selectedFabric !== 'Todos') {
-      result = result.filter((p) => p.fabric === selectedFabric);
+    // 7. Tecido (Seleção Múltipla)
+    if (appliedFilters.fabrics.length > 0) {
+      result = result.filter((p) =>
+        appliedFilters.fabrics.some((fab) => p.fabric === fab)
+      );
     }
 
-    // 8. Modelagem
-    if (selectedFit !== 'Todos') {
-      result = result.filter((p) => p.fit === selectedFit);
+    // 8. Modelagem (Seleção Múltipla)
+    if (appliedFilters.fits.length > 0) {
+      result = result.filter((p) =>
+        appliedFilters.fits.some((fit) => p.fit === fit)
+      );
     }
 
-    // 9. Linha
-    if (selectedLine !== 'Todas') {
-      result = result.filter((p) => p.line === selectedLine);
+    // 9. Linha (Seleção Múltipla)
+    if (appliedFilters.lines.length > 0) {
+      result = result.filter((p) =>
+        appliedFilters.lines.some((lin) => p.line === lin)
+      );
     }
 
     // Ordenação
@@ -218,48 +388,127 @@ function CatalogoContent() {
     }
 
     return result;
-  }, [
-    searchQuery,
-    selectedCategory,
-    selectedStatus,
-    selectedPriceRangeIndex,
-    customMinPrice,
-    customMaxPrice,
-    selectedSize,
-    selectedColor,
-    selectedFabric,
-    selectedFit,
-    selectedLine,
-    sortBy
-  ]);
+  }, [appliedFilters, searchQuery, sortBy]);
 
-  // Contagem de filtros ativos
-  const activeFiltersCount = [
-    searchQuery.trim() !== '',
-    selectedCategory !== 'Todas as Peças',
-    selectedStatus !== 'Todos' && selectedStatus !== '',
-    selectedPriceRangeIndex !== null || customMinPrice !== '' || customMaxPrice !== '',
-    selectedSize !== 'Todos',
-    selectedColor !== 'Todas',
-    selectedFabric !== 'Todos',
-    selectedFit !== 'Todos',
-    selectedLine !== 'Todas'
-  ].filter(Boolean).length;
+  // Contagem de Peças que batiam no Rascunho Atual (para o botão "APLICAR FILTROS")
+  const draftMatchesCount = useMemo(() => {
+    let result = [...PRODUCTS];
 
-  const resetAllFilters = () => {
-    setSearchQuery('');
-    setSelectedCategory('Todas as Peças');
-    setSelectedStatus('Todos');
-    setSelectedPriceRangeIndex(null);
-    setCustomMinPrice('');
-    setCustomMaxPrice('');
-    setSelectedSize('Todos');
-    setSelectedColor('Todas');
-    setSelectedFabric('Todos');
-    setSelectedFit('Todos');
-    setSelectedLine('Todas');
-    setSortBy('relevance');
-  };
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          (p.subcategory && p.subcategory.toLowerCase().includes(q)) ||
+          (p.fabric && p.fabric.toLowerCase().includes(q))
+      );
+    }
+
+    if (draftFilters.categories.length > 0) {
+      result = result.filter((p) =>
+        draftFilters.categories.some(
+          (cat) =>
+            p.category.toLowerCase() === cat.toLowerCase() ||
+            (p.subcategory && p.subcategory.toLowerCase() === cat.toLowerCase())
+        )
+      );
+    }
+
+    if (draftFilters.statuses.length > 0) {
+      result = result.filter((p) =>
+        draftFilters.statuses.some((st) => {
+          if (st === 'Mais Vendidos') return p.isBestSeller;
+          if (st === 'OUTLET' || st === 'Peças em OUTLET') return p.isOutlet;
+          if (st === 'Novidades' || st === 'Lançamento') return p.isNewArrival || p.status?.includes('Lançamento');
+          if (st === 'Últimas Peças') return p.isLastPieces || (p.remainingPieces !== undefined && p.remainingPieces <= 5) || p.badge?.includes('peça');
+          return p.status?.some((s) => s.toLowerCase() === st.toLowerCase());
+        })
+      );
+    }
+
+    if (draftFilters.priceRangeIndices.length > 0) {
+      result = result.filter((p) =>
+        draftFilters.priceRangeIndices.some((idx) => {
+          const range = FAIXAS_PRECO[idx];
+          return range && p.price >= range.min && p.price <= range.max;
+        })
+      );
+    } else {
+      const min = draftFilters.customMinPrice ? parseFloat(draftFilters.customMinPrice) : null;
+      const max = draftFilters.customMaxPrice ? parseFloat(draftFilters.customMaxPrice) : null;
+      if (min !== null) result = result.filter((p) => p.price >= min);
+      if (max !== null) result = result.filter((p) => p.price <= max);
+    }
+
+    if (draftFilters.sizes.length > 0) {
+      result = result.filter((p) =>
+        draftFilters.sizes.some((sz) =>
+          p.sizes.some((s) => s.toLowerCase().includes(sz.toLowerCase()))
+        )
+      );
+    }
+
+    if (draftFilters.colors.length > 0) {
+      result = result.filter((p) =>
+        draftFilters.colors.some((col) =>
+          p.colors.some((c) => c.name.toLowerCase() === col.toLowerCase())
+        )
+      );
+    }
+
+    if (draftFilters.fabrics.length > 0) {
+      result = result.filter((p) =>
+        draftFilters.fabrics.some((fab) => p.fabric === fab)
+      );
+    }
+
+    if (draftFilters.fits.length > 0) {
+      result = result.filter((p) =>
+        draftFilters.fits.some((fit) => p.fit === fit)
+      );
+    }
+
+    if (draftFilters.lines.length > 0) {
+      result = result.filter((p) =>
+        draftFilters.lines.some((lin) => p.line === lin)
+      );
+    }
+
+    return result.length;
+  }, [draftFilters, searchQuery]);
+
+  // Contagem de filtros ativos aplicados
+  const activeFiltersCount = useMemo(() => {
+    return (
+      (searchQuery.trim() !== '' ? 1 : 0) +
+      appliedFilters.categories.length +
+      appliedFilters.statuses.length +
+      appliedFilters.priceRangeIndices.length +
+      (appliedFilters.customMinPrice || appliedFilters.customMaxPrice ? 1 : 0) +
+      appliedFilters.sizes.length +
+      appliedFilters.colors.length +
+      appliedFilters.fabrics.length +
+      appliedFilters.fits.length +
+      appliedFilters.lines.length
+    );
+  }, [appliedFilters, searchQuery]);
+
+  // Contagem de filtros marcados no rascunho
+  const draftFiltersCount = useMemo(() => {
+    return (
+      draftFilters.categories.length +
+      draftFilters.statuses.length +
+      draftFilters.priceRangeIndices.length +
+      (draftFilters.customMinPrice || draftFilters.customMaxPrice ? 1 : 0) +
+      draftFilters.sizes.length +
+      draftFilters.colors.length +
+      draftFilters.fabrics.length +
+      draftFilters.fits.length +
+      draftFilters.lines.length
+    );
+  }, [draftFilters]);
 
   // Controle de Acordeão dos Filtros Laterais
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -277,11 +526,27 @@ function CatalogoContent() {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // Componente Reutilizável da Barra Lateral de Filtros (Esquerda) com Acordeão
+  // Componente Reutilizável da Barra Lateral de Filtros com Seleção Múltipla & Acordeão
   const FiltersSidebarContent = () => (
-    <div className="space-y-3 text-[#1A1918] dark:text-[#FAF8F5]">
+    <div className="space-y-4 text-[#1A1918] dark:text-[#FAF8F5]">
       
-      {/* 1. Categorias */}
+      {/* Botão Superior Rápido para Aplicar Filtros se houver rascunho */}
+      <div className="pb-1 border-b border-[#C5A059]/15 flex items-center justify-between gap-2">
+        <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E]">
+          {draftFiltersCount > 0 ? `${draftFiltersCount} filtros selecionados` : 'Nenhum filtro marcado'}
+        </span>
+        {(draftFiltersCount > 0 || activeFiltersCount > 0) && (
+          <button
+            type="button"
+            onClick={resetAllFilters}
+            className="text-[11px] text-[#C5A059] dark:text-[#DFBE76] hover:underline font-semibold cursor-pointer"
+          >
+            Limpar tudo
+          </button>
+        )}
+      </div>
+
+      {/* 1. Categorias (Multi-select) */}
       <div className="border-b border-[#C5A059]/15 pb-2.5">
         <button
           type="button"
@@ -292,17 +557,19 @@ function CatalogoContent() {
             <span className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76] group-hover:text-[#1A1918] dark:group-hover:text-white transition-colors">
               Categorias
             </span>
-            {selectedCategory !== 'Todas as Peças' && (
-              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
+            {draftFilters.categories.length > 0 && (
+              <span className="text-[10px] bg-[#C5A059] text-white px-1.5 py-0.2 rounded-none font-bold">
+                {draftFilters.categories.length}
+              </span>
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            {selectedCategory !== 'Todas as Peças' && (
+            {draftFilters.categories.length > 0 && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedCategory('Todas as Peças');
+                  setDraftFilters((p) => ({ ...p, categories: [] }));
                 }}
                 className="text-[10px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer mr-1"
               >
@@ -320,9 +587,10 @@ function CatalogoContent() {
         {openSections.categorias && (
           <div className="pt-2 max-h-56 overflow-y-auto pr-1 space-y-1 text-xs custom-scrollbar">
             <button
-              onClick={() => setSelectedCategory('Todas as Peças')}
+              type="button"
+              onClick={() => setDraftFilters((p) => ({ ...p, categories: [] }))}
               className={`w-full text-left py-1.5 px-2.5 rounded-none transition-colors flex items-center justify-between cursor-pointer ${
-                selectedCategory === 'Todas as Peças'
+                draftFilters.categories.length === 0
                   ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-semibold'
                   : 'hover:bg-[#FAF8F5] dark:hover:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1]'
               }`}
@@ -336,19 +604,25 @@ function CatalogoContent() {
             </p>
             {CATEGORIES_ROUPAS.map((cat) => {
               const count = PRODUCTS.filter((p) => p.category === cat || p.subcategory === cat).length;
-              const isSelected = selectedCategory === cat;
+              const isSelected = draftFilters.categories.includes(cat);
               return (
                 <button
+                  type="button"
                   key={cat}
-                  onClick={() => setSelectedCategory(cat)}
+                  onClick={() => toggleDraftCategory(cat)}
                   className={`w-full text-left py-1.5 px-2.5 rounded-none transition-colors flex items-center justify-between cursor-pointer ${
                     isSelected
                       ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-semibold'
                       : 'hover:bg-[#FAF8F5] dark:hover:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1]'
                   }`}
                 >
-                  <span className="truncate">{cat}</span>
-                  <span className="text-[10px] opacity-70">({count})</span>
+                  <div className="flex items-center gap-2 truncate">
+                    <span className={`w-3 h-3 rounded-none border flex items-center justify-center shrink-0 ${isSelected ? 'border-white bg-white/20' : 'border-black/30 dark:border-white/30'}`}>
+                      {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                    </span>
+                    <span className="truncate">{cat}</span>
+                  </div>
+                  <span className="text-[10px] opacity-70 shrink-0">({count})</span>
                 </button>
               );
             })}
@@ -358,19 +632,25 @@ function CatalogoContent() {
             </p>
             {CATEGORIES_ACESSORIOS.map((cat) => {
               const count = PRODUCTS.filter((p) => p.category === cat || p.subcategory === cat).length;
-              const isSelected = selectedCategory === cat;
+              const isSelected = draftFilters.categories.includes(cat);
               return (
                 <button
+                  type="button"
                   key={cat}
-                  onClick={() => setSelectedCategory(cat)}
+                  onClick={() => toggleDraftCategory(cat)}
                   className={`w-full text-left py-1.5 px-2.5 rounded-none transition-colors flex items-center justify-between cursor-pointer ${
                     isSelected
                       ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-semibold'
                       : 'hover:bg-[#FAF8F5] dark:hover:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1]'
                   }`}
                 >
-                  <span className="truncate">{cat}</span>
-                  <span className="text-[10px] opacity-70">({count})</span>
+                  <div className="flex items-center gap-2 truncate">
+                    <span className={`w-3 h-3 rounded-none border flex items-center justify-center shrink-0 ${isSelected ? 'border-white bg-white/20' : 'border-black/30 dark:border-white/30'}`}>
+                      {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                    </span>
+                    <span className="truncate">{cat}</span>
+                  </div>
+                  <span className="text-[10px] opacity-70 shrink-0">({count})</span>
                 </button>
               );
             })}
@@ -378,7 +658,7 @@ function CatalogoContent() {
         )}
       </div>
 
-      {/* 2. Faixa de Preço */}
+      {/* 2. Faixa de Preço (Multi-select) */}
       <div className="border-b border-[#C5A059]/15 pb-2.5">
         <button
           type="button"
@@ -389,19 +669,19 @@ function CatalogoContent() {
             <span className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76] group-hover:text-[#1A1918] dark:group-hover:text-white transition-colors">
               Faixa de Preço
             </span>
-            {(selectedPriceRangeIndex !== null || customMinPrice || customMaxPrice) && (
-              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
+            {(draftFilters.priceRangeIndices.length > 0 || draftFilters.customMinPrice || draftFilters.customMaxPrice) && (
+              <span className="text-[10px] bg-[#C5A059] text-white px-1.5 py-0.2 rounded-none font-bold">
+                {draftFilters.priceRangeIndices.length || 1}
+              </span>
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            {(selectedPriceRangeIndex !== null || customMinPrice || customMaxPrice) && (
+            {(draftFilters.priceRangeIndices.length > 0 || draftFilters.customMinPrice || draftFilters.customMaxPrice) && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedPriceRangeIndex(null);
-                  setCustomMinPrice('');
-                  setCustomMaxPrice('');
+                  setDraftFilters((p) => ({ ...p, priceRangeIndices: [], customMinPrice: '', customMaxPrice: '' }));
                 }}
                 className="text-[10px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer mr-1"
               >
@@ -420,27 +700,24 @@ function CatalogoContent() {
           <div className="pt-2 space-y-2 text-xs">
             <div className="space-y-1">
               {FAIXAS_PRECO.map((faixa, idx) => {
-                const isSelected = selectedPriceRangeIndex === idx;
+                const isSelected = draftFilters.priceRangeIndices.includes(idx);
                 return (
                   <button
+                    type="button"
                     key={faixa.label}
-                    onClick={() => {
-                      if (isSelected) {
-                        setSelectedPriceRangeIndex(null);
-                      } else {
-                        setSelectedPriceRangeIndex(idx);
-                        setCustomMinPrice('');
-                        setCustomMaxPrice('');
-                      }
-                    }}
+                    onClick={() => toggleDraftPriceRange(idx)}
                     className={`w-full text-left py-1.5 px-2.5 rounded-none border transition-all flex items-center justify-between cursor-pointer ${
                       isSelected
                         ? 'border-[#C5A059] bg-[#C5A059]/15 text-[#1A1918] dark:text-[#FAF8F5] font-semibold'
                         : 'border-transparent text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
                     }`}
                   >
-                    <span>{faixa.label}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-[#C5A059]" />}
+                    <div className="flex items-center gap-2">
+                      <span className={`w-3 h-3 rounded-none border flex items-center justify-center shrink-0 ${isSelected ? 'border-[#C5A059] bg-[#C5A059] text-white' : 'border-black/30 dark:border-white/30'}`}>
+                        {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                      </span>
+                      <span>{faixa.label}</span>
+                    </div>
                   </button>
                 );
               })}
@@ -453,10 +730,9 @@ function CatalogoContent() {
                 <input
                   type="number"
                   placeholder="0"
-                  value={customMinPrice}
+                  value={draftFilters.customMinPrice}
                   onChange={(e) => {
-                    setSelectedPriceRangeIndex(null);
-                    setCustomMinPrice(e.target.value);
+                    setDraftFilters((p) => ({ ...p, priceRangeIndices: [], customMinPrice: e.target.value }));
                   }}
                   className="w-full px-2 py-1 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059]"
                 />
@@ -467,10 +743,9 @@ function CatalogoContent() {
                 <input
                   type="number"
                   placeholder="700"
-                  value={customMaxPrice}
+                  value={draftFilters.customMaxPrice}
                   onChange={(e) => {
-                    setSelectedPriceRangeIndex(null);
-                    setCustomMaxPrice(e.target.value);
+                    setDraftFilters((p) => ({ ...p, priceRangeIndices: [], customMaxPrice: e.target.value }));
                   }}
                   className="w-full px-2 py-1 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059]"
                 />
@@ -480,7 +755,7 @@ function CatalogoContent() {
         )}
       </div>
 
-      {/* 3. Tamanhos */}
+      {/* 3. Tamanhos (Multi-select) */}
       <div className="border-b border-[#C5A059]/15 pb-2.5">
         <button
           type="button"
@@ -491,17 +766,19 @@ function CatalogoContent() {
             <span className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76] group-hover:text-[#1A1918] dark:group-hover:text-white transition-colors">
               Tamanho
             </span>
-            {selectedSize !== 'Todos' && (
-              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
+            {draftFilters.sizes.length > 0 && (
+              <span className="text-[10px] bg-[#C5A059] text-white px-1.5 py-0.2 rounded-none font-bold">
+                {draftFilters.sizes.length}
+              </span>
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            {selectedSize !== 'Todos' && (
+            {draftFilters.sizes.length > 0 && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedSize('Todos');
+                  setDraftFilters((p) => ({ ...p, sizes: [] }));
                 }}
                 className="text-[10px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer mr-1"
               >
@@ -518,24 +795,29 @@ function CatalogoContent() {
 
         {openSections.tamanho && (
           <div className="pt-2 flex flex-wrap gap-1.5">
-            {allSizes.map((sz) => (
-              <button
-                key={sz}
-                onClick={() => setSelectedSize(sz)}
-                className={`px-2.5 py-1 rounded-none text-xs font-medium border transition-colors cursor-pointer ${
-                  selectedSize === sz
-                    ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white border-[#1A1918] dark:border-[#C5A059] shadow-xs'
-                    : 'bg-white dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] border-black/10 dark:border-white/10 hover:border-[#C5A059]'
-                }`}
-              >
-                {sz}
-              </button>
-            ))}
+            {allSizes.map((sz) => {
+              const isSelected = draftFilters.sizes.includes(sz);
+              return (
+                <button
+                  type="button"
+                  key={sz}
+                  onClick={() => toggleDraftSize(sz)}
+                  className={`px-3 py-1.5 rounded-none text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
+                    isSelected
+                      ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white border-[#1A1918] dark:border-[#C5A059] shadow-xs'
+                      : 'bg-white dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] border-black/15 dark:border-white/15 hover:border-[#C5A059]'
+                  }`}
+                >
+                  {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                  <span>{sz}</span>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* 4. Cores */}
+      {/* 4. Cores (Multi-select) */}
       <div className="border-b border-[#C5A059]/15 pb-2.5">
         <button
           type="button"
@@ -546,17 +828,19 @@ function CatalogoContent() {
             <span className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76] group-hover:text-[#1A1918] dark:group-hover:text-white transition-colors">
               Cor
             </span>
-            {selectedColor !== 'Todas' && (
-              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
+            {draftFilters.colors.length > 0 && (
+              <span className="text-[10px] bg-[#C5A059] text-white px-1.5 py-0.2 rounded-none font-bold">
+                {draftFilters.colors.length}
+              </span>
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            {selectedColor !== 'Todas' && (
+            {draftFilters.colors.length > 0 && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedColor('Todas');
+                  setDraftFilters((p) => ({ ...p, colors: [] }));
                 }}
                 className="text-[10px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer mr-1"
               >
@@ -574,15 +858,16 @@ function CatalogoContent() {
         {openSections.cor && (
           <div className="pt-2 space-y-1">
             {allColors.map((col) => {
-              const isSelected = selectedColor === col.value;
+              const isSelected = draftFilters.colors.includes(col.value);
               return (
                 <button
+                  type="button"
                   key={col.value}
-                  onClick={() => setSelectedColor(col.value)}
-                  className={`w-full text-left py-1 px-2 rounded-none text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                  onClick={() => toggleDraftColor(col.value)}
+                  className={`w-full text-left py-1.5 px-2 rounded-none text-xs flex items-center justify-between transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-[#1A1918]/10 dark:bg-[#C5A059]/20 font-semibold text-[#1A1918] dark:text-white'
-                      : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
+                      ? 'bg-[#C5A059]/15 font-bold text-[#1A1918] dark:text-white border border-[#C5A059]/40'
+                      : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] border border-transparent'
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -600,7 +885,7 @@ function CatalogoContent() {
         )}
       </div>
 
-      {/* 5. Tecidos */}
+      {/* 5. Tecidos (Multi-select) */}
       <div className="border-b border-[#C5A059]/15 pb-2.5">
         <button
           type="button"
@@ -611,17 +896,19 @@ function CatalogoContent() {
             <span className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76] group-hover:text-[#1A1918] dark:group-hover:text-white transition-colors">
               Tecido
             </span>
-            {selectedFabric !== 'Todos' && (
-              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
+            {draftFilters.fabrics.length > 0 && (
+              <span className="text-[10px] bg-[#C5A059] text-white px-1.5 py-0.2 rounded-none font-bold">
+                {draftFilters.fabrics.length}
+              </span>
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            {selectedFabric !== 'Todos' && (
+            {draftFilters.fabrics.length > 0 && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedFabric('Todos');
+                  setDraftFilters((p) => ({ ...p, fabrics: [] }));
                 }}
                 className="text-[10px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer mr-1"
               >
@@ -638,34 +925,33 @@ function CatalogoContent() {
 
         {openSections.tecido && (
           <div className="pt-2 space-y-1 text-xs">
-            <button
-              onClick={() => setSelectedFabric('Todos')}
-              className={`w-full text-left py-1 px-2 rounded-none transition-colors cursor-pointer ${
-                selectedFabric === 'Todos'
-                  ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-medium'
-                  : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
-              }`}
-            >
-              Todos os Tecidos
-            </button>
-            {FILTROS_TECIDO.map((tec) => (
-              <button
-                key={tec}
-                onClick={() => setSelectedFabric(tec)}
-                className={`w-full text-left py-1 px-2 rounded-none transition-colors cursor-pointer ${
-                  selectedFabric === tec
-                    ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-medium'
-                    : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
-                }`}
-              >
-                {tec}
-              </button>
-            ))}
+            {FILTROS_TECIDO.map((fab) => {
+              const isSelected = draftFilters.fabrics.includes(fab);
+              return (
+                <button
+                  type="button"
+                  key={fab}
+                  onClick={() => toggleDraftFabric(fab)}
+                  className={`w-full text-left py-1.5 px-2 rounded-none transition-colors flex items-center justify-between cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#C5A059]/15 font-bold text-[#1A1918] dark:text-[#FAF8F5] border border-[#C5A059]/40'
+                      : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`w-3 h-3 rounded-none border flex items-center justify-center shrink-0 ${isSelected ? 'border-[#C5A059] bg-[#C5A059] text-white' : 'border-black/30 dark:border-white/30'}`}>
+                      {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                    </span>
+                    <span>{fab}</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* 6. Modelagem */}
+      {/* 6. Modelagem (Multi-select) */}
       <div className="border-b border-[#C5A059]/15 pb-2.5">
         <button
           type="button"
@@ -676,17 +962,19 @@ function CatalogoContent() {
             <span className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76] group-hover:text-[#1A1918] dark:group-hover:text-white transition-colors">
               Modelagem
             </span>
-            {selectedFit !== 'Todos' && (
-              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
+            {draftFilters.fits.length > 0 && (
+              <span className="text-[10px] bg-[#C5A059] text-white px-1.5 py-0.2 rounded-none font-bold">
+                {draftFilters.fits.length}
+              </span>
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            {selectedFit !== 'Todos' && (
+            {draftFilters.fits.length > 0 && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedFit('Todos');
+                  setDraftFilters((p) => ({ ...p, fits: [] }));
                 }}
                 className="text-[10px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer mr-1"
               >
@@ -703,34 +991,33 @@ function CatalogoContent() {
 
         {openSections.modelagem && (
           <div className="pt-2 space-y-1 text-xs">
-            <button
-              onClick={() => setSelectedFit('Todos')}
-              className={`w-full text-left py-1 px-2 rounded-none transition-colors cursor-pointer ${
-                selectedFit === 'Todos'
-                  ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-medium'
-                  : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
-              }`}
-            >
-              Todas as Modelagens
-            </button>
-            {FILTROS_MODELAGEM.map((mod) => (
-              <button
-                key={mod}
-                onClick={() => setSelectedFit(mod)}
-                className={`w-full text-left py-1 px-2 rounded-none transition-colors cursor-pointer ${
-                  selectedFit === mod
-                    ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-medium'
-                    : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
-                }`}
-              >
-                {mod}
-              </button>
-            ))}
+            {FILTROS_MODELAGEM.map((mod) => {
+              const isSelected = draftFilters.fits.includes(mod);
+              return (
+                <button
+                  type="button"
+                  key={mod}
+                  onClick={() => toggleDraftFit(mod)}
+                  className={`w-full text-left py-1.5 px-2 rounded-none transition-colors flex items-center justify-between cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#C5A059]/15 font-bold text-[#1A1918] dark:text-[#FAF8F5] border border-[#C5A059]/40'
+                      : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`w-3 h-3 rounded-none border flex items-center justify-center shrink-0 ${isSelected ? 'border-[#C5A059] bg-[#C5A059] text-white' : 'border-black/30 dark:border-white/30'}`}>
+                      {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                    </span>
+                    <span>{mod}</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* 7. Linha de Estilo */}
+      {/* 7. Linha de Estilo (Multi-select) */}
       <div className="border-b border-[#C5A059]/15 pb-2.5">
         <button
           type="button"
@@ -741,17 +1028,19 @@ function CatalogoContent() {
             <span className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76] group-hover:text-[#1A1918] dark:group-hover:text-white transition-colors">
               Linha
             </span>
-            {selectedLine !== 'Todas' && (
-              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
+            {draftFilters.lines.length > 0 && (
+              <span className="text-[10px] bg-[#C5A059] text-white px-1.5 py-0.2 rounded-none font-bold">
+                {draftFilters.lines.length}
+              </span>
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            {selectedLine !== 'Todas' && (
+            {draftFilters.lines.length > 0 && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedLine('Todas');
+                  setDraftFilters((p) => ({ ...p, lines: [] }));
                 }}
                 className="text-[10px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer mr-1"
               >
@@ -768,34 +1057,33 @@ function CatalogoContent() {
 
         {openSections.linha && (
           <div className="pt-2 space-y-1 text-xs">
-            <button
-              onClick={() => setSelectedLine('Todas')}
-              className={`w-full text-left py-1 px-2 rounded-none transition-colors cursor-pointer ${
-                selectedLine === 'Todas'
-                  ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-medium'
-                  : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
-              }`}
-            >
-              Todas as Linhas
-            </button>
-            {FILTROS_LINHA.map((lin) => (
-              <button
-                key={lin}
-                onClick={() => setSelectedLine(lin)}
-                className={`w-full text-left py-1 px-2 rounded-none transition-colors cursor-pointer ${
-                  selectedLine === lin
-                    ? 'bg-[#1A1918] text-white dark:bg-[#C5A059] font-medium'
-                    : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220]'
-                }`}
-              >
-                {lin}
-              </button>
-            ))}
+            {FILTROS_LINHA.map((lin) => {
+              const isSelected = draftFilters.lines.includes(lin);
+              return (
+                <button
+                  type="button"
+                  key={lin}
+                  onClick={() => toggleDraftLine(lin)}
+                  className={`w-full text-left py-1.5 px-2 rounded-none transition-colors flex items-center justify-between cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#C5A059]/15 font-bold text-[#1A1918] dark:text-[#FAF8F5] border border-[#C5A059]/40'
+                      : 'text-[#57534E] dark:text-[#D6D3D1] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`w-3 h-3 rounded-none border flex items-center justify-center shrink-0 ${isSelected ? 'border-[#C5A059] bg-[#C5A059] text-white' : 'border-black/30 dark:border-white/30'}`}>
+                      {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                    </span>
+                    <span>{lin}</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* 8. Status */}
+      {/* 8. Status & Destaque (Multi-select) */}
       <div className="border-b border-[#C5A059]/15 pb-2.5">
         <button
           type="button"
@@ -806,17 +1094,19 @@ function CatalogoContent() {
             <span className="text-xs uppercase tracking-widest font-bold text-[#C5A059] dark:text-[#DFBE76] group-hover:text-[#1A1918] dark:group-hover:text-white transition-colors">
               Status & Destaque
             </span>
-            {selectedStatus !== 'Todos' && selectedStatus !== '' && (
-              <span className="w-1.5 h-1.5 rounded-none bg-[#C5A059]" />
+            {draftFilters.statuses.length > 0 && (
+              <span className="text-[10px] bg-[#C5A059] text-white px-1.5 py-0.2 rounded-none font-bold">
+                {draftFilters.statuses.length}
+              </span>
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            {selectedStatus !== 'Todos' && selectedStatus !== '' && (
+            {draftFilters.statuses.length > 0 && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedStatus('Todos');
+                  setDraftFilters((p) => ({ ...p, statuses: [] }));
                 }}
                 className="text-[10px] text-[#78716C] dark:text-[#A8A29E] hover:underline cursor-pointer mr-1"
               >
@@ -834,18 +1124,20 @@ function CatalogoContent() {
         {openSections.status && (
           <div className="pt-2 flex flex-wrap gap-1.5">
             {FILTROS_STATUS.map((st) => {
-              const isSelected = selectedStatus === st;
+              const isSelected = draftFilters.statuses.includes(st);
               return (
                 <button
+                  type="button"
                   key={st}
-                  onClick={() => setSelectedStatus(isSelected ? 'Todos' : st)}
-                  className={`px-2.5 py-1 rounded-none text-xs font-medium border transition-colors cursor-pointer ${
+                  onClick={() => toggleDraftStatus(st)}
+                  className={`px-3 py-1.5 rounded-none text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white border-[#1A1918] dark:border-[#C5A059]'
-                      : 'bg-white dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] border-black/10 dark:border-white/10 hover:border-[#C5A059]'
+                      ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white border-[#1A1918] dark:border-[#C5A059] shadow-xs'
+                      : 'bg-white dark:bg-[#252220] text-[#57534E] dark:text-[#D6D3D1] border-black/15 dark:border-white/15 hover:border-[#C5A059]'
                   }`}
                 >
-                  {st}
+                  {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                  <span>{st}</span>
                 </button>
               );
             })}
@@ -853,18 +1145,28 @@ function CatalogoContent() {
         )}
       </div>
 
-      {/* Botão de Limpar Tudo */}
-      {activeFiltersCount > 0 && (
-        <div className="pt-2">
+      {/* Botões de Ação do Painel de Filtros: APLICAR FILTROS e Reverter ao Normal */}
+      <div className="pt-3 space-y-2">
+        <button
+          type="button"
+          onClick={applyFilters}
+          className="w-full py-3 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] rounded-none text-xs uppercase tracking-widest font-bold flex items-center justify-center gap-2 transition-all duration-300 shadow-md cursor-pointer"
+        >
+          <Check className="w-4 h-4 stroke-[2.5]" />
+          <span>APLICAR FILTROS ({draftMatchesCount})</span>
+        </button>
+
+        {(draftFiltersCount > 0 || activeFiltersCount > 0) && (
           <button
+            type="button"
             onClick={resetAllFilters}
-            className="w-full py-2 rounded-none border border-[#C5A059] text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full py-2 border border-[#C5A059]/40 bg-white dark:bg-[#201D1B] text-[#57534E] dark:text-[#D6D3D1] hover:text-[#1A1918] dark:hover:text-white rounded-none text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Limpar Todos os Filtros ({activeFiltersCount})</span>
+            <span>Reverter Filtros ao Normal</span>
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
     </div>
   );
@@ -877,8 +1179,21 @@ function CatalogoContent() {
         wishlistCount={wishlistCount}
         onOpenCart={openCart}
         onOpenWishlist={() => {}}
-        onSelectCategory={setSelectedCategory}
-        activeCategory={selectedCategory}
+        onSelectCategory={(cat) => {
+          if (cat === 'Todas as Peças') {
+            resetAllFilters();
+          } else {
+            setAppliedFilters((prev) => ({ ...prev, categories: [cat] }));
+            setDraftFilters((prev) => ({ ...prev, categories: [cat] }));
+          }
+        }}
+        activeCategory={
+          appliedFilters.categories.length === 1
+            ? appliedFilters.categories[0]
+            : appliedFilters.categories.length > 1
+            ? `${appliedFilters.categories.length} Categorias`
+            : 'Todas as Peças'
+        }
         isSubpage={true}
       />
 
@@ -910,7 +1225,9 @@ function CatalogoContent() {
           <div className="border-b border-[#C5A059]/20 pb-4 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
               <h1 className="font-serif-luxury text-2xl sm:text-4xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
-                {selectedCategory === 'Todas as Peças' ? 'Catálogo Completo' : selectedCategory}
+                {appliedFilters.categories.length === 0
+                  ? 'Catálogo Completo'
+                  : appliedFilters.categories.join(', ')}
               </h1>
               <span className="text-xs text-[#78716C] dark:text-[#A8A29E]">
                 Mostrando <strong>{filteredProducts.length}</strong> de {PRODUCTS.length} modelos
@@ -1045,92 +1362,160 @@ function CatalogoContent() {
                     </span>
                   )}
 
-                  {selectedCategory !== 'Todas as Peças' && (
+                  {appliedFilters.categories.map((cat) => (
+                    <span
+                      key={cat}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                    >
+                      <span>{cat}</span>
+                      <button
+                        onClick={() => removeAppliedCategory(cat)}
+                        className="hover:text-red-500 cursor-pointer"
+                        title={`Remover filtro ${cat}`}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+
+                  {appliedFilters.statuses.map((st) => (
+                    <span
+                      key={st}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                    >
+                      <span>{st}</span>
+                      <button
+                        onClick={() => removeAppliedStatus(st)}
+                        className="hover:text-red-500 cursor-pointer"
+                        title={`Remover status ${st}`}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+
+                  {appliedFilters.priceRangeIndices.map((idx) => {
+                    const fx = FAIXAS_PRECO[idx];
+                    if (!fx) return null;
+                    return (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                      >
+                        <span>{fx.label}</span>
+                        <button
+                          onClick={() => removeAppliedPriceRange(idx)}
+                          className="hover:text-red-500 cursor-pointer"
+                          title={`Remover faixa de preço ${fx.label}`}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    );
+                  })}
+
+                  {(appliedFilters.customMinPrice || appliedFilters.customMaxPrice) && (
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
-                      <span>{selectedCategory}</span>
-                      <button onClick={() => setSelectedCategory('Todas as Peças')} className="hover:text-red-500 cursor-pointer">
+                      <span>
+                        R$ {appliedFilters.customMinPrice || 0} - R${' '}
+                        {appliedFilters.customMaxPrice || 'Max'}
+                      </span>
+                      <button
+                        onClick={clearAppliedCustomPrice}
+                        className="hover:text-red-500 cursor-pointer"
+                        title="Remover preço personalizado"
+                      >
                         <X className="w-3 h-3" />
                       </button>
                     </span>
                   )}
 
-                  {selectedStatus !== 'Todos' && selectedStatus !== '' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
-                      <span>{selectedStatus}</span>
-                      <button onClick={() => setSelectedStatus('Todos')} className="hover:text-red-500 cursor-pointer">
+                  {appliedFilters.sizes.map((sz) => (
+                    <span
+                      key={sz}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                    >
+                      <span>Tam: {sz}</span>
+                      <button
+                        onClick={() => removeAppliedSize(sz)}
+                        className="hover:text-red-500 cursor-pointer"
+                        title={`Remover tamanho ${sz}`}
+                      >
                         <X className="w-3 h-3" />
                       </button>
                     </span>
-                  )}
+                  ))}
 
-                  {selectedPriceRangeIndex !== null && FAIXAS_PRECO[selectedPriceRangeIndex] && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
-                      <span>{FAIXAS_PRECO[selectedPriceRangeIndex].label}</span>
-                      <button onClick={() => setSelectedPriceRangeIndex(null)} className="hover:text-red-500 cursor-pointer">
+                  {appliedFilters.colors.map((col) => (
+                    <span
+                      key={col}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                    >
+                      <span>Cor: {col}</span>
+                      <button
+                        onClick={() => removeAppliedColor(col)}
+                        className="hover:text-red-500 cursor-pointer"
+                        title={`Remover cor ${col}`}
+                      >
                         <X className="w-3 h-3" />
                       </button>
                     </span>
-                  )}
+                  ))}
 
-                  {(customMinPrice || customMaxPrice) && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
-                      <span>R$ {customMinPrice || 0} - R$ {customMaxPrice || 'Max'}</span>
-                      <button onClick={() => { setCustomMinPrice(''); setCustomMaxPrice(''); }} className="hover:text-red-500 cursor-pointer">
+                  {appliedFilters.fabrics.map((fab) => (
+                    <span
+                      key={fab}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                    >
+                      <span>Tecido: {fab}</span>
+                      <button
+                        onClick={() => removeAppliedFabric(fab)}
+                        className="hover:text-red-500 cursor-pointer"
+                        title={`Remover tecido ${fab}`}
+                      >
                         <X className="w-3 h-3" />
                       </button>
                     </span>
-                  )}
+                  ))}
 
-                  {selectedSize !== 'Todos' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
-                      <span>Tam: {selectedSize}</span>
-                      <button onClick={() => setSelectedSize('Todos')} className="hover:text-red-500 cursor-pointer">
+                  {appliedFilters.fits.map((fit) => (
+                    <span
+                      key={fit}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                    >
+                      <span>Modelagem: {fit}</span>
+                      <button
+                        onClick={() => removeAppliedFit(fit)}
+                        className="hover:text-red-500 cursor-pointer"
+                        title={`Remover modelagem ${fit}`}
+                      >
                         <X className="w-3 h-3" />
                       </button>
                     </span>
-                  )}
+                  ))}
 
-                  {selectedColor !== 'Todas' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
-                      <span>Cor: {selectedColor}</span>
-                      <button onClick={() => setSelectedColor('Todas')} className="hover:text-red-500 cursor-pointer">
+                  {appliedFilters.lines.map((lin) => (
+                    <span
+                      key={lin}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                    >
+                      <span>Linha: {lin}</span>
+                      <button
+                        onClick={() => removeAppliedLine(lin)}
+                        className="hover:text-red-500 cursor-pointer"
+                        title={`Remover linha ${lin}`}
+                      >
                         <X className="w-3 h-3" />
                       </button>
                     </span>
-                  )}
-
-                  {selectedFabric !== 'Todos' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
-                      <span>Tecido: {selectedFabric}</span>
-                      <button onClick={() => setSelectedFabric('Todos')} className="hover:text-red-500 cursor-pointer">
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  )}
-
-                  {selectedFit !== 'Todos' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
-                      <span>Modelagem: {selectedFit}</span>
-                      <button onClick={() => setSelectedFit('Todos')} className="hover:text-red-500 cursor-pointer">
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  )}
-
-                  {selectedLine !== 'Todas' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
-                      <span>Linha: {selectedLine}</span>
-                      <button onClick={() => setSelectedLine('Todas')} className="hover:text-red-500 cursor-pointer">
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  )}
+                  ))}
 
                   <button
                     onClick={resetAllFilters}
-                    className="text-xs text-[#C5A059] dark:text-[#DFBE76] hover:underline font-semibold ml-auto cursor-pointer"
+                    className="text-xs text-[#C5A059] dark:text-[#DFBE76] hover:underline font-semibold ml-auto cursor-pointer flex items-center gap-1"
                   >
-                    Limpar tudo
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Reverter filtros</span>
                   </button>
                 </div>
               )}
@@ -1225,13 +1610,26 @@ function CatalogoContent() {
                 <FiltersSidebarContent />
               </div>
 
-              <div className="p-4 border-t border-[#C5A059]/20 bg-[#FAF8F5] dark:bg-[#141312]">
+              <div className="p-4 border-t border-[#C5A059]/20 bg-[#FAF8F5] dark:bg-[#141312] space-y-2">
                 <button
-                  onClick={() => setMobileFilterDrawerOpen(false)}
-                  className="w-full py-3 bg-[#1A1918] dark:bg-[#C5A059] text-white rounded-none text-xs uppercase tracking-wider font-semibold cursor-pointer"
+                  type="button"
+                  onClick={applyFilters}
+                  className="w-full py-3 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] rounded-none text-xs uppercase tracking-widest font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
                 >
-                  Ver {filteredProducts.length} Peças
+                  <Check className="w-4 h-4 stroke-[2.5]" />
+                  <span>APLICAR FILTROS ({draftMatchesCount} PEÇAS)</span>
                 </button>
+
+                {(draftFiltersCount > 0 || activeFiltersCount > 0) && (
+                  <button
+                    type="button"
+                    onClick={resetAllFilters}
+                    className="w-full py-2.5 border border-[#C5A059]/40 bg-white dark:bg-[#201D1B] text-[#57534E] dark:text-[#D6D3D1] hover:text-[#1A1918] dark:hover:text-white rounded-none text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Reverter Filtros ao Normal</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
