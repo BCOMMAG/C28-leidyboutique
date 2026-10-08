@@ -542,24 +542,26 @@ function CatalogoContent() {
   };
 
   // Renderizador Direto da Barra Lateral de Filtros (Função direta impede desmonte dos inputs e perda de foco)
-  const renderFiltersSidebarContent = () => (
+  const renderFiltersSidebarContent = (isDesktop = false) => (
     <div className="space-y-4 text-[#1A1918] dark:text-[#FAF8F5]">
       
-      {/* Botão Superior Rápido para Aplicar Filtros se houver rascunho */}
-      <div className="pb-1 border-b border-[#C5A059]/15 flex items-center justify-between gap-2">
-        <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E]">
-          {draftFiltersCount > 0 ? `${draftFiltersCount} filtros selecionados` : 'Nenhum filtro marcado'}
-        </span>
-        {(draftFiltersCount > 0 || activeFiltersCount > 0) && (
-          <button
-            type="button"
-            onClick={resetAllFilters}
-            className="text-[11px] text-[#C5A059] dark:text-[#DFBE76] hover:underline font-semibold cursor-pointer"
-          >
-            Limpar tudo
-          </button>
-        )}
-      </div>
+      {/* Botão Superior Rápido para Aplicar Filtros (Exibido na Gaveta Mobile) */}
+      {!isDesktop && (
+        <div className="pb-1 border-b border-[#C5A059]/15 flex items-center justify-between gap-2">
+          <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E]">
+            {draftFiltersCount > 0 ? `${draftFiltersCount} filtros selecionados` : 'Nenhum filtro marcado'}
+          </span>
+          {(draftFiltersCount > 0 || activeFiltersCount > 0) && (
+            <button
+              type="button"
+              onClick={resetAllFilters}
+              className="text-[11px] text-[#C5A059] dark:text-[#DFBE76] hover:underline font-semibold cursor-pointer"
+            >
+              Limpar tudo
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 1. Categorias (Multi-select) */}
       <div className="border-b border-[#C5A059]/15 pb-2.5">
@@ -1299,24 +1301,57 @@ function CatalogoContent() {
           <div className="flex flex-col lg:flex-row gap-6 xl:gap-8 items-start">
             
             {/* ============================================================ */}
-            {/* 1. COLUNA ESQUERDA: FILTROS DA BOUTIQUE (Scroll Independente) */}
+            {/* 1. COLUNA ESQUERDA: FILTROS DA BOUTIQUE (Scroll Independente com Botão Fixo no Topo) */}
             {/* ============================================================ */}
-            <aside className="hidden lg:block w-64 xl:w-72 shrink-0 bg-white dark:bg-[#1A1918] p-4 xl:p-5 rounded-none border border-[#C5A059]/25 shadow-xs sticky top-28 max-h-[calc(100vh-8.5rem)] overflow-y-auto pr-2 custom-scrollbar">
-              <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#C5A059]/20">
-                <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="w-4 h-4 text-[#C5A059]" />
-                  <span className="font-serif-luxury text-base font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
-                    Filtros da Boutique
-                  </span>
+            <aside className="hidden lg:flex flex-col w-64 xl:w-72 shrink-0 bg-white dark:bg-[#1A1918] p-4 xl:p-5 rounded-none border border-[#C5A059]/25 shadow-xs sticky top-28 max-h-[calc(100vh-8.5rem)]">
+              {/* Header Fixo do Painel Desktop: Título + Botão de Aplicar Filtros no Topo */}
+              <div className="shrink-0 pb-3.5 mb-3 border-b border-[#C5A059]/20 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal className="w-4 h-4 text-[#C5A059]" />
+                    <span className="font-serif-luxury text-base font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
+                      Filtros da Boutique
+                    </span>
+                  </div>
+                  {activeFiltersCount > 0 && (
+                    <span className="text-[11px] bg-[#C5A059] text-white px-2 py-0.5 rounded-none font-bold">
+                      {activeFiltersCount}
+                    </span>
+                  )}
                 </div>
-                {activeFiltersCount > 0 && (
-                  <span className="text-[11px] bg-[#C5A059] text-white px-2 py-0.5 rounded-none font-bold">
-                    {activeFiltersCount}
+
+                {/* Botão APLICAR FILTROS Fixo no Topo (Visível imediatamente sem precisar rolar a tela) */}
+                <button
+                  type="button"
+                  onClick={applyFilters}
+                  className="w-full py-2.5 px-3 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] rounded-none text-xs uppercase tracking-widest font-bold flex items-center justify-center gap-2 transition-all duration-300 shadow-md cursor-pointer active:scale-95"
+                >
+                  <Check className="w-4 h-4 stroke-[2.5]" />
+                  <span>APLICAR FILTROS ({draftMatchesCount})</span>
+                </button>
+
+                <div className="flex items-center justify-between text-[11px] text-[#78716C] dark:text-[#A8A29E] pt-0.5">
+                  <span>
+                    {draftFiltersCount > 0
+                      ? `${draftFiltersCount} ${draftFiltersCount === 1 ? 'filtro selecionado' : 'filtros selecionados'}`
+                      : 'Nenhum filtro marcado'}
                   </span>
-                )}
+                  {(draftFiltersCount > 0 || activeFiltersCount > 0) && (
+                    <button
+                      type="button"
+                      onClick={resetAllFilters}
+                      className="text-[11px] text-[#C5A059] dark:text-[#DFBE76] hover:underline font-semibold cursor-pointer"
+                    >
+                      Limpar tudo
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {renderFiltersSidebarContent()}
+              {/* Lista dos Filtros com Rolagem Independente */}
+              <div className="flex-1 overflow-y-auto pr-1.5 custom-scrollbar">
+                {renderFiltersSidebarContent(true)}
+              </div>
             </aside>
 
             {/* ============================================================ */}
@@ -1387,14 +1422,14 @@ function CatalogoContent() {
               {/* CHIPS DE FILTROS ATIVOS (Remoção Rápida com 'X') */}
               {activeFiltersCount > 0 && (
                 <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                  <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E] font-medium mr-1">
+                  <span className="text-xs text-white font-semibold mr-1 drop-shadow-xs">
                     Filtros ativos:
                   </span>
 
                   {searchQuery && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-black/60 dark:bg-[#1A1918]/90 border border-[#C5A059]/50 text-xs text-white font-medium shadow-sm backdrop-blur-xs">
                       <span>Busca: "{searchQuery}"</span>
-                      <button onClick={() => setSearchQuery('')} className="hover:text-red-500 cursor-pointer">
+                      <button onClick={() => setSearchQuery('')} className="hover:text-red-400 cursor-pointer text-[#DFBE76]">
                         <X className="w-3 h-3" />
                       </button>
                     </span>
@@ -1403,12 +1438,12 @@ function CatalogoContent() {
                   {appliedFilters.categories.map((cat) => (
                     <span
                       key={cat}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-black/60 dark:bg-[#1A1918]/90 border border-[#C5A059]/50 text-xs text-white font-medium shadow-sm backdrop-blur-xs"
                     >
                       <span>{cat}</span>
                       <button
                         onClick={() => removeAppliedCategory(cat)}
-                        className="hover:text-red-500 cursor-pointer"
+                        className="hover:text-red-400 cursor-pointer text-[#DFBE76]"
                         title={`Remover filtro ${cat}`}
                       >
                         <X className="w-3 h-3" />
@@ -1419,12 +1454,12 @@ function CatalogoContent() {
                   {appliedFilters.statuses.map((st) => (
                     <span
                       key={st}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-black/60 dark:bg-[#1A1918]/90 border border-[#C5A059]/50 text-xs text-white font-medium shadow-sm backdrop-blur-xs"
                     >
                       <span>{st}</span>
                       <button
                         onClick={() => removeAppliedStatus(st)}
-                        className="hover:text-red-500 cursor-pointer"
+                        className="hover:text-red-400 cursor-pointer text-[#DFBE76]"
                         title={`Remover status ${st}`}
                       >
                         <X className="w-3 h-3" />
@@ -1438,12 +1473,12 @@ function CatalogoContent() {
                     return (
                       <span
                         key={idx}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-black/60 dark:bg-[#1A1918]/90 border border-[#C5A059]/50 text-xs text-white font-medium shadow-sm backdrop-blur-xs"
                       >
                         <span>{fx.label}</span>
                         <button
                           onClick={() => removeAppliedPriceRange(idx)}
-                          className="hover:text-red-500 cursor-pointer"
+                          className="hover:text-red-400 cursor-pointer text-[#DFBE76]"
                           title={`Remover faixa de preço ${fx.label}`}
                         >
                           <X className="w-3 h-3" />
@@ -1453,14 +1488,14 @@ function CatalogoContent() {
                   })}
 
                   {(appliedFilters.customMinPrice || appliedFilters.customMaxPrice) && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-black/60 dark:bg-[#1A1918]/90 border border-[#C5A059]/50 text-xs text-white font-medium shadow-sm backdrop-blur-xs">
                       <span>
                         R$ {appliedFilters.customMinPrice || 0} - R${' '}
                         {appliedFilters.customMaxPrice || 'Max'}
                       </span>
                       <button
                         onClick={clearAppliedCustomPrice}
-                        className="hover:text-red-500 cursor-pointer"
+                        className="hover:text-red-400 cursor-pointer text-[#DFBE76]"
                         title="Remover preço personalizado"
                       >
                         <X className="w-3 h-3" />
@@ -1471,12 +1506,12 @@ function CatalogoContent() {
                   {appliedFilters.sizes.map((sz) => (
                     <span
                       key={sz}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-black/60 dark:bg-[#1A1918]/90 border border-[#C5A059]/50 text-xs text-white font-medium shadow-sm backdrop-blur-xs"
                     >
                       <span>Tam: {sz}</span>
                       <button
                         onClick={() => removeAppliedSize(sz)}
-                        className="hover:text-red-500 cursor-pointer"
+                        className="hover:text-red-400 cursor-pointer text-[#DFBE76]"
                         title={`Remover tamanho ${sz}`}
                       >
                         <X className="w-3 h-3" />
@@ -1487,12 +1522,12 @@ function CatalogoContent() {
                   {appliedFilters.colors.map((col) => (
                     <span
                       key={col}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-black/60 dark:bg-[#1A1918]/90 border border-[#C5A059]/50 text-xs text-white font-medium shadow-sm backdrop-blur-xs"
                     >
                       <span>Cor: {col}</span>
                       <button
                         onClick={() => removeAppliedColor(col)}
-                        className="hover:text-red-500 cursor-pointer"
+                        className="hover:text-red-400 cursor-pointer text-[#DFBE76]"
                         title={`Remover cor ${col}`}
                       >
                         <X className="w-3 h-3" />
@@ -1503,12 +1538,12 @@ function CatalogoContent() {
                   {appliedFilters.fabrics.map((fab) => (
                     <span
                       key={fab}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-black/60 dark:bg-[#1A1918]/90 border border-[#C5A059]/50 text-xs text-white font-medium shadow-sm backdrop-blur-xs"
                     >
                       <span>Tecido: {fab}</span>
                       <button
                         onClick={() => removeAppliedFabric(fab)}
-                        className="hover:text-red-500 cursor-pointer"
+                        className="hover:text-red-400 cursor-pointer text-[#DFBE76]"
                         title={`Remover tecido ${fab}`}
                       >
                         <X className="w-3 h-3" />
@@ -1519,12 +1554,12 @@ function CatalogoContent() {
                   {appliedFilters.fits.map((fit) => (
                     <span
                       key={fit}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-black/60 dark:bg-[#1A1918]/90 border border-[#C5A059]/50 text-xs text-white font-medium shadow-sm backdrop-blur-xs"
                     >
                       <span>Modelagem: {fit}</span>
                       <button
                         onClick={() => removeAppliedFit(fit)}
-                        className="hover:text-red-500 cursor-pointer"
+                        className="hover:text-red-400 cursor-pointer text-[#DFBE76]"
                         title={`Remover modelagem ${fit}`}
                       >
                         <X className="w-3 h-3" />
@@ -1535,12 +1570,12 @@ function CatalogoContent() {
                   {appliedFilters.lines.map((lin) => (
                     <span
                       key={lin}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none bg-[#C5A059]/15 border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5]"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-black/60 dark:bg-[#1A1918]/90 border border-[#C5A059]/50 text-xs text-white font-medium shadow-sm backdrop-blur-xs"
                     >
                       <span>Linha: {lin}</span>
                       <button
                         onClick={() => removeAppliedLine(lin)}
-                        className="hover:text-red-500 cursor-pointer"
+                        className="hover:text-red-400 cursor-pointer text-[#DFBE76]"
                         title={`Remover linha ${lin}`}
                       >
                         <X className="w-3 h-3" />
@@ -1550,7 +1585,7 @@ function CatalogoContent() {
 
                   <button
                     onClick={resetAllFilters}
-                    className="text-xs text-[#C5A059] dark:text-[#DFBE76] hover:underline font-semibold ml-auto cursor-pointer flex items-center gap-1"
+                    className="text-xs text-[#DFBE76] hover:text-white hover:underline font-semibold ml-auto cursor-pointer flex items-center gap-1 transition-colors drop-shadow-xs"
                   >
                     <RotateCcw className="w-3 h-3" />
                     <span>Reverter filtros</span>
