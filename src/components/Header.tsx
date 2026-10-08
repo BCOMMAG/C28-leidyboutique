@@ -29,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   const router = useRouter();
   const { theme, toggleTheme, searchQuery, setSearchQuery } = useStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Estados dos dropdowns desktop
@@ -315,6 +316,20 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </div>
 
+            {/* Botão de Pesquisa no Mobile (Abre barra retrátil no topo) */}
+            <button
+              onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+              className={`p-2 md:hidden transition-colors cursor-pointer ${
+                isScrolled
+                  ? 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059]'
+                  : 'text-white hover:text-[#DFBE76] drop-shadow-sm'
+              }`}
+              aria-label="Pesquisar"
+              title="Pesquisar"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+
             {/* Toggle Modo Escuro / Claro */}
             <button
               onClick={toggleTheme}
@@ -376,6 +391,43 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Barra de Pesquisa Retrátil no Mobile (Topo da tela) */}
+      {mobileSearchOpen && (
+        <div className="md:hidden bg-white/98 dark:bg-[#141312]/98 border-t border-b border-[#C5A059]/20 px-4 py-2.5 shadow-md">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Pesquisar por modelo, tecido ou cor..."
+              value={searchQuery}
+              autoFocus
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (typeof window !== 'undefined' && !window.location.pathname.includes('/catalogo') && e.target.value.trim().length > 0) {
+                  router.push(`/catalogo?q=${encodeURIComponent(e.target.value)}`);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  router.push(`/catalogo?q=${encodeURIComponent(searchQuery)}`);
+                  setMobileSearchOpen(false);
+                }
+              }}
+              className="w-full pl-9 pr-8 py-2 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#201D1B] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
+            />
+            <Search className="w-4 h-4 text-[#C5A059] absolute left-3 top-1/2 -translate-y-1/2" />
+            <button
+              onClick={() => {
+                if (searchQuery) setSearchQuery('');
+                else setMobileSearchOpen(false);
+              }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#78716C] hover:text-[#1A1918] dark:hover:text-white p-1 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Menu Gaveta Mobile com Acordeões & Pesquisa */}
       {mobileMenuOpen && (

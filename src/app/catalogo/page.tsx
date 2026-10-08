@@ -914,6 +914,28 @@ function CatalogoContent() {
                 Mostrando <strong>{filteredProducts.length}</strong> de {PRODUCTS.length} modelos
               </span>
             </div>
+
+            {/* Barra de Pesquisa Superior no Catálogo (Destaque mobile e desktop) */}
+            <div className="mt-4 relative max-w-xl">
+              <input
+                type="text"
+                placeholder="Pesquisar por modelo, tecido, cor ou estilo..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm rounded-none border border-[#C5A059]/30 bg-white dark:bg-[#1A1918] text-[#1A1918] dark:text-[#FAF8F5] placeholder-[#78716C] dark:placeholder-[#A8A29E] focus:outline-none focus:border-[#C5A059] shadow-2xs transition-all"
+              />
+              <Search className="w-4 h-4 text-[#C5A059] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#78716C] hover:text-[#1A1918] dark:hover:text-white p-1 cursor-pointer"
+                  title="Limpar busca"
+                  aria-label="Limpar busca"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* LAYOUT PRINCIPAL DE 2 COLUNAS: FILTROS À ESQUERDA + PRODUTOS EM LARGURA TOTAL */}

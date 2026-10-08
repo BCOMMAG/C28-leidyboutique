@@ -150,13 +150,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
       {/* Detalhes do Produto com Slots de Altura Garantida */}
       <div className={`flex flex-col flex-1 justify-between bg-white dark:bg-[#1A1918] ${
-        isCompact ? 'p-2.5 sm:p-3' : isMedium ? 'p-3 sm:p-4' : 'p-4 sm:p-5'
+        isCompact ? 'p-2.5 sm:p-3' : isMedium ? 'p-2.5 sm:p-3.5' : 'p-3.5 sm:p-5'
       }`}>
         <div className="flex flex-col">
           {/* SLOT 1: Categoria (Altura fixa garantida para nunca empurrar o título) */}
-          <div className="h-5 sm:h-6 flex items-center">
+          <div className="h-4 sm:h-5 flex items-center">
             <span className={`uppercase tracking-widest text-[#C5A059] dark:text-[#DFBE76] font-medium truncate block ${
-              isCompact ? 'text-[9px] sm:text-[10px]' : 'text-[10px] sm:text-[11px]'
+              isCompact ? 'text-[9px] sm:text-[10px]' : 'text-[9px] sm:text-[10px]'
             }`}>
               {product.category}
             </span>
@@ -164,7 +164,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
           {/* SLOT 2: Nome da Peça (Altura fixa reservada com line-clamp-2) */}
           <div className={`flex items-start ${
-            isCompact ? 'h-8 sm:h-9' : isMedium ? 'h-9 sm:h-10' : 'h-11 sm:h-12'
+            isCompact ? 'h-8 sm:h-9' : isMedium ? 'h-8 sm:h-9' : 'h-10 sm:h-11'
           }`}>
             <h3
               onClick={() => onOpenDetails(product)}
@@ -182,21 +182,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
 
           {/* SLOT 3: Paleta de Cores e Tamanhos (Altura fixa perfeitamente nivelada) */}
-          <div className="mt-1.5 sm:mt-2 h-6 sm:h-7 flex items-center justify-between gap-1">
+          <div className="mt-1 sm:mt-1.5 h-6 flex items-center justify-between gap-1">
             {/* Cores */}
             <div className="flex items-center gap-1 min-w-0">
               <div className="flex items-center gap-1 shrink-0">
                 {product.colors.slice(0, 3).map((color, idx) => (
                   <span
                     key={idx}
-                    className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-none border border-black/20 dark:border-white/20 shadow-2xs block shrink-0"
+                    className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-none border border-black/20 dark:border-white/20 shadow-2xs block shrink-0"
                     style={{ backgroundColor: color.hex }}
                     title={color.name}
                   />
                 ))}
               </div>
               <span className={`text-[#78716C] dark:text-[#A8A29E] truncate ${
-                isCompact ? 'text-[10px] max-w-[60px]' : 'text-[11px] max-w-[90px]'
+                isCompact ? 'text-[9px] max-w-[55px]' : 'text-[9px] sm:text-[10px] max-w-[65px] sm:max-w-[85px]'
               }`}>
                 {product.colors.length > 1
                   ? `${product.colors.length} cores`
@@ -204,63 +204,69 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               </span>
             </div>
 
-            {/* Tamanho */}
+            {/* Tamanho (Exibe 'Único' quando for 'Tamanho Único') */}
             <span className={`text-[#78716C] dark:text-[#A8A29E] bg-[#FAF8F5] dark:bg-[#252220] rounded-none border border-[#C5A059]/20 font-medium shrink-0 ${
-              isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] sm:text-[11px] px-2 py-0.5'
+              isCompact ? 'text-[9px] px-1.5 py-0.5' : 'text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5'
             }`}>
-              {product.sizes[0]?.split(' ')[0]}
+              {product.sizes[0] === 'Tamanho Único' ? 'Único' : product.sizes[0]?.split(' ')[0]}
             </span>
           </div>
         </div>
 
-        {/* SLOT 4: Preço e Botão de Ação (Cravado na base do card) */}
-        <div className="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-[#C5A059]/15 flex items-end justify-between gap-1">
-          <div className="min-w-0 flex-1">
-            {/* Rótulo de preço */}
-            <span className="text-[9px] uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E] block truncate leading-none mb-1">
-              {isOutletSection ? 'Preço Outlet' : 'Valor da Peça'}
-            </span>
+        {/* SLOT 4: Preço e Botão de Ação (Empilhado verticalmente no mobile para nunca sobrepor) */}
+        <div className="mt-2 sm:mt-2.5 pt-2 border-t border-[#C5A059]/15 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-1">
+          <div className="min-w-0 w-full sm:w-auto">
+            {/* Rótulo de preço ou preço original de OUTLET */}
+            {isOutletSection && product.formattedOriginalPrice ? (
+              <div className="flex items-center gap-1.5 leading-none mb-1">
+                <span className="text-[10px] sm:text-[11px] text-[#A8A29E] line-through font-normal leading-none">
+                  {product.formattedOriginalPrice}
+                </span>
+                <span className="text-[9px] uppercase tracking-wider text-[#C5A059] font-bold leading-none">
+                  OUTLET
+                </span>
+              </div>
+            ) : (
+              <span className="text-[9px] uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E] block truncate leading-none mb-1">
+                Valor da Peça
+              </span>
+            )}
             {/* Valor numérico */}
-            <div className="flex items-baseline gap-1 flex-wrap">
+            <div className="flex items-baseline gap-1">
               <span className={`font-bold text-[#1A1918] dark:text-[#FAF8F5] tracking-tight leading-none ${
-                isCompact ? 'text-sm sm:text-base' : isMedium ? 'text-base sm:text-lg' : 'text-lg sm:text-xl'
+                isCompact ? 'text-sm sm:text-base' : isMedium ? 'text-sm sm:text-base lg:text-lg' : 'text-base sm:text-lg lg:text-xl'
               }`}>
                 {product.formattedPrice}
               </span>
-              {isOutletSection && product.formattedOriginalPrice && (
-                <span className="text-[10px] text-[#A8A29E] line-through font-normal leading-none">
-                  {product.formattedOriginalPrice}
-                </span>
-              )}
             </div>
           </div>
 
-          {/* Botão de Compra Inteligente (Comprar Agora vs Adicionar ao Carrinho) */}
+          {/* Botão de Compra Inteligente (Largura total no mobile para toque confortável e sem colisão) */}
           {cartCount === 0 ? (
             <button
               onClick={handleAction}
-              className={`rounded-none bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-xs ${
+              className={`w-full sm:w-auto rounded-none bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-xs active:scale-[0.98] ${
                 isCompact
                   ? 'px-2 py-1.5 gap-1 text-[11px] font-semibold'
-                  : 'px-3 py-2 gap-1.5 text-xs font-semibold'
+                  : 'px-2.5 sm:px-3 py-2 gap-1.5 text-xs font-semibold'
               }`}
               title="Comprar Agora"
               aria-label="Comprar Agora"
             >
-              <ShoppingBag className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+              <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
               <span>{isCompact ? 'Comprar' : 'Comprar Agora'}</span>
             </button>
           ) : (
             <button
               onClick={handleAction}
-              className={`rounded-none transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-2xs border ${
+              className={`w-full sm:w-auto rounded-none transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-2xs border active:scale-[0.98] ${
                 isJustAdded
                   ? 'bg-[#25D366] text-white border-[#25D366]'
                   : 'bg-[#FAF8F5] dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] border-[#C5A059]/40'
               } ${
                 isCompact
                   ? 'px-2 py-1.5 gap-1 text-[11px] font-medium'
-                  : 'px-2.5 py-2 gap-1 text-xs font-medium'
+                  : 'px-2.5 sm:px-3 py-2 gap-1 text-xs font-medium'
               }`}
               title="Adicionar à Sacola"
               aria-label="Adicionar à Sacola"
