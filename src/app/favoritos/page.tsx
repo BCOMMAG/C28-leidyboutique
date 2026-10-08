@@ -65,7 +65,7 @@ export default function FavoritosPage() {
           <div className="mb-6 flex items-center justify-between">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-[#57534E] dark:text-[#A8A29E] hover:text-[#C5A059] font-semibold transition-colors"
+              className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-white hover:text-[#DFBE76] font-semibold transition-colors drop-shadow-xs"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Voltar para a Página Inicial</span>
@@ -73,7 +73,7 @@ export default function FavoritosPage() {
 
             <Link
               href="/catalogo"
-              className="text-xs uppercase tracking-wider text-[#C5A059] dark:text-[#DFBE76] hover:underline font-semibold"
+              className="text-xs uppercase tracking-wider text-[#DFBE76] hover:text-white font-semibold transition-colors drop-shadow-xs"
             >
               Ver Todo o Catálogo →
             </Link>
@@ -82,17 +82,17 @@ export default function FavoritosPage() {
           {/* Cabeçalho da Página de Favoritos */}
           <div className="border-b border-[#C5A059]/20 pb-8 mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <span className="text-xs uppercase tracking-[0.25em] text-[#C5A059] dark:text-[#DFBE76] font-bold block mb-1.5">
+              <span className="text-xs uppercase tracking-[0.25em] text-[#DFBE76] font-bold block mb-1.5 drop-shadow-xs">
                 Sua Seleção Pessoal
               </span>
-              <h1 className="font-serif-luxury text-3xl sm:text-4xl lg:text-5xl text-[#1A1918] dark:text-[#FAF8F5] font-medium">
+              <h1 className="font-serif-luxury text-3xl sm:text-4xl lg:text-5xl text-white font-medium drop-shadow-sm">
                 Peças Favoritas
               </h1>
             </div>
 
             {favoriteProducts.length > 0 && (
               <div className="flex items-center gap-3">
-                <span className="text-xs text-[#78716C] dark:text-[#A8A29E] bg-white dark:bg-[#1C1A18] px-3 py-1.5 rounded-none border border-[#C5A059]/30 font-medium">
+                <span className="text-xs text-white/90 bg-white/10 dark:bg-[#1C1A18]/80 px-3 py-1.5 rounded-none border border-[#C5A059]/40 font-medium backdrop-blur-xs">
                   {favoriteProducts.length} {favoriteProducts.length === 1 ? 'peça salva' : 'peças salvas'}
                 </span>
 
