@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import { X, Trash2, ShoppingBag, MessageCircle, ShieldCheck } from 'lucide-react';
 import { CartItem } from '@/types';
@@ -23,6 +23,28 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   onRemoveItem,
   onQuickAddItem
 }) => {
+  // Trava a rolagem da página quando a sacola está aberta
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
+  // Fecha com a tecla Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -51,34 +73,37 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     <div className="fixed inset-0 z-50 overflow-hidden animate-fadeIn">
       {/* Backdrop com desfoque */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity cursor-pointer"
+        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity cursor-pointer"
         onClick={onClose}
+        aria-hidden="true"
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-[#FAF8F5] dark:bg-[#141312] text-[#1A1918] dark:text-[#FAF8F5] shadow-2xl flex flex-col border-l border-[#C5A059]/30">
+      {/* Container da gaveta: 100% de largura no mobile e lateral elegante no desktop */}
+      <div className="fixed inset-y-0 right-0 left-0 sm:left-auto max-w-full flex sm:pl-10 pointer-events-none">
+        <div className="w-full sm:w-[440px] max-w-full pointer-events-auto bg-[#FAF8F5] dark:bg-[#141312] text-[#1A1918] dark:text-[#FAF8F5] shadow-2xl flex flex-col sm:border-l border-[#C5A059]/30 h-full">
           
           {/* Header da Sacola */}
-          <div className="p-5 border-b border-[#C5A059]/20 flex items-center justify-between bg-white dark:bg-[#1A1918]">
+          <div className="p-4 sm:p-5 border-b border-[#C5A059]/20 flex items-center justify-between bg-white dark:bg-[#1A1918] shrink-0">
             <div className="flex items-center gap-2.5">
               <ShoppingBag className="w-5 h-5 text-[#C5A059]" />
-              <h3 className="font-serif-luxury text-lg font-medium text-[#1A1918] dark:text-[#FAF8F5]">
+              <h3 className="font-serif-luxury text-base sm:text-lg font-medium text-[#1A1918] dark:text-[#FAF8F5]">
                 Sua Sacola ({items.reduce((acc, i) => acc + i.quantity, 0)})
               </h3>
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-[#57534E] dark:text-[#A8A29E] hover:text-[#1A1918] dark:hover:text-white rounded-none hover:bg-[#FAF8F5] dark:hover:bg-[#252220] transition-colors cursor-pointer"
+              className="p-2 -mr-1 text-[#57534E] dark:text-[#A8A29E] hover:text-[#1A1918] dark:hover:text-white rounded-none hover:bg-[#FAF8F5] dark:hover:bg-[#252220] transition-colors cursor-pointer"
+              aria-label="Fechar sacola"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Barra de Progresso de Frete Cortesia */}
-          <div className="px-5 py-3 bg-[#F4EFE6] dark:bg-[#1E1B19] border-b border-[#C5A059]/15">
-            <div className="flex justify-between items-center text-xs mb-1.5">
+          <div className="px-4 sm:px-5 py-3 bg-[#F4EFE6] dark:bg-[#1E1B19] border-b border-[#C5A059]/15 shrink-0">
+            <div className="flex justify-between items-center text-xs mb-1.5 gap-2">
               {remainingForFreeShipping > 0 ? (
-                <span className="text-[#57534E] dark:text-[#D6D3D1]">
+                <span className="text-[#57534E] dark:text-[#D6D3D1] truncate">
                   Faltam <strong className="text-[#1A1918] dark:text-[#FAF8F5]">R$ {remainingForFreeShipping.toFixed(2).replace('.', ',')}</strong> para Frete Cortesia!
                 </span>
               ) : (
@@ -86,7 +111,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   Parabéns! Você ganhou Frete Cortesia!
                 </span>
               )}
-              <span className="text-[11px] font-bold text-[#C5A059] dark:text-[#DFBE76]">
+              <span className="text-[11px] font-bold text-[#C5A059] dark:text-[#DFBE76] shrink-0">
                 {Math.round(progressToFreeShipping)}%
               </span>
             </div>
@@ -99,7 +124,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           </div>
 
           {/* Lista de Itens do Carrinho */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 sm:space-y-4 min-h-0">
             {items.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-4">
                 <div className="w-16 h-16 rounded-none bg-white dark:bg-[#1E1B19] border border-[#C5A059]/30 flex items-center justify-center shadow-xs">
@@ -125,10 +150,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex gap-3.5 p-3.5 bg-white dark:bg-[#1C1A18] rounded-none border border-[#C5A059]/20 shadow-xs relative"
+                    className="flex gap-3 sm:gap-3.5 p-3 sm:p-3.5 bg-white dark:bg-[#1C1A18] rounded-none border border-[#C5A059]/20 shadow-xs relative"
                   >
                     {/* Imagem do Produto */}
-                    <div className="relative w-18 h-24 rounded-none overflow-hidden bg-[#F4F2EE] dark:bg-[#252220] shrink-0 border border-black/5">
+                    <div className="relative w-16 sm:w-18 h-22 sm:h-24 rounded-none overflow-hidden bg-[#F4F2EE] dark:bg-[#252220] shrink-0 border border-black/5">
                       <Image
                         src={item.image}
                         alt={item.name}
@@ -149,9 +174,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center justify-between mt-2 gap-2">
                         {/* Seletor de Quantidade */}
-                        <div className="flex items-center border border-[#C5A059]/30 rounded-none bg-[#FAF8F5] dark:bg-[#252220] px-2 py-0.5">
+                        <div className="flex items-center border border-[#C5A059]/30 rounded-none bg-[#FAF8F5] dark:bg-[#252220] px-2 py-0.5 shrink-0">
                           <button
                             onClick={() => onUpdateQuantity(item.id, -1)}
                             className="text-xs font-bold text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] px-1 cursor-pointer"
@@ -170,7 +195,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         </div>
 
                         {/* Preço */}
-                        <span className="text-xs font-bold text-[#1A1918] dark:text-[#FAF8F5]">
+                        <span className="text-xs font-bold text-[#1A1918] dark:text-[#FAF8F5] whitespace-nowrap">
                           R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
                         </span>
                       </div>
@@ -179,7 +204,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     {/* Botão Remover */}
                     <button
                       onClick={() => onRemoveItem(item.id)}
-                      className="absolute top-3 right-3 text-[#A8A29E] hover:text-red-500 transition-colors p-1 cursor-pointer"
+                      className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 text-[#A8A29E] hover:text-red-500 transition-colors p-1 cursor-pointer"
                       title="Remover peça"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -189,11 +214,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
                 {/* Sugestão de Upsell Rápida na Sacola */}
                 {upsellProduct && onQuickAddItem && (
-                  <div className="p-3.5 rounded-none bg-[#F7F3EB] dark:bg-[#1E1B19] border border-[#C5A059]/30 mt-4">
+                  <div className="p-3 sm:p-3.5 rounded-none bg-[#F7F3EB] dark:bg-[#1E1B19] border border-[#C5A059]/30 mt-3 sm:mt-4">
                     <span className="text-[10px] uppercase tracking-widest text-[#C5A059] dark:text-[#DFBE76] font-bold block mb-1.5">
                       Você também pode gostar:
                     </span>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5 sm:gap-3">
                       <div className="relative w-12 h-14 rounded-none overflow-hidden shrink-0 bg-white dark:bg-[#252220]">
                         <Image
                           src={upsellProduct.thumbnail}
@@ -212,7 +237,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       </div>
                       <button
                         onClick={() => onQuickAddItem(upsellProduct)}
-                        className="px-3 py-1.5 bg-white dark:bg-[#252220] border border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white rounded-none text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                        className="px-3 py-1.5 bg-white dark:bg-[#252220] border border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white rounded-none text-xs font-semibold transition-all shadow-xs cursor-pointer shrink-0"
                       >
                         Ver
                       </button>
@@ -225,20 +250,20 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
           {/* Rodapé da Sacola com Total e Finalização WhatsApp */}
           {items.length > 0 && (
-            <div className="p-5 border-t border-[#C5A059]/20 bg-white dark:bg-[#1A1918] space-y-3">
+            <div className="p-4 sm:p-5 border-t border-[#C5A059]/20 bg-white dark:bg-[#1A1918] space-y-2.5 sm:space-y-3 shrink-0 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-5">
               {/* Resumo do Pedido */}
               <div className="space-y-1.5 text-xs text-[#57534E] dark:text-[#D6D3D1]">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span>Subtotal:</span>
                   <span className="font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
                     R$ {subtotal.toFixed(2).replace('.', ',')}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span>Envio / Entrega:</span>
                   <span className="text-[#C5A059] dark:text-[#DFBE76] font-medium">Combinado no WhatsApp</span>
                 </div>
-                <div className="flex justify-between text-base font-bold text-[#1A1918] dark:text-[#FAF8F5] pt-2 border-t border-dashed border-[#C5A059]/20">
+                <div className="flex justify-between items-center text-sm sm:text-base font-bold text-[#1A1918] dark:text-[#FAF8F5] pt-2 border-t border-dashed border-[#C5A059]/20">
                   <span>Total Previsto:</span>
                   <span className="text-[#C5A059] dark:text-[#DFBE76]">
                     R$ {subtotal.toFixed(2).replace('.', ',')}
@@ -247,7 +272,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               </div>
 
               {/* Banner de Transparência do Processo */}
-              <div className="p-3 rounded-none bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/30 text-[11px] text-[#57534E] dark:text-[#D6D3D1] leading-relaxed flex items-start gap-2">
+              <div className="p-2.5 sm:p-3 rounded-none bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/30 text-[11px] text-[#57534E] dark:text-[#D6D3D1] leading-relaxed flex items-start gap-2">
                 <ShieldCheck className="w-4 h-4 text-[#25D366] shrink-0 mt-0.5" />
                 <span>
                   <strong>Atendimento VIP:</strong> Suas peças serão reservadas e a Leidy entrará em contato para confirmar detalhes e pagamento.
@@ -258,7 +283,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full py-3 px-6 rounded-none text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 border border-[#C5A059]/40 bg-[#FAF8F5] dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all duration-300 shadow-2xs active:scale-95 cursor-pointer"
+                className="w-full py-2.5 sm:py-3 px-6 rounded-none text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 border border-[#C5A059]/40 bg-[#FAF8F5] dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all duration-300 shadow-2xs active:scale-95 cursor-pointer"
               >
                 <span>Continuar Comprando</span>
               </button>
@@ -268,7 +293,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 href={generateWhatsAppOrderLink()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-4 px-6 rounded-none text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#25D366] dark:hover:bg-[#25D366] transition-all duration-300 shadow-md active:scale-95 group cursor-pointer"
+                className="w-full py-3.5 sm:py-4 px-6 rounded-none text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#25D366] dark:hover:bg-[#25D366] transition-all duration-300 shadow-md active:scale-95 group cursor-pointer"
               >
                 <MessageCircle className="w-4 h-4 text-[#25D366] group-hover:text-white transition-colors" />
                 <span>Finalizar Pedido pelo WhatsApp</span>

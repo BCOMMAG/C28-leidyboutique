@@ -147,7 +147,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ];
     });
     if (openDrawer) {
-      setIsCartOpen(true);
+      openCart();
     }
   };
 
@@ -179,8 +179,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const isWishlisted = (productId: string) => wishlistIds.includes(productId);
 
-  // Controle de histórico do navegador/mobile para fechar o modal com o botão "Voltar" do celular
+  // Controle de histórico do navegador/mobile para fechar o modal ou sacola com o botão "Voltar" do celular
   const productModalHistoryPushedRef = useRef(false);
+  const cartDrawerHistoryPushedRef = useRef(false);
 
   const openProduct = (product: Product) => {
     setSelectedProduct(product);
@@ -208,9 +209,37 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const openCart = () => {
+    setIsCartOpen(true);
+    if (typeof window !== 'undefined' && !cartDrawerHistoryPushedRef.current) {
+      try {
+        window.history.pushState(
+          { leidyModal: 'cart' },
+          '',
+          window.location.href
+        );
+        cartDrawerHistoryPushedRef.current = true;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const closeCart = () => {
+    setIsCartOpen(false);
+    if (typeof window !== 'undefined' && cartDrawerHistoryPushedRef.current) {
+      cartDrawerHistoryPushedRef.current = false;
+      window.history.back();
+    }
+  };
+
   // Interceptador do evento popstate (botão voltar do celular ou navegador)
   useEffect(() => {
     const handlePopState = () => {
+      if (cartDrawerHistoryPushedRef.current) {
+        cartDrawerHistoryPushedRef.current = false;
+        setIsCartOpen(false);
+      }
       if (productModalHistoryPushedRef.current) {
         productModalHistoryPushedRef.current = false;
         setIsProductModalOpen(false);
@@ -222,9 +251,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       window.removeEventListener('popstate', handlePopState);
     };
   }, []);
-
-  const openCart = () => setIsCartOpen(true);
-  const closeCart = () => setIsCartOpen(false);
 
   const openSizeGuide = () => setIsSizeGuideOpen(true);
   const closeSizeGuide = () => setIsSizeGuideOpen(false);
