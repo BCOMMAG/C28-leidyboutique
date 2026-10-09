@@ -66,14 +66,16 @@ function CatalogoContent() {
   // Parâmetros de URL iniciais
   const urlCategory = searchParams.get('categoria') || '';
   const urlStatus = searchParams.get('status') || '';
+  const urlFabric = searchParams.get('tecido') || '';
   const urlMinPrice = searchParams.get('precoMin') ? Number(searchParams.get('precoMin')) : null;
   const urlMaxPrice = searchParams.get('precoMax') ? Number(searchParams.get('precoMax')) : null;
   const urlSearch = searchParams.get('q') || '';
 
   // Função para criar o estado padrão dos filtros com seleção múltipla
-  const createDefaultFilters = (cat?: string, st?: string, minP?: number | null, maxP?: number | null) => {
+  const createDefaultFilters = (cat?: string, st?: string, minP?: number | null, maxP?: number | null, tec?: string) => {
     const categories: string[] = cat && cat !== 'Todas as Peças' ? [cat] : [];
     const statuses: string[] = st && st !== 'Todos' ? [st] : [];
+    const fabrics: string[] = tec ? [tec] : [];
     let priceRangeIndices: number[] = [];
 
     if (minP !== null || maxP !== null) {
@@ -88,7 +90,7 @@ function CatalogoContent() {
       customMaxPrice: maxP !== null && priceRangeIndices.length === 0 ? String(maxP) : '',
       sizes: [] as string[],
       colors: [] as string[],
-      fabrics: [] as string[],
+      fabrics,
       fits: [] as string[],
       lines: [] as string[],
       statuses
@@ -97,12 +99,12 @@ function CatalogoContent() {
 
   // 1. Filtros Efetivamente Aplicados na Listagem de Produtos
   const [appliedFilters, setAppliedFilters] = useState(() =>
-    createDefaultFilters(urlCategory, urlStatus, urlMinPrice, urlMaxPrice)
+    createDefaultFilters(urlCategory, urlStatus, urlMinPrice, urlMaxPrice, urlFabric)
   );
 
   // 2. Filtros em Edição / Rascunho (o usuário pode mexer à vontade e depois clicar em APLICAR FILTROS)
   const [draftFilters, setDraftFilters] = useState(() =>
-    createDefaultFilters(urlCategory, urlStatus, urlMinPrice, urlMaxPrice)
+    createDefaultFilters(urlCategory, urlStatus, urlMinPrice, urlMaxPrice, urlFabric)
   );
 
   // Estados da Barra Superior
@@ -123,10 +125,11 @@ function CatalogoContent() {
 
     const cat = searchParams.get('categoria');
     const st = searchParams.get('status');
+    const tec = searchParams.get('tecido');
     const min = searchParams.get('precoMin') ? Number(searchParams.get('precoMin')) : null;
     const max = searchParams.get('precoMax') ? Number(searchParams.get('precoMax')) : null;
 
-    const updated = createDefaultFilters(cat || undefined, st || undefined, min, max);
+    const updated = createDefaultFilters(cat || undefined, st || undefined, min, max, tec || undefined);
     setAppliedFilters(updated);
     setDraftFilters(updated);
   }, [searchParams, setSearchQuery]);
@@ -316,14 +319,65 @@ function CatalogoContent() {
       );
     }
 
-    // 2. Categorias (Seleção Múltipla)
+    // 2. Categorias (Seleção Múltipla com correspondência inteligente para os links do menu)
     if (appliedFilters.categories.length > 0) {
       result = result.filter((p) =>
-        appliedFilters.categories.some(
-          (cat) =>
-            p.category.toLowerCase() === cat.toLowerCase() ||
-            (p.subcategory && p.subcategory.toLowerCase() === cat.toLowerCase())
-        )
+        appliedFilters.categories.some((cat) => {
+          const catLower = cat.toLowerCase();
+          if (catLower === 'acessórios' || catLower === 'acessorios') {
+            return CATEGORIES_ACESSORIOS.some((ac) => ac.toLowerCase() === p.category.toLowerCase());
+          }
+          if (catLower === 'tricots') {
+            return (
+              p.category.toLowerCase().includes('tricot') ||
+              (p.subcategory && p.subcategory.toLowerCase().includes('tricot')) ||
+              (p.fabric && p.fabric.toLowerCase().includes('tricot'))
+            );
+          }
+          if (catLower === 'alfaiataria') {
+            return (
+              p.category.toLowerCase().includes('alfaiataria') ||
+              (p.fit && p.fit.toLowerCase().includes('alfaiataria')) ||
+              p.category.toLowerCase().includes('blazer')
+            );
+          }
+          if (catLower === 'jaquetas e casacos' || catLower === 'casacos & jaquetas') {
+            return p.category.toLowerCase().includes('casaco') || p.category.toLowerCase().includes('jaqueta');
+          }
+          if (catLower === 'shorts e saias' || catLower === 'saias e shorts') {
+            return (
+              p.category.toLowerCase().includes('saia') ||
+              p.category.toLowerCase().includes('short') ||
+              p.category.toLowerCase().includes('bermuda')
+            );
+          }
+          if (catLower === 'vestidos e macacões' || catLower === 'vestidos e macacoes') {
+            return (
+              p.category.toLowerCase().includes('vestido') ||
+              p.category.toLowerCase().includes('macacão') ||
+              p.category.toLowerCase().includes('macacoes')
+            );
+          }
+          if (catLower === 'vestidos') {
+            return p.category.toLowerCase().includes('vestido');
+          }
+          if (catLower === 'blusas') {
+            return (
+              p.category.toLowerCase().includes('blusa') ||
+              p.category.toLowerCase().includes('camisa') ||
+              p.category.toLowerCase().includes('top')
+            );
+          }
+          if (catLower === 'calças' || catLower === 'calcas') {
+            return p.category.toLowerCase().includes('calça') || p.category.toLowerCase().includes('calca');
+          }
+          return (
+            p.category.toLowerCase() === catLower ||
+            (p.subcategory && p.subcategory.toLowerCase() === catLower) ||
+            p.category.toLowerCase().includes(catLower) ||
+            catLower.includes(p.category.toLowerCase())
+          );
+        })
       );
     }
 
@@ -332,9 +386,13 @@ function CatalogoContent() {
       result = result.filter((p) =>
         appliedFilters.statuses.some((st) => {
           if (st === 'Mais Vendidos') return p.isBestSeller;
-          if (st === 'OUTLET' || st === 'Peças em OUTLET') return p.isOutlet;
-          if (st === 'Novidades' || st === 'Lançamento') return p.isNewArrival || p.status?.includes('Lançamento');
-          if (st === 'Últimas Peças') return p.isLastPieces || (p.remainingPieces !== undefined && p.remainingPieces <= 5) || p.badge?.includes('peça');
+          if (st === 'OUTLET' || st === 'Peças em OUTLET' || st === 'BAZAR') return p.isOutlet;
+          if (st === 'Novidades' || st === 'Lançamento' || st === 'Lançamento 2026') {
+            return p.isNewArrival || p.status?.includes('Lançamento') || p.status?.includes('Novidades');
+          }
+          if (st === 'Últimas Peças') {
+            return p.isLastPieces || (p.remainingPieces !== undefined && p.remainingPieces <= 5) || p.badge?.includes('peça');
+          }
           return p.status?.some((s) => s.toLowerCase() === st.toLowerCase());
         })
       );

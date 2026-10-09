@@ -343,8 +343,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain custom-scrollbar">
           <div className="grid grid-cols-1 lg:grid-cols-12 min-h-full">
             
-            {/* COLUNA ESQUERDA: GALERIA E VÍDEO (Aparece em destaque no mobile sem cortes) */}
-            <div className="lg:col-span-5 p-2.5 sm:p-5 lg:p-6 bg-[#F4EFE6]/60 dark:bg-[#141312]/60 flex flex-col items-center justify-between border-b lg:border-b-0 lg:border-r border-[#C5A059]/20">
+            {/* COLUNA ESQUERDA: GALERIA E VÍDEO (Miniaturas coladas logo abaixo do visualizador) */}
+            <div className="lg:col-span-5 p-2.5 sm:p-5 lg:p-6 bg-[#F4EFE6]/60 dark:bg-[#141312]/60 flex flex-col items-center justify-start lg:sticky lg:top-0 self-start border-b lg:border-b-0 lg:border-r border-[#C5A059]/20">
             
             {/* Visualizador Principal com Navegação por Setas e Swipe */}
             <div
