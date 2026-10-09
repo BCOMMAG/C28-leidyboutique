@@ -1338,26 +1338,89 @@ function CatalogoContent() {
               </span>
             </div>
 
-            {/* Barra de Pesquisa Superior no Catálogo (Destaque mobile e desktop) */}
-            <div className="mt-4 relative max-w-xl">
-              <input
-                type="text"
-                placeholder="Pesquisar por modelo, tecido, cor ou estilo..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm rounded-none border border-[#C5A059]/30 bg-white dark:bg-[#1A1918] text-[#1A1918] dark:text-[#FAF8F5] placeholder-[#78716C] dark:placeholder-[#A8A29E] focus:outline-none focus:border-[#C5A059] shadow-2xs transition-all"
-              />
-              <Search className="w-4 h-4 text-[#C5A059] absolute left-3.5 top-1/2 -translate-y-1/2" />
-              {searchQuery && (
+            {/* Barra de Pesquisa, Ordenação e Grade em Linha Única (Abaixo de Catálogo Completo conforme solicitado) */}
+            <div className="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+              {/* Campo de Pesquisa */}
+              <div className="relative flex-1 max-w-md xl:max-w-xl">
+                <input
+                  type="text"
+                  placeholder="Pesquisar por modelo, tecido, cor ou estilo..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm rounded-none border border-[#C5A059]/30 bg-white dark:bg-[#1A1918] text-[#1A1918] dark:text-[#FAF8F5] placeholder-[#78716C] dark:placeholder-[#A8A29E] focus:outline-none focus:border-[#C5A059] shadow-2xs transition-all"
+                />
+                <Search className="w-4 h-4 text-[#C5A059] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#78716C] hover:text-[#1A1918] dark:hover:text-white p-1 cursor-pointer"
+                    title="Limpar busca"
+                    aria-label="Limpar busca"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Controles de Ordenar e Amostragem de Produtos por Linha (Ao lado da pesquisa) */}
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 bg-white dark:bg-[#1A1918] px-3 py-1.5 sm:px-4 sm:py-2 rounded-none border border-[#C5A059]/30 shadow-2xs">
+                {/* Botão Mobile para Abrir Gaveta de Filtros */}
                 <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#78716C] hover:text-[#1A1918] dark:hover:text-white p-1 cursor-pointer"
-                  title="Limpar busca"
-                  aria-label="Limpar busca"
+                  type="button"
+                  onClick={() => setMobileFilterDrawerOpen(true)}
+                  className="lg:hidden flex items-center gap-2 px-2.5 py-1.5 rounded-none bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/40 text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] cursor-pointer"
                 >
-                  <X className="w-4 h-4" />
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#C5A059]" />
+                  <span>Filtros</span>
+                  {activeFiltersCount > 0 && (
+                    <span className="w-4 h-4 rounded-none bg-[#C5A059] text-white text-[10px] flex items-center justify-center font-bold">
+                      {activeFiltersCount}
+                    </span>
+                  )}
                 </button>
-              )}
+
+                {/* Dropdown de Ordenação */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[#78716C] dark:text-[#A8A29E] hidden sm:inline whitespace-nowrap font-medium">
+                    Ordenar:
+                  </span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="px-2.5 sm:px-3 py-1.5 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] font-medium cursor-pointer"
+                  >
+                    <option value="relevance">Destaques da Boutique</option>
+                    <option value="price-asc">Menor Preço</option>
+                    <option value="price-desc">Maior Preço</option>
+                    <option value="newest">Mais Recentes</option>
+                  </select>
+                </div>
+
+                {/* SELETOR DE AMOSTRAGEM / GRADE (Colunas por Linha no Desktop) */}
+                <div className="hidden lg:flex items-center gap-1.5 pl-3 border-l border-[#C5A059]/25">
+                  <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E] whitespace-nowrap font-medium">
+                    Produtos por linha:
+                  </span>
+                  {[2, 3, 4, 5].map((cols) => {
+                    const isActive = gridColumns === cols;
+                    return (
+                      <button
+                        key={cols}
+                        type="button"
+                        onClick={() => setGridColumns(cols as 2 | 3 | 4 | 5)}
+                        className={`w-7 h-7 rounded-none text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
+                          isActive
+                            ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white shadow-xs'
+                            : 'bg-[#FAF8F5] dark:bg-[#252220] text-[#57534E] dark:text-[#A8A29E] hover:border-[#C5A059] border border-transparent'
+                        }`}
+                        title={`Mostrar ${cols} produtos por linha`}
+                      >
+                        {cols}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1419,69 +1482,9 @@ function CatalogoContent() {
             </aside>
 
             {/* ============================================================ */}
-            {/* 2. COLUNA CENTRAL: BARRA SUPERIOR FIXADA + GRID DE PRODUTOS  */}
+            {/* 2. COLUNA CENTRAL: CHIPS DE FILTROS ATIVOS + GRID DE PRODUTOS  */}
             {/* ============================================================ */}
-            <div className="flex-1 min-w-0 space-y-5">
-              
-              {/* BARRA SUPERIOR DO CATÁLOGO (FLUXO NORMAL) */}
-              <div className="bg-white dark:bg-[#1A1918] p-3.5 sm:p-4 rounded-none border border-[#C5A059]/25 shadow-sm flex flex-wrap items-center justify-between gap-3">
-                
-                {/* Botão Mobile para Abrir Gaveta de Filtros */}
-                <button
-                  onClick={() => setMobileFilterDrawerOpen(true)}
-                  className="lg:hidden flex items-center gap-2 px-3.5 py-2 rounded-none bg-[#FAF8F5] dark:bg-[#252220] border border-[#C5A059]/40 text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] cursor-pointer"
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#C5A059]" />
-                  <span>Filtros</span>
-                  {activeFiltersCount > 0 && (
-                    <span className="w-4 h-4 rounded-none bg-[#C5A059] text-white text-[10px] flex items-center justify-center font-bold">
-                      {activeFiltersCount}
-                    </span>
-                  )}
-                </button>
-
-                {/* Dropdown de Ordenação */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-[#78716C] dark:text-[#A8A29E] hidden sm:inline whitespace-nowrap">
-                    Ordenar:
-                  </span>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
-                    className="px-3 py-1.5 text-xs rounded-none border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] focus:outline-none focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] font-medium cursor-pointer"
-                  >
-                    <option value="relevance">Destaques da Boutique</option>
-                    <option value="price-asc">Menor Preço</option>
-                    <option value="price-desc">Maior Preço</option>
-                    <option value="newest">Mais Recentes</option>
-                  </select>
-                </div>
-
-                {/* SELETOR DE AMOSTRAGEM / GRADE (Colunas por Linha no Desktop) */}
-                <div className="hidden lg:flex items-center gap-1.5 pl-3 border-l border-[#C5A059]/20 ml-auto">
-                  <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E]">
-                    Produtos por linha:
-                  </span>
-                  {[2, 3, 4, 5].map((cols) => {
-                    const isActive = gridColumns === cols;
-                    return (
-                      <button
-                        key={cols}
-                        onClick={() => setGridColumns(cols as 2 | 3 | 4 | 5)}
-                        className={`w-7 h-7 rounded-none text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
-                          isActive
-                            ? 'bg-[#1A1918] dark:bg-[#C5A059] text-white shadow-xs'
-                            : 'bg-[#FAF8F5] dark:bg-[#252220] text-[#57534E] dark:text-[#A8A29E] hover:border-[#C5A059] border border-transparent'
-                        }`}
-                        title={`Mostrar ${cols} produtos por linha`}
-                      >
-                        {cols}
-                      </button>
-                    );
-                  })}
-                </div>
-
-              </div>
+            <div className="flex-1 min-w-0 space-y-4">
 
               {/* CHIPS DE FILTROS ATIVOS (Remoção Rápida com 'X') */}
               {activeFiltersCount > 0 && (
