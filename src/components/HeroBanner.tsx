@@ -62,11 +62,11 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onExploreClick }) => {
           )}
         </button>
 
-        {/* Chamada Sutil para Rolar até os Produtos */}
+        {/* Chamada Sutil para Rolar até os Produtos (Visual semi-translúcido / discreto) */}
         <div className="absolute bottom-8 md:bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
           <button
             onClick={onExploreClick}
-            className="px-6 py-2.5 rounded-none bg-white/90 text-[#1A1918] hover:bg-[#FAF8F5] text-[11px] uppercase tracking-[0.2em] font-semibold transition-all duration-300 shadow-md backdrop-blur-xs flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95 border border-[#C5A059]/40"
+            className="px-5 py-2 rounded-none bg-white/45 hover:bg-white/90 text-[#1A1918] text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-semibold transition-all duration-300 shadow-sm backdrop-blur-md flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95 border border-white/60 hover:border-[#C5A059]/70"
           >
             <span>Conhecer Coleção</span>
             <ChevronDown className="w-3.5 h-3.5 animate-bounce" />

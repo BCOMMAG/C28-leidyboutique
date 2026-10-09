@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
@@ -154,8 +154,35 @@ export const Header: React.FC<HeaderProps> = ({
     setSideDrawerOpen(true);
   };
 
-  // Estado de dropdown flutuante no menu desktop superior
+  // Estado de dropdown flutuante no menu desktop superior com tolerância de transição (grace period)
   const [activeDesktopDropdown, setActiveDesktopDropdown] = useState<string | null>(null);
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleDropdownMouseEnter = (label: string) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+      dropdownTimeoutRef.current = null;
+    }
+    setActiveDesktopDropdown(label);
+  };
+
+  const handleDropdownMouseLeave = () => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setActiveDesktopDropdown(null);
+    }, 260); // 260ms de tolerância evita que o menu suma ao mover o mouse entre o botão e o submenu
+  };
+
+  // Limpa timer se o componente for desmontado
+  useEffect(() => {
+    return () => {
+      if (dropdownTimeoutRef.current) {
+        clearTimeout(dropdownTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Sincroniza estado de busca se alterado externamente
   useEffect(() => {
@@ -212,6 +239,10 @@ export const Header: React.FC<HeaderProps> = ({
     setSideDrawerOpen(false);
     setMobileSearchOpen(false);
     setDesktopSearchOpen(false);
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+      dropdownTimeoutRef.current = null;
+    }
     setActiveDesktopDropdown(null);
 
     const params = new URLSearchParams();
@@ -309,9 +340,9 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* 4. CENTRO (DESKTOP): Links de Navegação em 2 Linhas com Dropdown de Subopções */}
             <nav className="hidden lg:flex flex-col justify-center items-center gap-1 px-2 xl:px-4 flex-1 min-w-0">
-              {/* Linha 1 */}
+              {/* Linha 1 com z-30 para sobrepor perfeitamente a Linha 2 */}
               <div
-                className={`flex items-center justify-center gap-x-3.5 xl:gap-x-5 2xl:gap-x-6 text-[11px] xl:text-xs 2xl:text-[13px] font-medium tracking-normal ${
+                className={`relative z-30 flex items-center justify-center gap-x-3.5 xl:gap-x-5 2xl:gap-x-6 text-[11px] xl:text-xs 2xl:text-[13px] font-medium tracking-normal ${
                   isTransparent ? 'text-white/95 drop-shadow-sm' : 'text-[#1A1918] dark:text-[#FAF8F5]'
                 }`}
               >
@@ -322,9 +353,9 @@ export const Header: React.FC<HeaderProps> = ({
                   return (
                     <div
                       key={item.label}
-                      className="relative"
-                      onMouseEnter={() => hasSub && setActiveDesktopDropdown(item.label)}
-                      onMouseLeave={() => setActiveDesktopDropdown(null)}
+                      className={`relative ${isDropdownActive ? 'z-50' : 'z-20'}`}
+                      onMouseEnter={() => hasSub && handleDropdownMouseEnter(item.label)}
+                      onMouseLeave={() => hasSub && handleDropdownMouseLeave()}
                     >
                       <button
                         type="button"
@@ -339,10 +370,16 @@ export const Header: React.FC<HeaderProps> = ({
                         {hasSub && <ChevronDown className="w-3 h-3 opacity-70 ml-0.5" />}
                       </button>
 
-                      {/* Dropdown flutuante desktop para selecionar a peça específica (blusa, calça, etc.) */}
+                      {/* Dropdown flutuante desktop com ponte invisível e tolerância de hover para não sumir ao mover o mouse */}
                       {hasSub && isDropdownActive && (
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 pt-1 z-50 animate-fadeIn">
-                          <div className="bg-white dark:bg-[#1A1918] border border-[#C5A059]/40 shadow-2xl p-2 min-w-[210px] space-y-1">
+                        <div
+                          className="absolute top-full left-1/2 -translate-x-1/2 pt-1.5 z-50 animate-fadeIn"
+                          onMouseEnter={() => handleDropdownMouseEnter(item.label)}
+                          onMouseLeave={handleDropdownMouseLeave}
+                        >
+                          {/* Ponte invisível que impede que o mouse saia da área ativa durante o deslocamento */}
+                          <div className="absolute -top-3 inset-x-0 h-3 bg-transparent pointer-events-auto" />
+                          <div className="relative bg-white dark:bg-[#1A1918] border border-[#C5A059]/40 shadow-2xl p-2 min-w-[220px] space-y-1">
                             <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-bold block px-2 py-1 border-b border-[#C5A059]/15">
                               {item.label}
                             </span>
@@ -367,9 +404,9 @@ export const Header: React.FC<HeaderProps> = ({
                 })}
               </div>
 
-              {/* Linha 2 */}
+              {/* Linha 2 com z-10 */}
               <div
-                className={`flex items-center justify-center gap-x-3.5 xl:gap-x-5 2xl:gap-x-6 text-[11px] xl:text-xs 2xl:text-[13px] font-medium tracking-normal ${
+                className={`relative z-10 flex items-center justify-center gap-x-3.5 xl:gap-x-5 2xl:gap-x-6 text-[11px] xl:text-xs 2xl:text-[13px] font-medium tracking-normal ${
                   isTransparent ? 'text-white/95 drop-shadow-sm' : 'text-[#1A1918] dark:text-[#FAF8F5]'
                 }`}
               >
