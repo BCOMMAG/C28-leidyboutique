@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   ShoppingBag,
   Heart,
@@ -13,33 +13,83 @@ import {
   Moon,
   Search,
   ArrowRight,
-  User,
   ChevronRight,
+  ChevronDown,
   MessageCircle
 } from 'lucide-react';
 import { useStore } from '@/context/StoreContext';
 import { STORE_INFO } from '@/data/products';
+
+export interface SubOption {
+  label: string;
+  type: 'status' | 'category' | 'fabric';
+  value: string;
+  extraCategory?: string;
+  extraFabric?: string;
+}
 
 export interface NavItem {
   label: string;
   type: 'status' | 'category' | 'fabric';
   value: string;
   isSpecial?: boolean;
-  hasChevron?: boolean;
+  subOptions?: SubOption[];
 }
 
-// Linha 1 de Peças e Coleções no Menu Superior Desktop (conforme exemplo enviado pelo cliente)
+// Linha 1 de Peças e Coleções no Menu Superior Desktop (Sem "Primavera Verão 2026", com subopções)
 export const MENU_ROW_1: NavItem[] = [
-  { label: 'Lançamento 2026', type: 'status', value: 'Lançamento' },
-  { label: 'Primavera Verão 2026', type: 'status', value: 'Mais Vendidos' },
-  { label: 'Acessórios', type: 'category', value: 'Acessórios' },
-  { label: 'Tricots', type: 'category', value: 'Tricots' },
-  { label: 'Linho Nobre', type: 'fabric', value: 'Linho Puro' },
+  {
+    label: 'Lançamento 2026',
+    type: 'status',
+    value: 'Lançamento',
+    subOptions: [
+      { label: 'Ver Todos os Lançamentos', type: 'status', value: 'Lançamento' },
+      { label: 'Blusas & Tops', type: 'status', value: 'Lançamento', extraCategory: 'Blusas & Tops' },
+      { label: 'Calças', type: 'status', value: 'Lançamento', extraCategory: 'Calças' },
+      { label: 'Vestidos & Macacões', type: 'status', value: 'Lançamento', extraCategory: 'Vestidos & Macacões' },
+      { label: 'Casacos & Jaquetas', type: 'status', value: 'Lançamento', extraCategory: 'Casacos & Jaquetas' },
+      { label: 'Blazers & Alfaiataria', type: 'status', value: 'Lançamento', extraCategory: 'Blazers & Alfaiataria' },
+      { label: 'Conjuntos Exclusivos', type: 'status', value: 'Lançamento', extraCategory: 'Conjuntos Exclusivos' },
+    ]
+  },
+  {
+    label: 'Acessórios',
+    type: 'category',
+    value: 'Acessórios',
+    subOptions: [
+      { label: 'Ver Todos os Acessórios', type: 'category', value: 'Acessórios' },
+      { label: 'Bolsas & Carteiras', type: 'category', value: 'Bolsas & Carteiras' },
+      { label: 'Cintos', type: 'category', value: 'Cintos' },
+      { label: 'Colares & Joias', type: 'category', value: 'Colares & Joias' },
+      { label: 'Lenços', type: 'category', value: 'Lenços' },
+      { label: 'Óculos de Sol', type: 'category', value: 'Óculos de Sol' },
+    ]
+  },
+  {
+    label: 'Tricots',
+    type: 'category',
+    value: 'Tricots',
+    subOptions: [
+      { label: 'Ver Todos os Tricots', type: 'category', value: 'Tricots' },
+      { label: 'Casacos em Tricot Biamar', type: 'category', value: 'Casacos & Jaquetas', extraFabric: 'Tricot Biamar' },
+      { label: 'Blusas em Tricot Especial', type: 'category', value: 'Blusas & Tops', extraFabric: 'Tricot Biamar' },
+    ]
+  },
+  {
+    label: 'Linho Nobre',
+    type: 'fabric',
+    value: 'Linho Puro',
+    subOptions: [
+      { label: 'Ver Todas as Peças em Linho', type: 'fabric', value: 'Linho Puro' },
+      { label: 'Conjuntos em Linho', type: 'category', value: 'Conjuntos Exclusivos', extraFabric: 'Linho Puro' },
+      { label: 'Alfaiataria em Linho', type: 'category', value: 'Blazers & Alfaiataria', extraFabric: 'Linho Puro' },
+    ]
+  },
   { label: 'Blusas', type: 'category', value: 'Blusas' },
   { label: 'Calças', type: 'category', value: 'Calças' },
 ];
 
-// Linha 2 de Peças e Coleções no Menu Superior Desktop (conforme exemplo enviado pelo cliente)
+// Linha 2 de Peças e Coleções no Menu Superior Desktop
 export const MENU_ROW_2: NavItem[] = [
   { label: 'Alfaiataria', type: 'category', value: 'Alfaiataria' },
   { label: 'Vestidos', type: 'category', value: 'Vestidos' },
@@ -50,22 +100,21 @@ export const MENU_ROW_2: NavItem[] = [
   { label: 'Últimas Peças', type: 'status', value: 'Últimas Peças', isSpecial: true },
 ];
 
-// Itens da Gaveta Lateral Esquerda (Desktop e Mobile - exatamente no estilo do print de inspiração)
+// Itens da Gaveta Lateral Esquerda (Desktop e Mobile)
 export const SIDE_DRAWER_ITEMS: NavItem[] = [
-  { label: 'Lançamento 2026', type: 'status', value: 'Lançamento', hasChevron: true },
-  { label: 'Primavera Verão 2026', type: 'status', value: 'Mais Vendidos', hasChevron: true },
-  { label: 'Acessórios', type: 'category', value: 'Acessórios', hasChevron: true },
-  { label: 'Tricots', type: 'category', value: 'Tricots', hasChevron: true },
-  { label: 'Linho Nobre', type: 'fabric', value: 'Linho Puro', hasChevron: true },
-  { label: 'Blusas', type: 'category', value: 'Blusas' },
-  { label: 'Calças', type: 'category', value: 'Calças' },
-  { label: 'Alfaiataria', type: 'category', value: 'Alfaiataria' },
-  { label: 'Vestidos', type: 'category', value: 'Vestidos' },
-  { label: 'Jaquetas E Casacos', type: 'category', value: 'Jaquetas E Casacos' },
-  { label: 'Shorts E Saias', type: 'category', value: 'Shorts E Saias' },
-  { label: 'Vestidos E Macacões', type: 'category', value: 'Vestidos E Macacões' },
-  { label: 'BAZAR', type: 'status', value: 'OUTLET', isSpecial: true },
-  { label: 'Últimas Peças', type: 'status', value: 'Últimas Peças', isSpecial: true },
+  MENU_ROW_1[0], // Lançamento 2026 (com subopções)
+  MENU_ROW_1[1], // Acessórios (com subopções)
+  MENU_ROW_1[2], // Tricots (com subopções)
+  MENU_ROW_1[3], // Linho Nobre (com subopções)
+  MENU_ROW_1[4], // Blusas
+  MENU_ROW_1[5], // Calças
+  MENU_ROW_2[0], // Alfaiataria
+  MENU_ROW_2[1], // Vestidos
+  MENU_ROW_2[2], // Jaquetas E Casacos
+  MENU_ROW_2[3], // Shorts E Saias
+  MENU_ROW_2[4], // Vestidos E Macacões
+  MENU_ROW_2[5], // BAZAR
+  MENU_ROW_2[6], // Últimas Peças
 ];
 
 interface HeaderProps {
@@ -87,12 +136,20 @@ export const Header: React.FC<HeaderProps> = ({
   isSubpage = false
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const { theme, toggleTheme, searchQuery, setSearchQuery } = useStore();
+
   const [headerSearchInput, setHeaderSearchInput] = useState(searchQuery || '');
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [desktopSearchOpen, setDesktopSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Estados dos acordions da gaveta lateral
+  const [expandedDrawerItem, setExpandedDrawerItem] = useState<string | null>('Lançamento 2026');
+
+  // Estado de dropdown flutuante no menu desktop superior
+  const [activeDesktopDropdown, setActiveDesktopDropdown] = useState<string | null>(null);
 
   // Sincroniza estado de busca se alterado externamente
   useEffect(() => {
@@ -113,7 +170,7 @@ export const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isSubpage]);
 
-  // Trava scroll do body quando o menu lateral estiver aberto
+  // Trava scroll do body quando a gaveta lateral estiver aberta
   useEffect(() => {
     if (sideDrawerOpen) {
       const originalOverflow = document.body.style.overflow;
@@ -123,6 +180,10 @@ export const Header: React.FC<HeaderProps> = ({
       };
     }
   }, [sideDrawerOpen]);
+
+  // Regra 1: O menu superior tem que ser transparente na home até o usuário rolar a página
+  const isHome = pathname === '/';
+  const isTransparent = isHome && !isScrolled && !isSubpage;
 
   // Executa busca textual no catálogo
   const executeHeaderSearch = (textToSearch?: string) => {
@@ -135,55 +196,85 @@ export const Header: React.FC<HeaderProps> = ({
     router.push(`/catalogo?q=${encodeURIComponent(term)}`);
   };
 
-  // Navegação direta das opções de peças do menu (sem submenus)
-  const handleNavClick = (item: NavItem) => {
+  // Navegação direta das opções de peças do menu
+  const handleNavClick = (item: {
+    type: string;
+    value: string;
+    extraCategory?: string;
+    extraFabric?: string;
+  }) => {
     setSideDrawerOpen(false);
     setMobileSearchOpen(false);
     setDesktopSearchOpen(false);
+    setActiveDesktopDropdown(null);
+
+    const params = new URLSearchParams();
 
     if (item.type === 'status') {
-      router.push(`/catalogo?status=${encodeURIComponent(item.value)}`);
+      params.set('status', item.value);
+      if (item.extraCategory) {
+        params.set('categoria', item.extraCategory);
+      }
     } else if (item.type === 'category') {
-      if (onSelectCategory && typeof window !== 'undefined' && window.location.pathname === '/catalogo') {
-        onSelectCategory(item.value);
-      } else {
-        router.push(`/catalogo?categoria=${encodeURIComponent(item.value)}`);
+      params.set('categoria', item.value);
+      if (item.extraFabric) {
+        params.set('tecido', item.extraFabric);
       }
     } else if (item.type === 'fabric') {
-      router.push(`/catalogo?tecido=${encodeURIComponent(item.value)}`);
+      params.set('tecido', item.value);
+      if (item.extraCategory) {
+        params.set('categoria', item.extraCategory);
+      }
     }
+
+    const query = params.toString();
+    const targetUrl = query ? `/catalogo?${query}` : '/catalogo';
+    router.push(targetUrl);
+  };
+
+  const toggleDrawerAccordion = (label: string) => {
+    setExpandedDrawerItem((prev) => (prev === label ? null : label));
   };
 
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 bg-[#FAF8F5]/98 dark:bg-[#141312]/98 backdrop-blur-md border-b border-[#C5A059]/25 shadow-xs`}
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+          isTransparent
+            ? 'bg-transparent border-b border-transparent shadow-none'
+            : 'bg-[#FAF8F5]/98 dark:bg-[#141312]/98 backdrop-blur-md border-b border-[#C5A059]/25 shadow-xs'
+        }`}
       >
         <div className="max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-10">
-          <div className="relative flex items-center justify-between h-16 sm:h-20 lg:h-[84px] transition-all duration-300">
+          <div className="relative flex items-center justify-between h-16 sm:h-20 lg:h-[86px] transition-all duration-300">
             
-            {/* 1. LADO ESQUERDO: Botão Menu Lateral (Desktop & Mobile) + Logo "LEIDY" Perfeitamente Configurada */}
-            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 shrink-0 z-20">
-              {/* Botão Menu Lateral Esquerdo (Disponível em Desktop e Mobile conforme solicitado) */}
+            {/* 1. LADO ESQUERDO: Botão Menu Lateral (Mobile & Desktop) */}
+            <div className="flex items-center shrink-0 z-20">
               <button
                 onClick={() => setSideDrawerOpen(true)}
-                className="p-1.5 sm:p-2 text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] transition-colors cursor-pointer flex items-center gap-1.5 group"
-                title="Abrir menu lateral"
+                className={`p-1.5 sm:p-2 transition-colors cursor-pointer flex items-center gap-1.5 group ${
+                  isTransparent
+                    ? 'text-white hover:text-[#DFBE76] drop-shadow-sm'
+                    : 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059]'
+                }`}
+                title="Abrir menu de categorias"
                 aria-label="Abrir menu"
               >
                 <Menu className="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:scale-105" />
-                <span className="hidden xl:inline text-xs font-semibold uppercase tracking-wider text-[#1A1918] dark:text-[#FAF8F5] group-hover:text-[#C5A059]">
+                <span className="hidden xl:inline text-xs font-semibold uppercase tracking-wider group-hover:text-[#C5A059]">
                   Menu
                 </span>
               </button>
+            </div>
 
-              {/* Logo Marca Leidy Boutique (Configuração visual perfeita sem cortes) */}
+            {/* 2. LOGO NO DESKTOP: Posicionada um pouco mais para a direita (entre a opção Menu e as opções do centro) */}
+            <div className="hidden lg:flex items-center shrink-0 ml-4 xl:ml-8 2xl:ml-12 mr-6 xl:mr-10 2xl:mr-14 z-20">
               <Link
                 href="/"
                 className="flex items-center cursor-pointer transition-transform duration-300 hover:scale-105 shrink-0"
                 title="Leidy Boutique - Início"
               >
-                <div className="relative w-32 sm:w-40 md:w-48 lg:w-52 h-10 sm:h-12 lg:h-14 flex items-center shrink-0">
+                <div className="relative w-36 sm:w-44 lg:w-48 xl:w-52 h-10 sm:h-12 lg:h-14 flex items-center shrink-0">
                   <Image
                     src="/images/Logo sem fundo.png"
                     alt="Leidy Boutique"
@@ -195,34 +286,99 @@ export const Header: React.FC<HeaderProps> = ({
               </Link>
             </div>
 
-            {/* 2. CENTRO: Links de Navegação Desktop em 2 Linhas Elegantes com Opções de Peças */}
+            {/* 3. LOGO NO MOBILE: Exatamente no meio da tela (Regra 3) */}
+            <div className="lg:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-auto">
+              <Link href="/" className="flex items-center justify-center" title="Leidy Boutique">
+                <div className="relative w-28 sm:w-36 h-8 sm:h-10 flex items-center justify-center">
+                  <Image
+                    src="/images/Logo sem fundo.png"
+                    alt="Leidy Boutique"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+              </Link>
+            </div>
+
+            {/* 4. CENTRO (DESKTOP): Links de Navegação em 2 Linhas com Dropdown de Subopções */}
             <nav className="hidden lg:flex flex-col justify-center items-center gap-1 px-2 xl:px-4 flex-1 min-w-0">
               {/* Linha 1 */}
-              <div className="flex items-center justify-center gap-x-3 xl:gap-x-5 2xl:gap-x-6 text-[11px] xl:text-xs 2xl:text-[13px] font-medium tracking-normal text-[#1A1918] dark:text-[#FAF8F5]">
-                {MENU_ROW_1.map((item) => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={() => handleNavClick(item)}
-                    className="whitespace-nowrap hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer py-0.5"
-                  >
-                    {item.label}
-                  </button>
-                ))}
+              <div
+                className={`flex items-center justify-center gap-x-3.5 xl:gap-x-5 2xl:gap-x-6 text-[11px] xl:text-xs 2xl:text-[13px] font-medium tracking-normal ${
+                  isTransparent ? 'text-white/95 drop-shadow-sm' : 'text-[#1A1918] dark:text-[#FAF8F5]'
+                }`}
+              >
+                {MENU_ROW_1.map((item) => {
+                  const hasSub = Boolean(item.subOptions && item.subOptions.length > 0);
+                  const isDropdownActive = activeDesktopDropdown === item.label;
+
+                  return (
+                    <div
+                      key={item.label}
+                      className="relative"
+                      onMouseEnter={() => hasSub && setActiveDesktopDropdown(item.label)}
+                      onMouseLeave={() => setActiveDesktopDropdown(null)}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => handleNavClick(item)}
+                        className={`whitespace-nowrap transition-colors cursor-pointer py-1 flex items-center gap-0.5 ${
+                          isTransparent
+                            ? 'hover:text-[#DFBE76]'
+                            : 'hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
+                        }`}
+                      >
+                        <span>{item.label}</span>
+                        {hasSub && <ChevronDown className="w-3 h-3 opacity-70 ml-0.5" />}
+                      </button>
+
+                      {/* Dropdown flutuante desktop para selecionar a peça específica (blusa, calça, etc.) */}
+                      {hasSub && isDropdownActive && (
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 pt-1 z-50 animate-fadeIn">
+                          <div className="bg-white dark:bg-[#1A1918] border border-[#C5A059]/40 shadow-2xl p-2 min-w-[210px] space-y-1">
+                            <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-bold block px-2 py-1 border-b border-[#C5A059]/15">
+                              {item.label}
+                            </span>
+                            {item.subOptions!.map((sub) => (
+                              <button
+                                key={sub.label}
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleNavClick(sub);
+                                }}
+                                className="w-full text-left text-xs py-1.5 px-2.5 text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#FAF8F5] dark:hover:bg-[#252220] hover:text-[#C5A059] transition-colors rounded-none truncate cursor-pointer"
+                              >
+                                {sub.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Linha 2 */}
-              <div className="flex items-center justify-center gap-x-3 xl:gap-x-5 2xl:gap-x-6 text-[11px] xl:text-xs 2xl:text-[13px] font-medium tracking-normal text-[#1A1918] dark:text-[#FAF8F5]">
+              <div
+                className={`flex items-center justify-center gap-x-3.5 xl:gap-x-5 2xl:gap-x-6 text-[11px] xl:text-xs 2xl:text-[13px] font-medium tracking-normal ${
+                  isTransparent ? 'text-white/95 drop-shadow-sm' : 'text-[#1A1918] dark:text-[#FAF8F5]'
+                }`}
+              >
                 {MENU_ROW_2.map((item) => (
                   <button
                     key={item.label}
                     type="button"
                     onClick={() => handleNavClick(item)}
-                    className={`whitespace-nowrap transition-colors cursor-pointer py-0.5 ${
+                    className={`whitespace-nowrap transition-colors cursor-pointer py-1 ${
                       item.isSpecial
                         ? item.label === 'BAZAR'
                           ? 'font-bold text-[#C5A059] dark:text-[#DFBE76] hover:text-[#1A1918] dark:hover:text-white'
-                          : 'font-semibold text-rose-700 dark:text-rose-400 hover:text-rose-900'
+                          : 'font-semibold text-rose-500 dark:text-rose-400 hover:text-rose-600'
+                        : isTransparent
+                        ? 'hover:text-[#DFBE76]'
                         : 'hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
                     }`}
                   >
@@ -232,9 +388,9 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </nav>
 
-            {/* 3. LADO DIREITO: Ações do Header */}
-            {/* Desktop: Busca Expansível, Tema, Favoritos e Sacola */}
-            {/* Mobile: EXCLUSIVAMENTE Pesquisar, Favoritos e Sacola (Modo Noturno trocado por Pesquisar conforme solicitado) */}
+            {/* 5. LADO DIREITO: Ações do Header */}
+            {/* Desktop: Busca Expansível, Modo Noturno, Favoritos e Sacola */}
+            {/* Mobile: EXCLUSIVAMENTE Pesquisar, Favoritos e Sacola (Regra 4) */}
             <div className="flex items-center gap-1.5 sm:gap-2.5 lg:gap-3 shrink-0 z-20">
               
               {/* DESKTOP: Busca Expansível */}
@@ -292,7 +448,11 @@ export const Header: React.FC<HeaderProps> = ({
                   <button
                     type="button"
                     onClick={() => setDesktopSearchOpen(true)}
-                    className="p-1.5 sm:p-2 text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer"
+                    className={`p-1.5 sm:p-2 transition-colors cursor-pointer ${
+                      isTransparent
+                        ? 'text-white hover:text-[#DFBE76] drop-shadow-sm'
+                        : 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
+                    }`}
                     title="Pesquisar no site"
                     aria-label="Pesquisar"
                   >
@@ -301,10 +461,14 @@ export const Header: React.FC<HeaderProps> = ({
                 )}
               </div>
 
-              {/* DESKTOP: Alternador de Modo Escuro / Claro (Exibido apenas em Desktop; no Mobile fica na gaveta) */}
+              {/* DESKTOP: Alternador de Modo Escuro / Claro */}
               <button
                 onClick={toggleTheme}
-                className="hidden lg:flex p-1.5 sm:p-2 text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer"
+                className={`hidden lg:flex p-1.5 sm:p-2 transition-colors cursor-pointer ${
+                  isTransparent
+                    ? 'text-white hover:text-[#DFBE76] drop-shadow-sm'
+                    : 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
+                }`}
                 aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
                 title={theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
               >
@@ -319,7 +483,11 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 type="button"
                 onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-                className="lg:hidden p-1.5 sm:p-2 text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer"
+                className={`lg:hidden p-1.5 sm:p-2 transition-colors cursor-pointer ${
+                  isTransparent
+                    ? 'text-white hover:text-[#DFBE76] drop-shadow-sm'
+                    : 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
+                }`}
                 title="Pesquisar peças"
                 aria-label="Pesquisar"
               >
@@ -329,7 +497,11 @@ export const Header: React.FC<HeaderProps> = ({
               {/* Favoritos (Exibido em Mobile e Desktop) */}
               <Link
                 href="/favoritos"
-                className="relative p-1.5 sm:p-2 text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-colors cursor-pointer"
+                className={`relative p-1.5 sm:p-2 transition-colors cursor-pointer ${
+                  isTransparent
+                    ? 'text-white hover:text-[#DFBE76] drop-shadow-sm'
+                    : 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
+                }`}
                 aria-label="Ver coleção de favoritos"
                 title="Meus Favoritos"
               >
@@ -344,7 +516,11 @@ export const Header: React.FC<HeaderProps> = ({
               {/* Sacola de Compras com Contador (Exibido em Mobile e Desktop) */}
               <button
                 onClick={onOpenCart}
-                className="relative p-1.5 sm:p-2 text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76] transition-transform active:scale-95 cursor-pointer"
+                className={`relative p-1.5 sm:p-2 transition-transform active:scale-95 cursor-pointer ${
+                  isTransparent
+                    ? 'text-white hover:text-[#DFBE76] drop-shadow-sm'
+                    : 'text-[#1A1918] dark:text-[#FAF8F5] hover:text-[#C5A059] dark:hover:text-[#DFBE76]'
+                }`}
                 aria-label="Abrir sacola de compras"
                 title="Sacola de Compras"
               >
@@ -362,7 +538,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* 4. BARRA DE PESQUISA NO MOBILE: Campo de texto com botão "Buscar na Loja" e flexa verde */}
+        {/* 6. BARRA DE PESQUISA NO MOBILE: Campo com botão "Buscar na Loja" e flexa verde (Regra 4) */}
         {mobileSearchOpen && (
           <div className="lg:hidden bg-white/98 dark:bg-[#141312]/98 border-t border-b border-[#C5A059]/30 p-3 sm:p-3.5 shadow-lg animate-fadeIn">
             <div className="flex items-center gap-2">
@@ -421,7 +597,7 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </header>
 
-      {/* 5. GAVETA LATERAL ESQUERDA (DESKTOP E MOBILE - 100% FIEL AO PRINT DO CLIENTE) */}
+      {/* 7. GAVETA LATERAL ESQUERDA (DESKTOP E MOBILE) */}
       {sideDrawerOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden animate-fadeIn">
           {/* Backdrop escuro com desfoque */}
@@ -434,48 +610,80 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="fixed inset-y-0 left-0 max-w-full flex pr-10">
             <div className="w-[88vw] max-w-sm sm:max-w-md bg-[#FAF8F5] dark:bg-[#181615] text-[#1A1918] dark:text-[#FAF8F5] shadow-2xl flex flex-col border-r border-[#C5A059]/30 h-full animate-slide-in-left">
               
-              {/* Topo da Gaveta: Minha Conta & Fechar (Conforme print) */}
+              {/* Topo da Gaveta: Limpo e Elegante (SEM "Minha Conta & Atendimento" conforme Regra 2) */}
               <div className="p-4 sm:p-5 border-b border-[#C5A059]/20 flex items-center justify-between bg-white dark:bg-[#1E1C1A] shrink-0">
-                <div className="flex items-center gap-2.5 text-[#7A3E48] dark:text-[#DFBE76]">
-                  <User className="w-5 h-5 text-[#C5A059]" />
-                  <span className="font-semibold text-sm sm:text-base text-[#1A1918] dark:text-[#FAF8F5]">
-                    Minha Conta & Atendimento
-                  </span>
-                </div>
+                <span className="text-xs uppercase tracking-[0.2em] text-[#C5A059] dark:text-[#DFBE76] font-bold">
+                  Navegue por Peças
+                </span>
                 <button
                   onClick={() => setSideDrawerOpen(false)}
-                  className="p-1 text-[#78716C] hover:text-[#1A1918] dark:hover:text-white transition-colors cursor-pointer"
+                  className="p-1.5 text-[#78716C] hover:text-[#1A1918] dark:hover:text-white transition-colors cursor-pointer"
                   title="Fechar menu"
                 >
                   <X className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </div>
 
-              {/* Lista Vertical de Peças e Coleções (Conforme print com setas chevrons nas primeiras) */}
-              <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-0.5 custom-scrollbar">
-                {SIDE_DRAWER_ITEMS.map((item) => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={() => handleNavClick(item)}
-                    className="w-full flex items-center justify-between py-2.5 sm:py-3 px-2 text-left hover:bg-black/5 dark:hover:bg-white/5 rounded-none transition-colors group cursor-pointer"
-                  >
-                    <span
-                      className={`text-sm sm:text-base ${
-                        item.isSpecial
-                          ? item.label === 'BAZAR'
-                            ? 'font-bold text-[#C5A059] dark:text-[#DFBE76]'
-                            : 'font-semibold text-rose-700 dark:text-rose-400'
-                          : 'font-semibold text-[#2D1B20] dark:text-[#FAF8F5] group-hover:text-[#C5A059] dark:group-hover:text-[#DFBE76]'
-                      }`}
-                    >
-                      {item.label}
-                    </span>
-                    {item.hasChevron && (
-                      <ChevronRight className="w-4 h-4 text-[#78716C] dark:text-[#A8A29E] group-hover:text-[#C5A059] transition-colors" />
-                    )}
-                  </button>
-                ))}
+              {/* Lista Vertical de Peças e Coleções com Acordeão Interativo para Subopções (Regra 2) */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-1 custom-scrollbar">
+                {SIDE_DRAWER_ITEMS.map((item) => {
+                  const hasSub = Boolean(item.subOptions && item.subOptions.length > 0);
+                  const isExpanded = expandedDrawerItem === item.label;
+
+                  return (
+                    <div key={item.label} className="border-b border-[#C5A059]/10 last:border-0 pb-1">
+                      <div className="flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (hasSub) {
+                              toggleDrawerAccordion(item.label);
+                            } else {
+                              handleNavClick(item);
+                            }
+                          }}
+                          className="w-full flex items-center justify-between py-2.5 sm:py-3 px-2 text-left hover:bg-black/5 dark:hover:bg-white/5 rounded-none transition-colors group cursor-pointer"
+                        >
+                          <span
+                            className={`text-sm sm:text-base ${
+                              item.isSpecial
+                                ? item.label === 'BAZAR'
+                                  ? 'font-bold text-[#C5A059] dark:text-[#DFBE76]'
+                                  : 'font-semibold text-rose-600 dark:text-rose-400'
+                                : 'font-semibold text-[#2D1B20] dark:text-[#FAF8F5] group-hover:text-[#C5A059] dark:group-hover:text-[#DFBE76]'
+                            }`}
+                          >
+                            {item.label}
+                          </span>
+                          {hasSub && (
+                            <ChevronRight
+                              className={`w-4 h-4 text-[#78716C] dark:text-[#A8A29E] transition-transform duration-200 ${
+                                isExpanded ? 'rotate-90 text-[#C5A059]' : ''
+                              }`}
+                            />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Subopções exibidas ao clicar no item (ex: Blusas, Calças, Vestidos etc.) */}
+                      {hasSub && isExpanded && (
+                        <div className="pl-4 pr-2 pb-2 pt-1 space-y-1 bg-black/5 dark:bg-white/5 border-l-2 border-[#C5A059] animate-fadeIn">
+                          {item.subOptions!.map((sub) => (
+                            <button
+                              key={sub.label}
+                              type="button"
+                              onClick={() => handleNavClick(sub)}
+                              className="w-full text-left py-2 px-2.5 text-xs sm:text-sm font-medium text-[#57534E] dark:text-[#D6D3D1] hover:text-[#C5A059] dark:hover:text-[#DFBE76] hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center justify-between cursor-pointer"
+                            >
+                              <span>{sub.label}</span>
+                              <span className="text-[10px] text-[#A8A29E]">→</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Rodapé da Gaveta: Meus Favoritos, WhatsApp VIP e Modo Escuro */}
@@ -495,7 +703,9 @@ export const Header: React.FC<HeaderProps> = ({
                 </Link>
 
                 <a
-                  href={`https://wa.me/${STORE_INFO.whatsapp}?text=${encodeURIComponent('Olá Leidy! Gostaria de um atendimento personalizado na boutique.')}`}
+                  href={`https://wa.me/${STORE_INFO.whatsapp}?text=${encodeURIComponent(
+                    'Olá Leidy! Gostaria de um atendimento personalizado na boutique.'
+                  )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-2.5 px-3 bg-[#25D366]/10 hover:bg-[#25D366] text-[#1A1918] dark:text-white hover:text-white border border-[#25D366]/30 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
@@ -510,7 +720,11 @@ export const Header: React.FC<HeaderProps> = ({
                   className="w-full flex items-center justify-between py-2 px-3 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/30 text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] hover:border-[#C5A059] transition-all cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
-                    {theme === 'dark' ? <Sun className="w-4 h-4 text-[#DFBE76]" /> : <Moon className="w-4 h-4 text-[#C5A059]" />}
+                    {theme === 'dark' ? (
+                      <Sun className="w-4 h-4 text-[#DFBE76]" />
+                    ) : (
+                      <Moon className="w-4 h-4 text-[#C5A059]" />
+                    )}
                     <span>Modo Visual: {theme === 'dark' ? 'Escuro' : 'Claro'}</span>
                   </div>
                   <span className="text-[11px] text-[#C5A059] underline font-medium">

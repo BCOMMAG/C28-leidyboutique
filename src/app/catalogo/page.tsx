@@ -323,9 +323,14 @@ function CatalogoContent() {
     if (appliedFilters.categories.length > 0) {
       result = result.filter((p) =>
         appliedFilters.categories.some((cat) => {
-          const catLower = cat.toLowerCase();
+          const catLower = (cat || '').toLowerCase();
           if (catLower === 'acessórios' || catLower === 'acessorios') {
-            return CATEGORIES_ACESSORIOS.some((ac) => ac.toLowerCase() === p.category.toLowerCase());
+            return (
+              p.category.toLowerCase() === 'acessórios' ||
+              p.category.toLowerCase() === 'acessorios' ||
+              CATEGORIES_ACESSORIOS.some((ac) => ac.toLowerCase() === p.category.toLowerCase()) ||
+              Boolean(p.subcategory && CATEGORIES_ACESSORIOS.some((ac) => ac.toLowerCase() === p.subcategory?.toLowerCase()))
+            );
           }
           if (catLower === 'tricots') {
             return (
