@@ -2,10 +2,12 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { ShoppingBag, ArrowRight, Check } from 'lucide-react';
 import { useStore } from '@/context/StoreContext';
 
 export const BottomCartBar: React.FC = () => {
+  const router = useRouter();
   const { cartItems, cartCount, isCartOpen, openCart } = useStore();
 
   if (cartCount === 0 || isCartOpen) {
@@ -31,11 +33,15 @@ export const BottomCartBar: React.FC = () => {
     >
       <div className="w-full max-w-[1920px] mx-auto px-3.5 sm:px-6 lg:px-8 xl:px-10 pt-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
         
-        {/* Lado Esquerdo: Miniatura da Peça e Subtotal */}
-        <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+        {/* Lado Esquerdo: Miniatura da Peça e Subtotal (clicar abre a sacola) */}
+        <div
+          onClick={openCart}
+          className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 cursor-pointer group"
+          title="Ver sacola de compras"
+        >
           
           {/* Miniatura Real da Peça no Carrinho */}
-          <div className="relative w-9 h-11 sm:w-11 sm:h-13 shrink-0 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/30 overflow-hidden shadow-2xs">
+          <div className="relative w-9 h-11 sm:w-11 sm:h-13 shrink-0 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/30 overflow-hidden shadow-2xs group-hover:border-[#C5A059] transition-colors">
             {cartItems[0]?.image ? (
               <Image
                 src={cartItems[0].image}
@@ -58,7 +64,7 @@ export const BottomCartBar: React.FC = () => {
           {/* Textos Informativos */}
           <div className="min-w-0 flex flex-col justify-center">
             <div className="flex items-center gap-1.5 leading-tight mb-0.5">
-              <span className="text-[10px] sm:text-xs text-[#78716C] dark:text-[#A8A29E] font-medium truncate block">
+              <span className="text-[10px] sm:text-xs text-[#78716C] dark:text-[#A8A29E] font-medium truncate block group-hover:text-[#C5A059] transition-colors">
                 {cartCount} {cartCount === 1 ? 'peça adicionada' : 'peças na sacola'}
               </span>
               {isFreeShipping && (
@@ -77,10 +83,10 @@ export const BottomCartBar: React.FC = () => {
           </div>
         </div>
 
-        {/* Lado Direito: Botão de Finalizar Compras */}
+        {/* Lado Direito: Botão de Finalizar Compras -> Direciona com segurança para /checkout */}
         <div className="flex items-center shrink-0">
           <button
-            onClick={openCart}
+            onClick={() => router.push('/checkout')}
             className="px-4 sm:px-7 py-2.5 sm:py-3 rounded-none bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] transition-all font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1.5 shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
           >
             <span>Finalizar Compras</span>

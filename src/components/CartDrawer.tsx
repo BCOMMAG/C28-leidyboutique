@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { X, Trash2, ShoppingBag, MessageCircle, ShieldCheck, Truck, MapPin } from 'lucide-react';
+import { X, Trash2, ShoppingBag, MessageCircle, ShieldCheck, Truck, MapPin, Lock, ArrowRight } from 'lucide-react';
 import { CartItem } from '@/types';
 import { STORE_INFO, PRODUCTS } from '@/data/products';
 import { useStore } from '@/context/StoreContext';
@@ -452,25 +452,47 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </span>
               </div>
 
+              {/* Botão Principal: FINALIZAR COMPRA (Leva com segurança para /checkout) */}
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  router.push('/checkout');
+                }}
+                className="w-full py-3.5 sm:py-4 px-6 rounded-none text-xs uppercase tracking-widest font-bold flex items-center justify-center gap-2 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] transition-all duration-300 shadow-md active:scale-95 group cursor-pointer"
+              >
+                <Lock className="w-4 h-4" />
+                <span>FINALIZAR COMPRA</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </button>
+
+              {/* Botão Secundário: Dúvidas / Falar no WhatsApp sem quebrar tela */}
+              <button
+                type="button"
+                onClick={() => {
+                  const url = generateWhatsAppOrderLink();
+                  if (typeof window !== 'undefined') {
+                    try {
+                      window.open(url, '_blank');
+                    } catch {
+                      // Fallback seguro
+                    }
+                  }
+                }}
+                className="w-full py-2.5 sm:py-3 px-6 rounded-none text-xs uppercase tracking-wider font-semibold flex items-center justify-center gap-2 border border-[#25D366]/40 bg-[#25D366]/5 text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#25D366] hover:text-white transition-all duration-300 shadow-2xs active:scale-95 group cursor-pointer"
+              >
+                <MessageCircle className="w-4 h-4 text-[#25D366] group-hover:text-white transition-colors" />
+                <span>Tirar Dúvidas no WhatsApp</span>
+              </button>
+
               {/* Botão Continuar Comprando */}
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full py-2.5 sm:py-3 px-6 rounded-none text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 border border-[#C5A059]/40 bg-[#FAF8F5] dark:bg-[#252220] text-[#1A1918] dark:text-[#FAF8F5] hover:bg-[#1A1918] hover:text-white dark:hover:bg-[#C5A059] transition-all duration-300 shadow-2xs active:scale-95 cursor-pointer"
+                className="w-full py-2.5 px-6 rounded-none text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#252220] text-[#57534E] dark:text-[#A8A29E] hover:text-[#1A1918] dark:hover:text-white transition-colors cursor-pointer"
               >
                 <span>Continuar Comprando</span>
               </button>
-
-              {/* Botão de Envio para WhatsApp */}
-              <a
-                href={generateWhatsAppOrderLink()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3.5 sm:py-4 px-6 rounded-none text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 bg-[#1A1918] dark:bg-[#C5A059] text-white hover:bg-[#25D366] dark:hover:bg-[#25D366] transition-all duration-300 shadow-md active:scale-95 group cursor-pointer"
-              >
-                <MessageCircle className="w-4 h-4 text-[#25D366] group-hover:text-white transition-colors" />
-                <span>Finalizar Pedido pelo WhatsApp</span>
-              </a>
             </div>
           )}
 
