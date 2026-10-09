@@ -145,8 +145,14 @@ export const Header: React.FC<HeaderProps> = ({
   const [desktopSearchOpen, setDesktopSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Estados dos acordions da gaveta lateral
-  const [expandedDrawerItem, setExpandedDrawerItem] = useState<string | null>('Lançamento 2026');
+  // Estados dos acordions da gaveta lateral (inicia com nenhuma opção pré-selecionada)
+  const [expandedDrawerItem, setExpandedDrawerItem] = useState<string | null>(null);
+
+  // Função para abrir a gaveta lateral sempre com opções recolhidas
+  const openSideDrawer = () => {
+    setExpandedDrawerItem(null);
+    setSideDrawerOpen(true);
+  };
 
   // Estado de dropdown flutuante no menu desktop superior
   const [activeDesktopDropdown, setActiveDesktopDropdown] = useState<string | null>(null);
@@ -251,7 +257,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* 1. LADO ESQUERDO: Botão Menu Lateral (Mobile & Desktop) */}
             <div className="flex items-center shrink-0 z-20">
               <button
-                onClick={() => setSideDrawerOpen(true)}
+                onClick={openSideDrawer}
                 className={`p-1.5 sm:p-2 transition-colors cursor-pointer flex items-center gap-1.5 group ${
                   isTransparent
                     ? 'text-white hover:text-[#DFBE76] drop-shadow-sm'
