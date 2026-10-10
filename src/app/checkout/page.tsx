@@ -16,13 +16,14 @@ import {
   Copy,
   ChevronRight,
   ChevronDown,
-  AlertCircle,
   Lock,
   Sparkles,
   Trash2,
   Tag,
   MapPin,
-  Clock,
+  User,
+  CheckCircle2,
+  AlertTriangle,
   RotateCcw
 } from 'lucide-react';
 import { useStore } from '@/context/StoreContext';
@@ -59,6 +60,19 @@ export default function CheckoutPage() {
   const [city, setCity] = useState(savedAddress?.localidade || '');
   const [uf, setUf] = useState(savedAddress?.uf || '');
 
+  // Rastreia campos que foram preenchidos pelo ViaCEP
+  const [filledByCep, setFilledByCep] = useState<{
+    street?: boolean;
+    neighborhood?: boolean;
+    city?: boolean;
+    uf?: boolean;
+  }>({
+    street: Boolean(savedAddress?.logradouro),
+    neighborhood: Boolean(savedAddress?.bairro),
+    city: Boolean(savedAddress?.localidade),
+    uf: Boolean(savedAddress?.uf),
+  });
+
   // 3. Frete, Pagamento e Cupom
   const [selectedShipping, setSelectedShipping] = useState<string>('sedex');
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit_card' | 'whatsapp'>('pix');
@@ -77,17 +91,20 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState('');
   const [copiedPix, setCopiedPix] = useState(false);
   const [copiedOrder, setCopiedOrder] = useState(false);
-  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
 
-  // Sincroniza dados salvos de CEP/Endereço
-  useEffect(() => {
-    if (savedAddress) {
-      if (savedAddress.logradouro) setStreet(savedAddress.logradouro);
-      if (savedAddress.bairro) setNeighborhood(savedAddress.bairro);
-      if (savedAddress.localidade) setCity(savedAddress.localidade);
-      if (savedAddress.uf) setUf(savedAddress.uf);
-    }
-  }, [savedAddress]);
+  // 5. Controle de Seções Sanfona / Touchscreen no Mobile
+  // O resumo da sacola fica ABERTO logo de cara.
+  // Os dados pessoais, endereço e pagamento vêm fechados para não escancarar a tela.
+  const [mobileSections, setMobileSections] = useState({
+    dados: false,
+    endereco: false,
+    pagamento: false,
+    observacoes: false
+  });
+
+  const toggleMobileSection = (section: keyof typeof mobileSections) => {
+    setMobileSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
 
   // Formatação de telefone brasileiro
   const formatPhone = (val: string) => {
@@ -106,7 +123,119 @@ export default function CheckoutPage() {
     return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
   };
 
-  // Busca CEP via ViaCEP
+  // Carrega dados salvos e captura inicial de lead
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedPhone = localStorage.getItem('leidy_customer_phone');
+        const savedName = localStorage.getItem('leidy_customer_name');
+        if (savedPhone && !customerPhone) setCustomerPhone(formatPhone(savedPhone));
+        if (savedName && !customerName) setCustomerName(savedName);
+      } catch (e) {
+        console.warn('Erro ao carregar dados salvos do cliente:', e);
+      }
+    }
+  }, []);
+
+  // Sincroniza dados salvos de CEP/Endereço caso venham do StoreContext
+  useEffect(() => {
+    if (savedAddress) {
+      if (savedAddress.logradouro) setStreet(savedAddress.logradouro);
+      if (savedAddress.bairro) setNeighborhood(savedAddress.bairro);
+      if (savedAddress.localidade) setCity(savedAddress.localidade);
+      if (savedAddress.uf) setUf(savedAddress.uf);
+      setFilledByCep({
+        street: Boolean(savedAddress.logradouro),
+        neighborhood: Boolean(savedAddress.bairro),
+        city: Boolean(savedAddress.localidade),
+        uf: Boolean(savedAddress.uf),
+      });
+    }
+  }, [savedAddress]);
+
+  // Cálculos de Valores
+  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const freeShippingThreshold = STORE_INFO.freeShippingThreshold;
+  const isFreeShipping = subtotal >= freeShippingThreshold;
+  const progressToFreeShipping = Math.min(100, (subtotal / freeShippingThreshold) * 100);
+  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
+
+  const shippingOptions: ShippingOption[] = uf ? calculateShippingOptions(uf, subtotal) : [];
+  const chosenShippingOption = shippingOptions.find((opt) => opt.id === selectedShipping) || shippingOptions[0];
+
+  const shippingPrice = isFreeShipping
+    ? 0
+    : chosenShippingOption
+    ? chosenShippingOption.price
+    : 0;
+
+  // Desconto de Cupom
+  const couponDiscount = appliedCoupon ? (subtotal * appliedCoupon.percent) / 100 : 0;
+
+  // Desconto de 5% no PIX
+  const baseForPix = Math.max(0, subtotal - couponDiscount);
+  const pixDiscount = paymentMethod === 'pix' ? baseForPix * 0.05 : 0;
+
+  // Total Final
+  const totalAmount = Math.max(0, subtotal - couponDiscount + shippingPrice - pixDiscount);
+
+  // Sugestão de Upsell (Peça que não está no carrinho)
+  const upsellProduct = PRODUCTS.find((p) => !cartItems.some((i) => i.productId === p.id));
+
+  // Chave PIX Oficial da Boutique
+  const PIX_KEY = 'contato@leidyboutique.com.br';
+
+  // Captura do Lead (WhatsApp e Nome do Cliente em tempo real para controle da loja)
+  const captureLead = (phoneToSave?: string, nameToSave?: string, status: 'iniciado' | 'finalizado' = 'iniciado') => {
+    if (typeof window === 'undefined') return;
+    try {
+      const cleanPhone = (phoneToSave || customerPhone).replace(/\D/g, '');
+      const clientName = nameToSave !== undefined ? nameToSave : customerName;
+
+      if (cleanPhone) localStorage.setItem('leidy_customer_phone', cleanPhone);
+      if (clientName) localStorage.setItem('leidy_customer_name', clientName);
+
+      if (cleanPhone.length >= 10) {
+        const existingRaw = localStorage.getItem('leidy_checkout_leads');
+        const leads: Array<any> = existingRaw ? JSON.parse(existingRaw) : [];
+
+        const now = new Date().toISOString();
+        const leadIndex = leads.findIndex((l) => (l.phone || '').replace(/\D/g, '') === cleanPhone);
+
+        const leadData = {
+          id: leadIndex >= 0 ? leads[leadIndex].id : `lead_${Date.now()}`,
+          phone: phoneToSave || customerPhone,
+          name: clientName,
+          cep: cepInput,
+          city,
+          uf,
+          total: totalAmount,
+          itemCount: cartCount,
+          items: cartItems.map((i) => ({
+            name: i.name,
+            color: i.color,
+            size: i.size,
+            qty: i.quantity,
+            price: i.price
+          })),
+          updatedAt: now,
+          status
+        };
+
+        if (leadIndex >= 0) {
+          leads[leadIndex] = { ...leads[leadIndex], ...leadData };
+        } else {
+          leads.unshift(leadData);
+        }
+
+        localStorage.setItem('leidy_checkout_leads', JSON.stringify(leads.slice(0, 50)));
+      }
+    } catch (e) {
+      console.warn('Erro ao registrar captura de lead local:', e);
+    }
+  };
+
+  // Busca CEP via ViaCEP (sincronizada com o resumo e o formulário de entrega)
   const handleSearchCep = async (targetCep?: string) => {
     const clean = (targetCep || cepInput).replace(/\D/g, '');
     if (clean.length !== 8) {
@@ -123,8 +252,19 @@ export default function CheckoutPage() {
         setNeighborhood(data.bairro || '');
         setCity(data.localidade || '');
         setUf(data.uf || '');
+        setFilledByCep({
+          street: Boolean(data.logradouro),
+          neighborhood: Boolean(data.bairro),
+          city: Boolean(data.localidade),
+          uf: Boolean(data.uf),
+        });
+        // Se o número ainda não foi digitado, abre o acordeão de endereço no mobile
+        if (!number) {
+          setMobileSections((prev) => ({ ...prev, endereco: true }));
+        }
       } else {
         setCepError('CEP não encontrado. Preencha o endereço manualmente.');
+        setFilledByCep({});
       }
     } catch {
       setCepError('Erro ao consultar CEP. Tente novamente.');
@@ -160,37 +300,15 @@ export default function CheckoutPage() {
     setCouponError('');
   };
 
-  // Cálculos de Valores
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const freeShippingThreshold = STORE_INFO.freeShippingThreshold;
-  const isFreeShipping = subtotal >= freeShippingThreshold;
-  const progressToFreeShipping = Math.min(100, (subtotal / freeShippingThreshold) * 100);
-  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
+  // Verificações de conclusão de cada etapa
+  const isDadosDone = Boolean(customerName.trim() && customerPhone.replace(/\D/g, '').length >= 10);
+  const isEnderecoDone = Boolean(street.trim() && number.trim() && city.trim() && uf.trim());
+  const isPagamentoDone = Boolean(paymentMethod);
 
-  const shippingOptions: ShippingOption[] = uf ? calculateShippingOptions(uf, subtotal) : [];
-  const chosenShippingOption = shippingOptions.find((opt) => opt.id === selectedShipping) || shippingOptions[0];
-
-  const shippingPrice = isFreeShipping
-    ? 0
-    : chosenShippingOption
-    ? chosenShippingOption.price
-    : 0;
-
-  // Desconto de Cupom
-  const couponDiscount = appliedCoupon ? (subtotal * appliedCoupon.percent) / 100 : 0;
-
-  // Desconto de 5% no PIX
-  const baseForPix = Math.max(0, subtotal - couponDiscount);
-  const pixDiscount = paymentMethod === 'pix' ? baseForPix * 0.05 : 0;
-
-  // Total Final
-  const totalAmount = Math.max(0, subtotal - couponDiscount + shippingPrice - pixDiscount);
-
-  // Sugestão de Upsell (Peça que não está no carrinho)
-  const upsellProduct = PRODUCTS.find((p) => !cartItems.some((i) => i.productId === p.id));
-
-  // Chave PIX Oficial da Boutique
-  const PIX_KEY = 'contato@leidyboutique.com.br';
+  // Lista dinâmica do que falta
+  const pendingSteps: string[] = [];
+  if (!isDadosDone) pendingSteps.push('Seus Dados (Nome & WhatsApp)');
+  if (!isEnderecoDone) pendingSteps.push('Endereço (com Número)');
 
   // Validação do Formulário
   const validateForm = () => {
@@ -203,10 +321,10 @@ export default function CheckoutPage() {
       errors.phone = 'Informe seu WhatsApp com DDD para envio da confirmação.';
     }
     if (!street.trim()) {
-      errors.street = 'Informe o logradouro / rua.';
+      errors.street = 'Informe a rua ou busque pelo CEP.';
     }
     if (!number.trim()) {
-      errors.number = 'Informe o número.';
+      errors.number = 'Informe o número da residência/prédio.';
     }
     if (!city.trim()) {
       errors.city = 'Informe a cidade.';
@@ -219,25 +337,54 @@ export default function CheckoutPage() {
     return Object.keys(errors).length === 0;
   };
 
-  // Finalizar Compra
-  const handleFinalizeOrder = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Finalizar Compra com Direcionamento ao WhatsApp
+  const handleFinalizeOrder = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
     if (!validateForm()) {
-      window.scrollTo({ top: 120, behavior: 'smooth' });
+      // Abre automaticamente a seção onde estiver a pendência no mobile
+      if (!isDadosDone) {
+        setMobileSections((prev) => ({ ...prev, dados: true }));
+      } else if (!isEnderecoDone) {
+        setMobileSections((prev) => ({ ...prev, endereco: true }));
+      }
+
+      // Rola suavemente até o alerta de pendência
+      const alertEl = document.getElementById('checkout-progress-panel');
+      if (alertEl) {
+        alertEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        window.scrollTo({ top: 80, behavior: 'smooth' });
+      }
       return;
     }
+
+    // Registra o lead como finalizado
+    captureLead(customerPhone, customerName, 'finalizado');
 
     const randomCode = Math.floor(1000 + Math.random() * 9000);
     const newOrderId = `LB-2026-${randomCode}`;
     setOrderId(newOrderId);
     setOrderSubmitted(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Dispara a abertura do WhatsApp com a mensagem pronta e inalterável
+    const text = buildOrderSummaryText(newOrderId);
+    const url = `https://wa.me/${STORE_INFO.whatsapp}?text=${encodeURIComponent(text)}`;
+    if (typeof window !== 'undefined') {
+      try {
+        window.open(url, '_blank');
+      } catch (err) {
+        console.warn('Pop-up bloqueado pelo navegador:', err);
+      }
+    }
   };
 
-  // Monta a mensagem completa formatada do pedido
-  const buildOrderSummaryText = () => {
+  // Monta a mensagem completa formatada e inviolável do pedido
+  const buildOrderSummaryText = (customOrderId?: string) => {
+    const finalId = customOrderId || orderId || 'LB-2026';
     let msg = `✨ *PEDIDO CONFIRMADO NO SITE LEIDY BOUTIQUE* ✨\n`;
-    msg += `🔖 *Pedido:* #${orderId || 'LB-2026'}\n\n`;
+    msg += `🔖 *Pedido:* #${finalId}\n\n`;
     msg += `👤 *Cliente:* ${customerName || 'Cliente Leidy Boutique'}\n`;
     msg += `📱 *WhatsApp:* ${customerPhone || 'A confirmar'}\n`;
     if (customerEmail) msg += `✉️ *E-mail:* ${customerEmail}\n`;
@@ -265,7 +412,7 @@ export default function CheckoutPage() {
         : 'Atendimento VIP no WhatsApp'
     }\n`;
 
-    msg += `🚚 *Envio:* ${isFreeShipping ? 'Frete VIP Cortesia (Grátis)' : `${chosenShippingOption?.name || 'Padrão'} (R$ ${shippingPrice.toFixed(2).replace('.', ',')})`}\n`;
+    msg += `🚚 *Envio:* ${isFreeShipping ? 'Frete VIP Cortesia (Grátis)' : `${chosenShippingOption?.name || 'Correios'} (R$ ${shippingPrice.toFixed(2).replace('.', ',')})`}\n`;
 
     if (appliedCoupon) {
       msg += `🏷️ *Cupom Aplicado:* ${appliedCoupon.code} (-R$ ${couponDiscount.toFixed(2).replace('.', ',')})\n`;
@@ -284,7 +431,7 @@ export default function CheckoutPage() {
     return msg;
   };
 
-  // Abre WhatsApp com segurança total (sem quebrar a página)
+  // Abre WhatsApp diretamente com o texto do pedido
   const handleOpenWhatsApp = () => {
     const text = buildOrderSummaryText();
     const url = `https://wa.me/${STORE_INFO.whatsapp}?text=${encodeURIComponent(text)}`;
@@ -314,6 +461,21 @@ export default function CheckoutPage() {
       setCopiedPix(true);
       setTimeout(() => setCopiedPix(false), 3000);
     }
+  };
+
+  // Helper de estilização inteligente de campos
+  // Verde suave: preenchido pelo CEP
+  // Vermelho suave: obrigatório pendente
+  // Neutro: preenchido ou opcional
+  const getFieldClass = (isFilledCep: boolean, isRequired: boolean, value: string, hasError?: boolean) => {
+    const base = "w-full px-3.5 py-2.5 text-sm sm:text-xs focus:outline-none transition-colors border ";
+    if (isFilledCep) {
+      return base + "bg-emerald-50/80 dark:bg-emerald-950/25 border-emerald-400 dark:border-emerald-600/50 text-[#1A1918] dark:text-[#FAF8F5]";
+    }
+    if (hasError || (isRequired && !value.trim())) {
+      return base + "bg-rose-50/60 dark:bg-rose-950/20 border-rose-300 dark:border-rose-800/60 text-[#1A1918] dark:text-[#FAF8F5]";
+    }
+    return base + "bg-white dark:bg-[#201D1B] border-[#C5A059]/30 focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5]";
   };
 
   return (
@@ -358,7 +520,7 @@ export default function CheckoutPage() {
       </header>
 
       {/* 2. CONTEÚDO PRINCIPAL */}
-      <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      <main className="max-w-[1440px] mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-9 flex-1 w-full">
         
         {/* Caso a Sacola esteja vazia e nenhum pedido tenha sido enviado */}
         {cartCount === 0 && !orderSubmitted ? (
@@ -475,138 +637,324 @@ export default function CheckoutPage() {
           </div>
         ) : (
 
-          /* 4. TELA PRINCIPAL DO CHECKOUT (2 COLUNAS: DADOS + RESUMO INTERATIVO) */
+          /* 4. TELA PRINCIPAL DO CHECKOUT */
           <div>
             
-            {/* Barra de Progresso de Frete Cortesia VIP */}
-            <div className="mb-6 p-4 sm:p-5 bg-white dark:bg-[#1A1918] border border-[#C5A059]/30 shadow-xs">
-              <div className="flex justify-between items-center text-xs mb-2 gap-2">
-                {remainingForFreeShipping > 0 ? (
-                  <span className="text-[#57534E] dark:text-[#D6D3D1]">
-                    Faltam <strong className="text-[#1A1918] dark:text-[#FAF8F5]">R$ {remainingForFreeShipping.toFixed(2).replace('.', ',')}</strong> na sacola para você ganhar <strong>Frete Cortesia VIP</strong>!
+            {/* PAINEL DE CONTROLE DE FINALIZAÇÃO E PROGRESSO DINÂMICO */}
+            <div id="checkout-progress-panel" className="mb-6 p-4 sm:p-5 bg-white dark:bg-[#1A1918] border border-[#C5A059]/30 shadow-xs space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <span className="text-[10px] uppercase tracking-widest font-bold text-[#C5A059] block mb-0.5">
+                    Controle de Finalização
                   </span>
-                ) : (
-                  <span className="text-[#25D366] font-bold flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-[#DFBE76]" />
-                    Parabéns! Sua compra atingiu os critérios para Frete VIP Grátis!
-                  </span>
-                )}
-                <span className="text-xs font-bold text-[#C5A059] dark:text-[#DFBE76] shrink-0">
-                  {Math.round(progressToFreeShipping)}%
-                </span>
-              </div>
-              <div className="w-full bg-[#FAF8F5] dark:bg-[#201D1B] h-2.5 rounded-none overflow-hidden border border-[#C5A059]/20">
-                <div
-                  className="h-full bg-gradient-to-r from-[#C5A059] via-[#DFBE76] to-[#C5A059] transition-all duration-500 rounded-none"
-                  style={{ width: `${progressToFreeShipping}%` }}
-                />
-              </div>
-            </div>
+                  <p className="text-xs sm:text-sm font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
+                    {pendingSteps.length === 0 ? (
+                      <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                        ✨ Tudo pronto! Clique no botão abaixo para enviar seu pedido para o WhatsApp.
+                      </span>
+                    ) : (
+                      <span className="text-[#57534E] dark:text-[#D6D3D1]">
+                        Você está quase terminando sua compra! Falta apenas preencher: <strong className="text-rose-600 dark:text-rose-400">{pendingSteps.join(' e ')}</strong>.
+                      </span>
+                    )}
+                  </p>
+                </div>
 
-            {/* Resumo da Sacola Retrátil / Sanfona Exclusivo para Mobile */}
-            <div className="lg:hidden mb-6 bg-white dark:bg-[#1A1918] border border-[#C5A059]/30 shadow-xs">
-              <button
-                type="button"
-                onClick={() => setMobileSummaryOpen(!mobileSummaryOpen)}
-                className="w-full p-4 flex items-center justify-between text-left cursor-pointer transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
-              >
-                <div className="flex items-center gap-2 text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
-                  <ShoppingBag className="w-4 h-4 text-[#C5A059]" />
-                  <span>{mobileSummaryOpen ? 'Ocultar resumo da sacola' : 'Ver resumo da sacola'}</span>
-                  <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E]">
-                    ({cartCount} {cartCount === 1 ? 'peça' : 'peças'})
+                {/* Legenda sutil dos fundos */}
+                <div className="flex items-center gap-3 text-[10px] text-[#78716C] dark:text-[#A8A29E] shrink-0 pt-1 sm:pt-0">
+                  <span className="flex items-center gap-1">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block" />
+                    Preenchido via CEP
                   </span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-[#C5A059] transition-transform duration-200 ${
-                      mobileSummaryOpen ? 'rotate-180' : ''
-                    }`}
+                  <span className="flex items-center gap-1">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block" />
+                    Obrigatório pendente
+                  </span>
+                </div>
+              </div>
+
+              {/* Barra de Progresso de Frete Cortesia VIP */}
+              <div className="pt-2 border-t border-[#C5A059]/15">
+                <div className="flex justify-between items-center text-xs mb-1.5 gap-2">
+                  {remainingForFreeShipping > 0 ? (
+                    <span className="text-[11px] text-[#57534E] dark:text-[#D6D3D1]">
+                      Faltam <strong className="text-[#1A1918] dark:text-[#FAF8F5]">R$ {remainingForFreeShipping.toFixed(2).replace('.', ',')}</strong> na sacola para ganhar <strong>Frete Cortesia VIP</strong>!
+                    </span>
+                  ) : (
+                    <span className="text-[11px] text-[#25D366] font-bold flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-[#DFBE76]" />
+                      Sua compra atingiu Frete Cortesia VIP Grátis!
+                    </span>
+                  )}
+                  <span className="text-xs font-bold text-[#C5A059] dark:text-[#DFBE76] shrink-0">
+                    {Math.round(progressToFreeShipping)}%
+                  </span>
+                </div>
+                <div className="w-full bg-[#FAF8F5] dark:bg-[#201D1B] h-2 rounded-none overflow-hidden border border-[#C5A059]/20">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#C5A059] via-[#DFBE76] to-[#C5A059] transition-all duration-500 rounded-none"
+                    style={{ width: `${progressToFreeShipping}%` }}
                   />
                 </div>
-                <span className="text-sm font-bold text-[#C5A059] dark:text-[#DFBE76]">
-                  R$ {totalAmount.toFixed(2).replace('.', ',')}
-                </span>
-              </button>
-
-              {mobileSummaryOpen && (
-                <div className="px-4 pb-4 pt-1 border-t border-[#C5A059]/15 space-y-3 animate-fadeIn">
-                  <div className="space-y-3 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
-                    {cartItems.map((item) => (
-                      <div key={item.id} className="flex gap-3 items-center py-2 border-b border-[#C5A059]/10 last:border-0">
-                        <div className="relative w-12 h-16 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/20 shrink-0 overflow-hidden">
-                          {item.image ? (
-                            <Image src={item.image} alt={item.name} fill className="object-cover object-top" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[#C5A059]">
-                              <ShoppingBag className="w-4 h-4" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] truncate">
-                            {item.name}
-                          </h4>
-                          <p className="text-[10px] text-[#78716C] dark:text-[#A8A29E]">
-                            Cor: {item.color} • Tam: {item.size} • Qtd: {item.quantity}
-                          </p>
-                          <p className="text-xs font-bold text-[#C5A059] mt-0.5">
-                            R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="pt-2 border-t border-[#C5A059]/15 space-y-1 text-xs">
-                    <div className="flex justify-between text-[#78716C] dark:text-[#A8A29E]">
-                      <span>Subtotal</span>
-                      <span className="text-[#1A1918] dark:text-[#FAF8F5]">R$ {subtotal.toFixed(2).replace('.', ',')}</span>
-                    </div>
-                    <div className="flex justify-between text-[#78716C] dark:text-[#A8A29E]">
-                      <span>Frete</span>
-                      <span className="text-[#C5A059]">
-                        {isFreeShipping ? 'Grátis (VIP)' : shippingPrice > 0 ? `R$ ${shippingPrice.toFixed(2).replace('.', ',')}` : 'A calcular'}
-                      </span>
-                    </div>
-                    {couponDiscount > 0 && (
-                      <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
-                        <span>Cupom ({appliedCoupon?.code})</span>
-                        <span>- R$ {couponDiscount.toFixed(2).replace('.', ',')}</span>
-                      </div>
-                    )}
-                    {pixDiscount > 0 && (
-                      <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
-                        <span>Desconto PIX (5%)</span>
-                        <span>- R$ {pixDiscount.toFixed(2).replace('.', ',')}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
 
-            <form onSubmit={handleFinalizeOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* ============================================================ */}
+            {/* FLUXO MOBILE (lg:hidden)                                      */}
+            {/* 1. Resumo da Sacola ABERTO logo de cara                       */}
+            {/* 2. Seções dos dados em sanfonas touch (fechadas para não poluir) */}
+            {/* ============================================================ */}
+            <div className="lg:hidden space-y-4 mb-6">
               
-              {/* ============================================================ */}
-              {/* COLUNA ESQUERDA: DADOS, ENDEREÇO E PAGAMENTO (7 colunas)       */}
-              {/* ============================================================ */}
-              <div className="lg:col-span-7 space-y-6">
-                
-                {/* ETAPA 1: SEUS DADOS PESSOAIS */}
-                <div className="bg-white dark:bg-[#1A1918] p-5 sm:p-7 border border-[#C5A059]/30 shadow-xs">
-                  <div className="flex items-center gap-2.5 pb-4 mb-4 border-b border-[#C5A059]/20">
-                    <span className="w-6 h-6 rounded-none bg-[#C5A059] text-white text-xs font-bold flex items-center justify-center">
-                      1
-                    </span>
-                    <h2 className="font-serif-luxury text-base sm:text-lg font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
-                      Seus Dados Pessoais
+              {/* 1. RESUMO DA SACOLA NO MOBILE (ABERTO E TOTALMENTE VISÍVEL) */}
+              <div className="bg-white dark:bg-[#1A1918] p-4 border border-[#C5A059]/30 shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-[#C5A059]/20">
+                  <div className="flex items-center gap-2">
+                    <ShoppingBag className="w-4 h-4 text-[#C5A059]" />
+                    <h2 className="font-serif-luxury text-base font-bold text-[#1A1918] dark:text-[#FAF8F5]">
+                      Resumo da Sacola
                     </h2>
                   </div>
+                  <span className="text-xs font-bold text-[#C5A059]">
+                    {cartCount} {cartCount === 1 ? 'peça' : 'peças'}
+                  </span>
+                </div>
 
-                  <div className="space-y-3.5 text-xs">
+                {/* Peças da Sacola */}
+                <div className="space-y-3 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex gap-3 items-center py-2 border-b border-[#C5A059]/10 last:border-0 relative">
+                      <div className="relative w-12 h-16 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/20 shrink-0 overflow-hidden">
+                        {item.image ? (
+                          <Image src={item.image} alt={item.name} fill className="object-cover object-top" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[#C5A059]">
+                            <ShoppingBag className="w-4 h-4" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 pr-6">
+                        <h4 className="text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] truncate">
+                          {item.name}
+                        </h4>
+                        <p className="text-[10px] text-[#78716C] dark:text-[#A8A29E] mt-0.5">
+                          Cor: <strong className="text-[#1A1918] dark:text-[#FAF8F5]">{item.color}</strong> • Tam: <strong className="text-[#1A1918] dark:text-[#FAF8F5]">{item.size}</strong>
+                        </p>
+                        <div className="flex items-center justify-between mt-1.5">
+                          <div className="flex items-center border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#201D1B] px-1 py-0.5">
+                            <button
+                              type="button"
+                              onClick={() => updateCartQuantity(item.id, -1)}
+                              className="text-xs font-bold px-1.5 text-[#57534E] dark:text-[#A8A29E] hover:text-[#C5A059] cursor-pointer"
+                            >
+                              -
+                            </button>
+                            <span className="text-xs font-bold px-1.5 text-[#1A1918] dark:text-[#FAF8F5]">
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => updateCartQuantity(item.id, 1)}
+                              className="text-xs font-bold px-1.5 text-[#57534E] dark:text-[#A8A29E] hover:text-[#C5A059] cursor-pointer"
+                            >
+                              +
+                            </button>
+                          </div>
+                          <span className="text-xs font-bold text-[#C5A059]">
+                            R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFromCart(item.id)}
+                        className="absolute top-1 right-1 p-1 text-[#A8A29E] hover:text-red-500 cursor-pointer"
+                        title="Remover peça"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Cálculo de Frete Integrado no Resumo da Sacola */}
+                <div className="pt-3 border-t border-[#C5A059]/15">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-[#57534E] dark:text-[#D6D3D1] flex items-center gap-1.5">
+                      <Truck className="w-3.5 h-3.5 text-[#C5A059]" />
+                      <span>Calcular Frete & Prazo</span>
+                    </label>
+                    {isFreeShipping && (
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5">
+                        VIP Grátis
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={cepInput}
+                      onChange={(e) => {
+                        const formatted = formatCep(e.target.value);
+                        setCepInput(formatted);
+                        if (formatted.replace(/\D/g, '').length === 8) {
+                          handleSearchCep(formatted);
+                        }
+                      }}
+                      placeholder="00000-000"
+                      maxLength={9}
+                      className={getFieldClass(false, true, cepInput, Boolean(cepError))}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleSearchCep()}
+                      disabled={isCepLoading}
+                      className="px-3.5 py-2 bg-[#1A1918] dark:bg-[#C5A059] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#C5A059] transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
+                    >
+                      {isCepLoading ? 'Buscando...' : 'Calcular'}
+                    </button>
+                  </div>
+                  {cepError && <p className="text-[11px] text-rose-500 mt-1">{cepError}</p>}
+                  {city && uf && (
+                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
+                      <Check className="w-3 h-3 stroke-[2.5]" />
+                      <span>Destino: {city}/{uf} {street ? `• ${street}` : ''}</span>
+                    </p>
+                  )}
+                </div>
+
+                {/* Cupom de Desconto Integrado no Resumo da Sacola */}
+                <div className="pt-3 border-t border-[#C5A059]/15">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <Tag className="w-3.5 h-3.5 text-[#C5A059]" />
+                    <span className="text-xs font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                      Cupom de Desconto
+                    </span>
+                  </div>
+                  {appliedCoupon ? (
+                    <div className="flex items-center justify-between p-2 bg-emerald-500/10 border border-emerald-500/30 text-xs">
+                      <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300 font-bold">
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Cupom {appliedCoupon.code} ({appliedCoupon.percent}% OFF) Ativo!</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveCoupon}
+                        className="text-[11px] text-rose-500 hover:underline font-semibold cursor-pointer"
+                      >
+                        Remover
+                      </button>
+                    </div>
+                  ) : (
                     <div>
-                      <label className="block font-semibold mb-1 text-[#57534E] dark:text-[#D6D3D1]">
-                        Nome Completo *
-                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={couponInput}
+                          onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                          placeholder="Ex: LEIDY10"
+                          className="flex-1 px-3 py-2 bg-white dark:bg-[#201D1B] border border-[#C5A059]/30 text-xs uppercase text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyCoupon}
+                          className="px-3.5 py-2 bg-[#1A1918] dark:bg-[#C5A059] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#C5A059] transition-colors cursor-pointer shrink-0"
+                        >
+                          Aplicar
+                        </button>
+                      </div>
+                      {couponError && <p className="text-[11px] text-rose-500 mt-1">{couponError}</p>}
+                      {couponSuccess && <p className="text-[11px] text-emerald-600 mt-1">{couponSuccess}</p>}
+                    </div>
+                  )}
+                </div>
+
+                {/* Discriminativo Financeiro no Mobile */}
+                <div className="pt-3 border-t border-[#C5A059]/15 space-y-1.5 text-xs text-[#57534E] dark:text-[#D6D3D1]">
+                  <div className="flex justify-between">
+                    <span>Subtotal das Peças:</span>
+                    <span className="font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
+                      R$ {subtotal.toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Envio / Frete:</span>
+                    <span className="font-semibold text-[#C5A059]">
+                      {isFreeShipping ? (
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">Grátis (VIP)</span>
+                      ) : shippingPrice > 0 ? (
+                        `R$ ${shippingPrice.toFixed(2).replace('.', ',')}`
+                      ) : (
+                        'A calcular pelo CEP'
+                      )}
+                    </span>
+                  </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
+                      <span>Cupom ({appliedCoupon.code}):</span>
+                      <span>- R$ {couponDiscount.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                  )}
+                  {pixDiscount > 0 && (
+                    <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
+                      <span>Desconto Especial PIX (5%):</span>
+                      <span>- R$ {pixDiscount.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center text-base font-bold text-[#1A1918] dark:text-[#FAF8F5] pt-2 border-t border-dashed border-[#C5A059]/30">
+                    <span>Total Final:</span>
+                    <span className="text-[#C5A059] dark:text-[#DFBE76]">
+                      R$ {totalAmount.toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. ACORDEÃO TOUCH: SEUS DADOS PESSOAIS */}
+              <div className="bg-white dark:bg-[#1A1918] border border-[#C5A059]/30 shadow-xs overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleMobileSection('dados')}
+                  className="w-full p-4 flex items-center justify-between text-left cursor-pointer transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-5 h-5 rounded-none bg-[#C5A059] text-white text-xs font-bold flex items-center justify-center">
+                      1
+                    </span>
+                    <span className="font-serif-luxury text-sm font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
+                      Seus Dados Pessoais
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {isDadosDone ? (
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 border border-emerald-500/20 flex items-center gap-1">
+                        <Check className="w-3 h-3 stroke-[3]" /> Concluído
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 border border-rose-500/20">
+                        Pendente
+                      </span>
+                    )}
+                    <ChevronDown
+                      className={`w-4 h-4 text-[#C5A059] transition-transform duration-200 ${
+                        mobileSections.dados ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </div>
+                </button>
+
+                {mobileSections.dados && (
+                  <div className="p-4 pt-1 border-t border-[#C5A059]/15 space-y-3.5 text-xs animate-fadeIn">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                          Nome Completo *
+                        </label>
+                        {!customerName.trim() && (
+                          <span className="text-[10px] text-rose-500">* Obrigatório</span>
+                        )}
+                      </div>
                       <input
                         type="text"
                         value={customerName}
@@ -614,36 +962,599 @@ export default function CheckoutPage() {
                           setCustomerName(e.target.value);
                           if (formErrors.name) setFormErrors((p) => ({ ...p, name: '' }));
                         }}
+                        onBlur={() => captureLead(customerPhone, customerName)}
                         placeholder="Ex: Maria Carolina da Silva"
-                        className={`w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#201D1B] border ${
-                          formErrors.name ? 'border-red-500' : 'border-[#C5A059]/30 focus:border-[#C5A059]'
-                        } text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none`}
+                        className={getFieldClass(false, true, customerName, Boolean(formErrors.name))}
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                          WhatsApp com DDD *
+                        </label>
+                        {customerPhone.replace(/\D/g, '').length < 10 && (
+                          <span className="text-[10px] text-rose-500">* Obrigatório</span>
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        value={customerPhone}
+                        onChange={(e) => {
+                          const val = formatPhone(e.target.value);
+                          setCustomerPhone(val);
+                          if (formErrors.phone) setFormErrors((p) => ({ ...p, phone: '' }));
+                          if (val.replace(/\D/g, '').length >= 10) {
+                            captureLead(val, customerName);
+                          }
+                        }}
+                        onBlur={() => captureLead(customerPhone, customerName)}
+                        placeholder="(49) 99999-9999"
+                        maxLength={15}
+                        className={getFieldClass(false, true, customerPhone, Boolean(formErrors.phone))}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="font-semibold mb-1 block text-[#57534E] dark:text-[#D6D3D1]">
+                          E-mail (Opcional)
+                        </label>
+                        <input
+                          type="email"
+                          value={customerEmail}
+                          onChange={(e) => setCustomerEmail(e.target.value)}
+                          placeholder="seu@email.com"
+                          className="w-full px-3.5 py-2.5 text-sm sm:text-xs bg-white dark:bg-[#201D1B] border border-[#C5A059]/30 text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="font-semibold mb-1 block text-[#57534E] dark:text-[#D6D3D1]">
+                          CPF (Opcional)
+                        </label>
+                        <input
+                          type="text"
+                          value={customerCpf}
+                          onChange={(e) => setCustomerCpf(formatCpf(e.target.value))}
+                          placeholder="000.000.000-00"
+                          maxLength={14}
+                          className="w-full px-3.5 py-2.5 text-sm sm:text-xs bg-white dark:bg-[#201D1B] border border-[#C5A059]/30 text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 3. ACORDEÃO TOUCH: ENDEREÇO DE ENTREGA */}
+              <div className="bg-white dark:bg-[#1A1918] border border-[#C5A059]/30 shadow-xs overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleMobileSection('endereco')}
+                  className="w-full p-4 flex items-center justify-between text-left cursor-pointer transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-5 h-5 rounded-none bg-[#C5A059] text-white text-xs font-bold flex items-center justify-center">
+                      2
+                    </span>
+                    <span className="font-serif-luxury text-sm font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
+                      Endereço de Entrega
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {isEnderecoDone ? (
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 border border-emerald-500/20 flex items-center gap-1">
+                        <Check className="w-3 h-3 stroke-[3]" /> Concluído
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 border border-rose-500/20">
+                        Pendente
+                      </span>
+                    )}
+                    <ChevronDown
+                      className={`w-4 h-4 text-[#C5A059] transition-transform duration-200 ${
+                        mobileSections.endereco ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </div>
+                </button>
+
+                {mobileSections.endereco && (
+                  <div className="p-4 pt-1 border-t border-[#C5A059]/15 space-y-3.5 text-xs animate-fadeIn">
+                    {/* CEP */}
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                          CEP *
+                        </label>
+                        {!cepInput.trim() && (
+                          <span className="text-[10px] text-rose-500">* Obrigatório</span>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={cepInput}
+                          onChange={(e) => {
+                            const formatted = formatCep(e.target.value);
+                            setCepInput(formatted);
+                            if (formatted.replace(/\D/g, '').length === 8) {
+                              handleSearchCep(formatted);
+                            }
+                          }}
+                          placeholder="00000-000"
+                          maxLength={9}
+                          className={getFieldClass(false, true, cepInput, Boolean(cepError))}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleSearchCep()}
+                          disabled={isCepLoading}
+                          className="px-4 py-2.5 bg-[#1A1918] dark:bg-[#C5A059] text-white font-semibold uppercase tracking-wider text-xs hover:bg-[#C5A059] transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
+                        >
+                          {isCepLoading ? 'Buscando...' : 'Buscar'}
+                        </button>
+                      </div>
+                      {cepError && <span className="text-[11px] text-rose-500 mt-1 block">{cepError}</span>}
+                    </div>
+
+                    {/* Rua e Número */}
+                    <div className="grid grid-cols-12 gap-3">
+                      <div className="col-span-8">
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                            Rua / Avenida *
+                          </label>
+                          {filledByCep.street && (
+                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">✓ CEP</span>
+                          )}
+                        </div>
+                        <input
+                          type="text"
+                          value={street}
+                          onChange={(e) => {
+                            setStreet(e.target.value);
+                            setFilledByCep((p) => ({ ...p, street: false }));
+                          }}
+                          placeholder="Ex: Av. Brasil"
+                          className={getFieldClass(Boolean(filledByCep.street), true, street, Boolean(formErrors.street))}
+                        />
+                      </div>
+                      <div className="col-span-4">
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                            Número *
+                          </label>
+                          {!number.trim() && (
+                            <span className="text-[10px] text-rose-500">*</span>
+                          )}
+                        </div>
+                        <input
+                          type="text"
+                          value={number}
+                          onChange={(e) => {
+                            setNumber(e.target.value);
+                            if (formErrors.number) setFormErrors((p) => ({ ...p, number: '' }));
+                          }}
+                          placeholder="1250"
+                          className={getFieldClass(false, true, number, Boolean(formErrors.number))}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Complemento e Bairro */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="font-semibold mb-1 block text-[#57534E] dark:text-[#D6D3D1]">
+                          Complemento (Opcional)
+                        </label>
+                        <input
+                          type="text"
+                          value={complement}
+                          onChange={(e) => setComplement(e.target.value)}
+                          placeholder="Ex: Apto 402"
+                          className="w-full px-3.5 py-2.5 text-sm sm:text-xs bg-white dark:bg-[#201D1B] border border-[#C5A059]/30 text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                            Bairro *
+                          </label>
+                          {filledByCep.neighborhood && (
+                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">✓ CEP</span>
+                          )}
+                        </div>
+                        <input
+                          type="text"
+                          value={neighborhood}
+                          onChange={(e) => {
+                            setNeighborhood(e.target.value);
+                            setFilledByCep((p) => ({ ...p, neighborhood: false }));
+                          }}
+                          placeholder="Ex: Centro"
+                          className={getFieldClass(Boolean(filledByCep.neighborhood), true, neighborhood)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Cidade e UF */}
+                    <div className="grid grid-cols-12 gap-3">
+                      <div className="col-span-9">
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                            Cidade *
+                          </label>
+                          {filledByCep.city && (
+                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">✓ CEP</span>
+                          )}
+                        </div>
+                        <input
+                          type="text"
+                          value={city}
+                          onChange={(e) => {
+                            setCity(e.target.value);
+                            setFilledByCep((p) => ({ ...p, city: false }));
+                          }}
+                          placeholder="Ex: Chapecó"
+                          className={getFieldClass(Boolean(filledByCep.city), true, city, Boolean(formErrors.city))}
+                        />
+                      </div>
+                      <div className="col-span-3">
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                            UF *
+                          </label>
+                        </div>
+                        <input
+                          type="text"
+                          value={uf}
+                          onChange={(e) => {
+                            setUf(e.target.value.toUpperCase());
+                            setFilledByCep((p) => ({ ...p, uf: false }));
+                          }}
+                          placeholder="SC"
+                          maxLength={2}
+                          className={getFieldClass(Boolean(filledByCep.uf), true, uf, Boolean(formErrors.uf))}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Opções de Envio */}
+                    {uf && (
+                      <div className="pt-2 border-t border-[#C5A059]/15">
+                        <label className="block font-semibold mb-2 text-[#57534E] dark:text-[#D6D3D1]">
+                          Opção de Envio (Correios):
+                        </label>
+                        <div className="space-y-2">
+                          {isFreeShipping ? (
+                            <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Truck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                <div>
+                                  <span className="font-bold text-emerald-700 dark:text-emerald-300 block text-xs">
+                                    Frete VIP Cortesia (Grátis)
+                                  </span>
+                                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
+                                    Envio priorizado com rastreamento completo
+                                  </span>
+                                </div>
+                              </div>
+                              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">R$ 0,00</span>
+                            </div>
+                          ) : (
+                            shippingOptions.map((opt) => (
+                              <label
+                                key={opt.id}
+                                className={`flex items-center justify-between p-3 border cursor-pointer transition-colors ${
+                                  selectedShipping === opt.id
+                                    ? 'border-[#C5A059] bg-[#C5A059]/10 font-bold'
+                                    : 'border-black/10 dark:border-white/10 hover:border-[#C5A059]/50'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <input
+                                    type="radio"
+                                    name="shipping_mobile"
+                                    checked={selectedShipping === opt.id}
+                                    onChange={() => setSelectedShipping(opt.id)}
+                                    className="accent-[#C5A059]"
+                                  />
+                                  <div>
+                                    <span className="block text-xs text-[#1A1918] dark:text-[#FAF8F5]">{opt.name}</span>
+                                    <span className="text-[10px] text-[#78716C] dark:text-[#A8A29E]">{opt.deliveryDays}</span>
+                                  </div>
+                                </div>
+                                <span className="text-xs text-[#C5A059] font-bold">{opt.formattedPrice}</span>
+                              </label>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* 4. ACORDEÃO TOUCH: FORMA DE PAGAMENTO */}
+              <div className="bg-white dark:bg-[#1A1918] border border-[#C5A059]/30 shadow-xs overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleMobileSection('pagamento')}
+                  className="w-full p-4 flex items-center justify-between text-left cursor-pointer transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-5 h-5 rounded-none bg-[#C5A059] text-white text-xs font-bold flex items-center justify-center">
+                      3
+                    </span>
+                    <span className="font-serif-luxury text-sm font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
+                      Forma de Pagamento
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 border border-emerald-500/20">
+                      {paymentMethod === 'pix' ? 'PIX (5% OFF)' : paymentMethod === 'credit_card' ? `Cartão em ${cardInstallments}x` : 'WhatsApp'}
+                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-[#C5A059] transition-transform duration-200 ${
+                        mobileSections.pagamento ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </div>
+                </button>
+
+                {mobileSections.pagamento && (
+                  <div className="p-4 pt-1 border-t border-[#C5A059]/15 space-y-3 text-xs animate-fadeIn">
+                    {/* PIX */}
+                    <label
+                      className={`flex items-start justify-between p-3 border cursor-pointer transition-all ${
+                        paymentMethod === 'pix'
+                          ? 'border-[#C5A059] bg-[#C5A059]/10 shadow-xs'
+                          : 'border-black/10 dark:border-white/10 hover:border-[#C5A059]/50'
+                      }`}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <input
+                          type="radio"
+                          name="payment_mobile"
+                          checked={paymentMethod === 'pix'}
+                          onChange={() => setPaymentMethod('pix')}
+                          className="accent-[#C5A059] mt-0.5"
+                        />
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-bold text-[#1A1918] dark:text-[#FAF8F5]">
+                              PIX À Vista (5% de Desconto Especial)
+                            </span>
+                            <span className="px-1 py-0.2 bg-[#22C55E] text-white text-[8px] font-bold uppercase">
+                              5% OFF
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-[#78716C] dark:text-[#A8A29E] mt-0.5 leading-relaxed">
+                            Aprovação imediata e separação prioritária das suas peças na boutique.
+                          </p>
+                        </div>
+                      </div>
+                      <QrCode className="w-4 h-4 text-[#C5A059] shrink-0" />
+                    </label>
+
+                    {/* Cartão de Crédito */}
+                    <div
+                      className={`p-3 border transition-all ${
+                        paymentMethod === 'credit_card'
+                          ? 'border-[#C5A059] bg-[#C5A059]/10 shadow-xs'
+                          : 'border-black/10 dark:border-white/10 hover:border-[#C5A059]/50'
+                      }`}
+                    >
+                      <label className="flex items-start justify-between cursor-pointer">
+                        <div className="flex items-start gap-2.5">
+                          <input
+                            type="radio"
+                            name="payment_mobile"
+                            checked={paymentMethod === 'credit_card'}
+                            onChange={() => setPaymentMethod('credit_card')}
+                            className="accent-[#C5A059] mt-0.5"
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-[#1A1918] dark:text-[#FAF8F5] block">
+                              Cartão de Crédito (Até 6x Sem Juros)
+                            </span>
+                            <p className="text-[10px] text-[#78716C] dark:text-[#A8A29E] mt-0.5 leading-relaxed">
+                              Link de pagamento 100% seguro emitido pela consultora no fechamento.
+                            </p>
+                          </div>
+                        </div>
+                        <CreditCard className="w-4 h-4 text-[#C5A059] shrink-0" />
+                      </label>
+
+                      {paymentMethod === 'credit_card' && (
+                        <div className="mt-2.5 pt-2 border-t border-[#C5A059]/20">
+                          <label className="block text-[10px] font-semibold mb-1 text-[#57534E] dark:text-[#D6D3D1]">
+                            Selecione o parcelamento:
+                          </label>
+                          <select
+                            value={cardInstallments}
+                            onChange={(e) => setCardInstallments(Number(e.target.value))}
+                            className="w-full px-2.5 py-2 bg-white dark:bg-[#1A1918] border border-[#C5A059]/40 text-xs text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none font-medium cursor-pointer"
+                          >
+                            {[1, 2, 3, 4, 5, 6].map((num) => (
+                              <option key={num} value={num}>
+                                {num}x de R$ {(totalAmount / num).toFixed(2).replace('.', ',')} sem juros
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Combinar no WhatsApp */}
+                    <label
+                      className={`flex items-start justify-between p-3 border cursor-pointer transition-all ${
+                        paymentMethod === 'whatsapp'
+                          ? 'border-[#C5A059] bg-[#C5A059]/10 shadow-xs'
+                          : 'border-black/10 dark:border-white/10 hover:border-[#C5A059]/50'
+                      }`}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <input
+                          type="radio"
+                          name="payment_mobile"
+                          checked={paymentMethod === 'whatsapp'}
+                          onChange={() => setPaymentMethod('whatsapp')}
+                          className="accent-[#C5A059] mt-0.5"
+                        />
+                        <div>
+                          <span className="text-xs font-bold text-[#1A1918] dark:text-[#FAF8F5] block">
+                            Combinar Pagamento no WhatsApp VIP
+                          </span>
+                          <p className="text-[10px] text-[#78716C] dark:text-[#A8A29E] mt-0.5 leading-relaxed">
+                            Fale diretamente com a Leidy e escolha as condições especiais.
+                          </p>
+                        </div>
+                      </div>
+                      <MessageCircle className="w-4 h-4 text-[#25D366] shrink-0" />
+                    </label>
+                  </div>
+                )}
+              </div>
+
+              {/* 5. ACORDEÃO TOUCH: OBSERVAÇÕES */}
+              <div className="bg-white dark:bg-[#1A1918] border border-[#C5A059]/30 shadow-xs overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleMobileSection('observacoes')}
+                  className="w-full p-4 flex items-center justify-between text-left cursor-pointer transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-5 h-5 rounded-none bg-[#C5A059] text-white text-xs font-bold flex items-center justify-center">
+                      4
+                    </span>
+                    <span className="font-serif-luxury text-sm font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
+                      Observações para a Leidy (Opcional)
+                    </span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 text-[#C5A059] transition-transform duration-200 ${
+                      mobileSections.observacoes ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+
+                {mobileSections.observacoes && (
+                  <div className="p-4 pt-1 border-t border-[#C5A059]/15 text-xs animate-fadeIn">
+                    <textarea
+                      value={orderNotes}
+                      onChange={(e) => setOrderNotes(e.target.value)}
+                      placeholder="Ex: Embalar para presente, ponto de referência..."
+                      rows={2}
+                      className="w-full px-3 py-2 bg-white dark:bg-[#201D1B] border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* BOTÃO PRINCIPAL DE FINALIZAÇÃO NO MOBILE */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleFinalizeOrder()}
+                  className="w-full py-4 px-6 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs uppercase tracking-[0.18em] shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-5 h-5 fill-white stroke-[#25D366]" />
+                  <span>FINALIZAR COMPRA NO WHATSAPP</span>
+                </button>
+                <p className="text-[10px] text-center text-[#78716C] dark:text-[#A8A29E] mt-2">
+                  🔒 Seus dados serão enviados de forma segura para atendimento direto com a Leidy.
+                </p>
+              </div>
+
+            </div>
+
+            {/* ============================================================ */}
+            {/* FLUXO DESKTOP (hidden lg:grid)                                */}
+            {/* Duas Colunas: Formulário à Esquerda e Resumo Fixo à Direita   */}
+            {/* ============================================================ */}
+            <form onSubmit={handleFinalizeOrder} className="hidden lg:grid grid-cols-12 gap-8 items-start">
+              
+              {/* COLUNA ESQUERDA: DADOS, ENDEREÇO E PAGAMENTO (7 colunas) */}
+              <div className="lg:col-span-7 space-y-6">
+                
+                {/* ETAPA 1: SEUS DADOS PESSOAIS */}
+                <div className="bg-white dark:bg-[#1A1918] p-5 sm:p-7 border border-[#C5A059]/30 shadow-xs">
+                  <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#C5A059]/20">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-6 h-6 rounded-none bg-[#C5A059] text-white text-xs font-bold flex items-center justify-center">
+                        1
+                      </span>
+                      <h2 className="font-serif-luxury text-base sm:text-lg font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
+                        Seus Dados Pessoais
+                      </h2>
+                    </div>
+                    {isDadosDone ? (
+                      <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 border border-emerald-500/20 flex items-center gap-1">
+                        <Check className="w-3.5 h-3.5 stroke-[3]" /> Concluído
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 border border-rose-500/20">
+                        Pendente
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-3.5 text-xs">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                          Nome Completo *
+                        </label>
+                        {!customerName.trim() && (
+                          <span className="text-[10px] text-rose-500">* Obrigatório</span>
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        value={customerName}
+                        onChange={(e) => {
+                          setCustomerName(e.target.value);
+                          if (formErrors.name) setFormErrors((p) => ({ ...p, name: '' }));
+                        }}
+                        onBlur={() => captureLead(customerPhone, customerName)}
+                        placeholder="Ex: Maria Carolina da Silva"
+                        className={getFieldClass(false, true, customerName, Boolean(formErrors.name))}
                       />
                       {formErrors.name && (
-                        <span className="text-[11px] text-red-500 mt-1 block">{formErrors.name}</span>
+                        <span className="text-[11px] text-rose-500 mt-1 block">{formErrors.name}</span>
                       )}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       <div>
-                        <label className="block font-semibold mb-1 text-[#57534E] dark:text-[#D6D3D1]">
-                          WhatsApp com DDD *
-                        </label>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                            WhatsApp com DDD *
+                          </label>
+                          {customerPhone.replace(/\D/g, '').length < 10 && (
+                            <span className="text-[10px] text-rose-500">* Obrigatório</span>
+                          )}
+                        </div>
                         <input
                           type="text"
                           value={customerPhone}
                           onChange={(e) => {
-                            setCustomerPhone(formatPhone(e.target.value));
+                            const val = formatPhone(e.target.value);
+                            setCustomerPhone(val);
                             if (formErrors.phone) setFormErrors((p) => ({ ...p, phone: '' }));
+                            if (val.replace(/\D/g, '').length >= 10) {
+                              captureLead(val, customerName);
+                            }
                           }}
+                          onBlur={() => captureLead(customerPhone, customerName)}
                           placeholder="(49) 99999-9999"
                           maxLength={15}
-                          className={`w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#201D1B] border ${
-                            formErrors.phone ? 'border-red-500' : 'border-[#C5A059]/30 focus:border-[#C5A059]'
-                          } text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none`}
+                          className={getFieldClass(false, true, customerPhone, Boolean(formErrors.phone))}
                         />
                         {formErrors.phone && (
-                          <span className="text-[11px] text-red-500 mt-1 block">{formErrors.phone}</span>
+                          <span className="text-[11px] text-rose-500 mt-1 block">{formErrors.phone}</span>
                         )}
                       </div>
 
@@ -656,7 +1567,7 @@ export default function CheckoutPage() {
                           value={customerEmail}
                           onChange={(e) => setCustomerEmail(e.target.value)}
                           placeholder="seu@email.com"
-                          className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/30 focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none"
+                          className="w-full px-3.5 py-2.5 text-xs bg-white dark:bg-[#201D1B] border border-[#C5A059]/30 text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none"
                         />
                       </div>
                     </div>
@@ -671,7 +1582,7 @@ export default function CheckoutPage() {
                         onChange={(e) => setCustomerCpf(formatCpf(e.target.value))}
                         placeholder="000.000.000-00"
                         maxLength={14}
-                        className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/30 focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none"
+                        className="w-full px-3.5 py-2.5 text-xs bg-white dark:bg-[#201D1B] border border-[#C5A059]/30 text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none"
                       />
                     </div>
                   </div>
@@ -688,17 +1599,33 @@ export default function CheckoutPage() {
                         Endereço de Entrega
                       </h2>
                     </div>
-                    <span className="text-[10px] uppercase tracking-wider text-[#C5A059] font-bold flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5" /> ViaCEP Oficial
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {isEnderecoDone ? (
+                        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 border border-emerald-500/20 flex items-center gap-1">
+                          <Check className="w-3.5 h-3.5 stroke-[3]" /> Concluído
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 border border-rose-500/20">
+                          Pendente
+                        </span>
+                      )}
+                      <span className="text-[10px] uppercase tracking-wider text-[#C5A059] font-bold flex items-center gap-1 ml-2">
+                        <MapPin className="w-3.5 h-3.5" /> ViaCEP Oficial
+                      </span>
+                    </div>
                   </div>
 
                   <div className="space-y-3.5 text-xs">
                     {/* Campo de CEP com Busca */}
                     <div>
-                      <label className="block font-semibold mb-1 text-[#57534E] dark:text-[#D6D3D1]">
-                        CEP *
-                      </label>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                          CEP *
+                        </label>
+                        {!cepInput.trim() && (
+                          <span className="text-[10px] text-rose-500">* Obrigatório</span>
+                        )}
+                      </div>
                       <div className="flex gap-2">
                         <input
                           type="text"
@@ -712,7 +1639,7 @@ export default function CheckoutPage() {
                           }}
                           placeholder="00000-000"
                           maxLength={9}
-                          className="flex-1 px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/30 focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none"
+                          className={getFieldClass(false, true, cepInput, Boolean(cepError))}
                         />
                         <button
                           type="button"
@@ -724,38 +1651,50 @@ export default function CheckoutPage() {
                         </button>
                       </div>
                       {cepError && (
-                        <span className="text-[11px] text-red-500 mt-1 block">{cepError}</span>
+                        <span className="text-[11px] text-rose-500 mt-1 block">{cepError}</span>
                       )}
                     </div>
 
                     {/* Rua e Número */}
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
                       <div className="sm:col-span-8">
-                        <label className="block font-semibold mb-1 text-[#57534E] dark:text-[#D6D3D1]">
-                          Rua / Avenida *
-                        </label>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                            Rua / Avenida *
+                          </label>
+                          {filledByCep.street && (
+                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">✓ Preenchido via CEP</span>
+                          )}
+                        </div>
                         <input
                           type="text"
                           value={street}
-                          onChange={(e) => setStreet(e.target.value)}
+                          onChange={(e) => {
+                            setStreet(e.target.value);
+                            setFilledByCep((p) => ({ ...p, street: false }));
+                          }}
                           placeholder="Ex: Av. Brasil"
-                          className={`w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#201D1B] border ${
-                            formErrors.street ? 'border-red-500' : 'border-[#C5A059]/30 focus:border-[#C5A059]'
-                          } text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none`}
+                          className={getFieldClass(Boolean(filledByCep.street), true, street, Boolean(formErrors.street))}
                         />
                       </div>
                       <div className="sm:col-span-4">
-                        <label className="block font-semibold mb-1 text-[#57534E] dark:text-[#D6D3D1]">
-                          Número *
-                        </label>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                            Número *
+                          </label>
+                          {!number.trim() && (
+                            <span className="text-[10px] text-rose-500">* Obrigatório</span>
+                          )}
+                        </div>
                         <input
                           type="text"
                           value={number}
-                          onChange={(e) => setNumber(e.target.value)}
+                          onChange={(e) => {
+                            setNumber(e.target.value);
+                            if (formErrors.number) setFormErrors((p) => ({ ...p, number: '' }));
+                          }}
                           placeholder="Ex: 1250"
-                          className={`w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#201D1B] border ${
-                            formErrors.number ? 'border-red-500' : 'border-[#C5A059]/30 focus:border-[#C5A059]'
-                          } text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none`}
+                          className={getFieldClass(false, true, number, Boolean(formErrors.number))}
                         />
                       </div>
                     </div>
@@ -771,19 +1710,27 @@ export default function CheckoutPage() {
                           value={complement}
                           onChange={(e) => setComplement(e.target.value)}
                           placeholder="Ex: Apto 402"
-                          className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/30 focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none"
+                          className="w-full px-3.5 py-2.5 text-xs bg-white dark:bg-[#201D1B] border border-[#C5A059]/30 text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none"
                         />
                       </div>
                       <div>
-                        <label className="block font-semibold mb-1 text-[#57534E] dark:text-[#D6D3D1]">
-                          Bairro *
-                        </label>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                            Bairro *
+                          </label>
+                          {filledByCep.neighborhood && (
+                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">✓ Preenchido via CEP</span>
+                          )}
+                        </div>
                         <input
                           type="text"
                           value={neighborhood}
-                          onChange={(e) => setNeighborhood(e.target.value)}
+                          onChange={(e) => {
+                            setNeighborhood(e.target.value);
+                            setFilledByCep((p) => ({ ...p, neighborhood: false }));
+                          }}
                           placeholder="Ex: Centro"
-                          className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/30 focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none"
+                          className={getFieldClass(Boolean(filledByCep.neighborhood), true, neighborhood)}
                         />
                       </div>
                     </div>
@@ -791,33 +1738,46 @@ export default function CheckoutPage() {
                     {/* Cidade e Estado */}
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
                       <div className="sm:col-span-9">
-                        <label className="block font-semibold mb-1 text-[#57534E] dark:text-[#D6D3D1]">
-                          Cidade *
-                        </label>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                            Cidade *
+                          </label>
+                          {filledByCep.city && (
+                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">✓ Preenchido via CEP</span>
+                          )}
+                        </div>
                         <input
                           type="text"
                           value={city}
-                          onChange={(e) => setCity(e.target.value)}
+                          onChange={(e) => {
+                            setCity(e.target.value);
+                            setFilledByCep((p) => ({ ...p, city: false }));
+                          }}
                           placeholder="Ex: Chapecó"
-                          className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/30 focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none"
+                          className={getFieldClass(Boolean(filledByCep.city), true, city, Boolean(formErrors.city))}
                         />
                       </div>
                       <div className="sm:col-span-3">
-                        <label className="block font-semibold mb-1 text-[#57534E] dark:text-[#D6D3D1]">
-                          UF *
-                        </label>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                            UF *
+                          </label>
+                        </div>
                         <input
                           type="text"
                           value={uf}
-                          onChange={(e) => setUf(e.target.value.toUpperCase())}
+                          onChange={(e) => {
+                            setUf(e.target.value.toUpperCase());
+                            setFilledByCep((p) => ({ ...p, uf: false }));
+                          }}
                           placeholder="SC"
                           maxLength={2}
-                          className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/30 focus:border-[#C5A059] text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none text-center font-bold"
+                          className={getFieldClass(Boolean(filledByCep.uf), true, uf, Boolean(formErrors.uf))}
                         />
                       </div>
                     </div>
 
-                    {/* OPÇÕES REAIS DE FRETE */}
+                    {/* Opções Reais de Frete */}
                     {uf && (
                       <div className="pt-3 border-t border-[#C5A059]/15">
                         <label className="block font-semibold mb-2 text-[#57534E] dark:text-[#D6D3D1]">
@@ -852,7 +1812,7 @@ export default function CheckoutPage() {
                                 <div className="flex items-center gap-2.5">
                                   <input
                                     type="radio"
-                                    name="shipping"
+                                    name="shipping_desktop"
                                     checked={selectedShipping === opt.id}
                                     onChange={() => setSelectedShipping(opt.id)}
                                     className="accent-[#C5A059]"
@@ -869,7 +1829,6 @@ export default function CheckoutPage() {
                         </div>
                       </div>
                     )}
-
                   </div>
                 </div>
 
@@ -885,7 +1844,7 @@ export default function CheckoutPage() {
                   </div>
 
                   <div className="space-y-3">
-                    {/* Opção 1: PIX com 5% de desconto */}
+                    {/* Opção 1: PIX */}
                     <label
                       className={`flex items-start justify-between p-3.5 sm:p-4 border cursor-pointer transition-all ${
                         paymentMethod === 'pix'
@@ -896,7 +1855,7 @@ export default function CheckoutPage() {
                       <div className="flex items-start gap-3">
                         <input
                           type="radio"
-                          name="payment"
+                          name="payment_desktop"
                           checked={paymentMethod === 'pix'}
                           onChange={() => setPaymentMethod('pix')}
                           className="accent-[#C5A059] mt-0.5"
@@ -918,7 +1877,7 @@ export default function CheckoutPage() {
                       <QrCode className="w-5 h-5 text-[#C5A059] shrink-0" />
                     </label>
 
-                    {/* Opção 2: Cartão de Crédito com Simulação de Parcelas */}
+                    {/* Opção 2: Cartão de Crédito */}
                     <div
                       className={`p-3.5 sm:p-4 border transition-all ${
                         paymentMethod === 'credit_card'
@@ -930,7 +1889,7 @@ export default function CheckoutPage() {
                         <div className="flex items-start gap-3">
                           <input
                             type="radio"
-                            name="payment"
+                            name="payment_desktop"
                             checked={paymentMethod === 'credit_card'}
                             onChange={() => setPaymentMethod('credit_card')}
                             className="accent-[#C5A059] mt-0.5"
@@ -947,7 +1906,6 @@ export default function CheckoutPage() {
                         <CreditCard className="w-5 h-5 text-[#C5A059] shrink-0" />
                       </label>
 
-                      {/* Seletor de Parcelamento */}
                       {paymentMethod === 'credit_card' && (
                         <div className="mt-3 pt-3 border-t border-[#C5A059]/20">
                           <label className="block text-[11px] font-semibold mb-1.5 text-[#57534E] dark:text-[#D6D3D1]">
@@ -968,7 +1926,7 @@ export default function CheckoutPage() {
                       )}
                     </div>
 
-                    {/* Opção 3: Atendimento WhatsApp VIP */}
+                    {/* Opção 3: Atendimento WhatsApp */}
                     <label
                       className={`flex items-start justify-between p-3.5 sm:p-4 border cursor-pointer transition-all ${
                         paymentMethod === 'whatsapp'
@@ -979,7 +1937,7 @@ export default function CheckoutPage() {
                       <div className="flex items-start gap-3">
                         <input
                           type="radio"
-                          name="payment"
+                          name="payment_desktop"
                           checked={paymentMethod === 'whatsapp'}
                           onChange={() => setPaymentMethod('whatsapp')}
                           className="accent-[#C5A059] mt-0.5"
@@ -989,7 +1947,7 @@ export default function CheckoutPage() {
                             Combinar Pagamento no WhatsApp VIP
                           </span>
                           <p className="text-[11px] text-[#78716C] dark:text-[#A8A29E] mt-0.5 leading-relaxed">
-                            Fale diretamente com a Leidy e escolha as condições especiais de atendimento.
+                            Fale diretamente com a Leidy e tire qualquer dúvida com atendimento humanizado.
                           </p>
                         </div>
                       </div>
@@ -998,54 +1956,7 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* ETAPA 4: CUPOM DE DESCONTO */}
-                <div className="bg-white dark:bg-[#1A1918] p-5 sm:p-7 border border-[#C5A059]/30 shadow-xs">
-                  <div className="flex items-center gap-2 pb-3 mb-3 border-b border-[#C5A059]/20">
-                    <Tag className="w-4 h-4 text-[#C5A059]" />
-                    <h3 className="font-serif-luxury text-sm font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
-                      Possui Cupom de Desconto?
-                    </h3>
-                  </div>
-
-                  {appliedCoupon ? (
-                    <div className="flex items-center justify-between p-2.5 bg-emerald-500/10 border border-emerald-500/30 text-xs">
-                      <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-bold">
-                        <Check className="w-4 h-4" />
-                        <span>Cupom {appliedCoupon.code} ({appliedCoupon.percent}% OFF) Ativo!</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleRemoveCoupon}
-                        className="text-[11px] text-red-500 hover:underline font-semibold cursor-pointer"
-                      >
-                        Remover
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-1.5">
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={couponInput}
-                          onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                          placeholder="Digite seu cupom (Ex: LEIDY10)"
-                          className="flex-1 px-3 py-2 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/30 text-xs uppercase text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleApplyCoupon}
-                          className="px-4 py-2 bg-[#1A1918] dark:bg-[#C5A059] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#C5A059] transition-colors cursor-pointer shrink-0"
-                        >
-                          Aplicar
-                        </button>
-                      </div>
-                      {couponError && <p className="text-[11px] text-red-500">{couponError}</p>}
-                      {couponSuccess && <p className="text-[11px] text-emerald-600">{couponSuccess}</p>}
-                    </div>
-                  )}
-                </div>
-
-                {/* ETAPA 5: OBSERVAÇÕES DO PEDIDO */}
+                {/* ETAPA 4: OBSERVAÇÕES DO PEDIDO */}
                 <div className="bg-white dark:bg-[#1A1918] p-5 sm:p-7 border border-[#C5A059]/30 shadow-xs">
                   <label className="block text-xs font-semibold mb-1 text-[#57534E] dark:text-[#D6D3D1]">
                     Observações para a Leidy (Opcional)
@@ -1055,15 +1966,13 @@ export default function CheckoutPage() {
                     onChange={(e) => setOrderNotes(e.target.value)}
                     placeholder="Ex: Embalar para presente, ponto de referência..."
                     rows={2}
-                    className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
+                    className="w-full px-3.5 py-2.5 bg-white dark:bg-[#201D1B] border border-[#C5A059]/30 text-xs text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
                   />
                 </div>
 
               </div>
 
-              {/* ============================================================ */}
-              {/* COLUNA DIREITA: RESUMO INTERATIVO DO PEDIDO (5 colunas)       */}
-              {/* ============================================================ */}
+              {/* COLUNA DIREITA: RESUMO INTERATIVO DO PEDIDO (5 colunas - sticky) */}
               <div className="lg:col-span-5 sticky top-28 space-y-6">
                 
                 <div className="bg-white dark:bg-[#1A1918] p-5 sm:p-7 border border-[#C5A059]/30 shadow-md">
@@ -1076,11 +1985,10 @@ export default function CheckoutPage() {
                     </span>
                   </div>
 
-                  {/* Lista de Peças Interativa (Com alteração de quantidade e remoção!) */}
-                  <div className="space-y-3.5 max-h-80 overflow-y-auto pr-1 custom-scrollbar mb-5">
+                  {/* Lista de Peças */}
+                  <div className="space-y-3.5 max-h-72 overflow-y-auto pr-1 custom-scrollbar mb-4">
                     {cartItems.map((item) => (
-                      <div key={item.id} className="flex gap-3 pb-3.5 border-b border-[#C5A059]/10 last:border-0 relative">
-                        {/* Foto */}
+                      <div key={item.id} className="flex gap-3 pb-3 border-b border-[#C5A059]/10 last:border-0 relative">
                         <div className="relative w-14 sm:w-16 h-20 sm:h-22 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/25 shrink-0 overflow-hidden">
                           {item.image ? (
                             <Image src={item.image} alt={item.name} fill className="object-cover object-top" />
@@ -1091,7 +1999,6 @@ export default function CheckoutPage() {
                           )}
                         </div>
 
-                        {/* Dados e Controles */}
                         <div className="flex-1 min-w-0 pr-6">
                           <h4 className="text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] truncate leading-tight">
                             {item.name}
@@ -1101,7 +2008,6 @@ export default function CheckoutPage() {
                           </div>
 
                           <div className="flex items-center justify-between mt-2">
-                            {/* Controle de Quantidade */}
                             <div className="flex items-center border border-[#C5A059]/30 bg-[#FAF8F5] dark:bg-[#201D1B] px-1.5 py-0.5">
                               <button
                                 type="button"
@@ -1122,14 +2028,12 @@ export default function CheckoutPage() {
                               </button>
                             </div>
 
-                            {/* Valor */}
                             <span className="text-xs font-bold text-[#C5A059]">
                               R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
                             </span>
                           </div>
                         </div>
 
-                        {/* Botão Remover Peça */}
                         <button
                           type="button"
                           onClick={() => removeFromCart(item.id)}
@@ -1142,9 +2046,9 @@ export default function CheckoutPage() {
                     ))}
                   </div>
 
-                  {/* Sugestão de Upsell (Você também pode gostar) */}
+                  {/* Sugestão de Upsell */}
                   {upsellProduct && (
-                    <div className="p-3 bg-[#F7F3EB] dark:bg-[#1E1B19] border border-[#C5A059]/30 mb-5">
+                    <div className="p-3 bg-[#F7F3EB] dark:bg-[#1E1B19] border border-[#C5A059]/30 mb-4">
                       <span className="text-[10px] uppercase tracking-widest text-[#C5A059] dark:text-[#DFBE76] font-bold block mb-1.5">
                         Complete seu look:
                       </span>
@@ -1179,6 +2083,99 @@ export default function CheckoutPage() {
                     </div>
                   )}
 
+                  {/* CÁLCULO DE FRETE NO RESUMO DA SACOLA (Sincronizado com o Endereço) */}
+                  <div className="pt-3 pb-3 border-t border-[#C5A059]/15">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs font-semibold text-[#57534E] dark:text-[#D6D3D1] flex items-center gap-1.5">
+                        <Truck className="w-3.5 h-3.5 text-[#C5A059]" />
+                        <span>Calcular Frete & Prazo</span>
+                      </label>
+                      {isFreeShipping && (
+                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5">
+                          VIP Grátis
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={cepInput}
+                        onChange={(e) => {
+                          const formatted = formatCep(e.target.value);
+                          setCepInput(formatted);
+                          if (formatted.replace(/\D/g, '').length === 8) {
+                            handleSearchCep(formatted);
+                          }
+                        }}
+                        placeholder="00000-000"
+                        maxLength={9}
+                        className={getFieldClass(false, true, cepInput, Boolean(cepError))}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleSearchCep()}
+                        disabled={isCepLoading}
+                        className="px-3.5 py-2 bg-[#1A1918] dark:bg-[#C5A059] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#C5A059] transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
+                      >
+                        {isCepLoading ? 'Buscando...' : 'Calcular'}
+                      </button>
+                    </div>
+                    {cepError && <p className="text-[11px] text-rose-500 mt-1">{cepError}</p>}
+                    {city && uf && (
+                      <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1.5 flex items-center gap-1">
+                        <Check className="w-3 h-3 stroke-[2.5]" />
+                        <span>Destino: {city}/{uf} {street ? `• ${street}` : ''}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  {/* CUPOM DE DESCONTO NO RESUMO DA SACOLA */}
+                  <div className="pt-3 pb-3 border-t border-[#C5A059]/15">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <Tag className="w-3.5 h-3.5 text-[#C5A059]" />
+                      <span className="text-xs font-semibold text-[#57534E] dark:text-[#D6D3D1]">
+                        Cupom de Desconto
+                      </span>
+                    </div>
+
+                    {appliedCoupon ? (
+                      <div className="flex items-center justify-between p-2.5 bg-emerald-500/10 border border-emerald-500/30 text-xs">
+                        <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300 font-bold">
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Cupom {appliedCoupon.code} ({appliedCoupon.percent}% OFF) Ativo!</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRemoveCoupon}
+                          className="text-[11px] text-rose-500 hover:underline font-semibold cursor-pointer"
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={couponInput}
+                            onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                            placeholder="Ex: LEIDY10"
+                            className="flex-1 px-3 py-2 bg-white dark:bg-[#201D1B] border border-[#C5A059]/30 text-xs uppercase text-[#1A1918] dark:text-[#FAF8F5] focus:outline-none focus:border-[#C5A059]"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleApplyCoupon}
+                            className="px-3.5 py-2 bg-[#1A1918] dark:bg-[#C5A059] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#C5A059] transition-colors cursor-pointer shrink-0"
+                          >
+                            Aplicar
+                          </button>
+                        </div>
+                        {couponError && <p className="text-[11px] text-rose-500 mt-1">{couponError}</p>}
+                        {couponSuccess && <p className="text-[11px] text-emerald-600 mt-1">{couponSuccess}</p>}
+                      </div>
+                    )}
+                  </div>
+
                   {/* Discriminativo Financeiro Detalhado */}
                   <div className="space-y-2 text-xs pt-3 border-t border-[#C5A059]/20 text-[#57534E] dark:text-[#D6D3D1]">
                     <div className="flex justify-between items-center">
@@ -1196,7 +2193,7 @@ export default function CheckoutPage() {
                         ) : shippingPrice > 0 ? (
                           `R$ ${shippingPrice.toFixed(2).replace('.', ',')}`
                         ) : (
-                          'A calcular'
+                          'A calcular pelo CEP'
                         )}
                       </span>
                     </div>
@@ -1231,23 +2228,14 @@ export default function CheckoutPage() {
                     </span>
                   </div>
 
-                  {/* Botões de Finalização */}
+                  {/* Botão de Finalização Principal no Desktop */}
                   <div className="pt-5 space-y-2.5">
                     <button
                       type="submit"
-                      className="w-full py-4 px-6 bg-[#1A1918] dark:bg-[#C5A059] hover:bg-[#C5A059] dark:hover:bg-[#DFBE76] dark:hover:text-[#1A1918] text-white font-bold text-xs uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                      className="w-full py-4 px-6 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs uppercase tracking-[0.18em] shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                     >
-                      <Lock className="w-4 h-4" />
-                      <span>FINALIZAR COMPRA</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleOpenWhatsApp}
-                      className="w-full py-3 px-6 bg-[#25D366]/10 hover:bg-[#25D366] text-[#1A1918] dark:text-[#FAF8F5] hover:text-white border border-[#25D366]/40 font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
-                    >
-                      <MessageCircle className="w-4 h-4 text-[#25D366] group-hover:text-white" />
-                      <span>Ou Finalizar Direto no WhatsApp</span>
+                      <MessageCircle className="w-5 h-5 fill-white stroke-[#25D366]" />
+                      <span>FINALIZAR COMPRA NO WHATSAPP</span>
                     </button>
                   </div>
 

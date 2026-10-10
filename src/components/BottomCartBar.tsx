@@ -11,7 +11,8 @@ export const BottomCartBar: React.FC = () => {
   const pathname = usePathname();
   const { cartItems, cartCount, isCartOpen, openCart } = useStore();
 
-  if (cartCount === 0 || isCartOpen || pathname === '/checkout') {
+  const isCheckoutPage = pathname?.startsWith('/checkout');
+  if (cartCount === 0 || isCartOpen || isCheckoutPage) {
     return null;
   }
 
