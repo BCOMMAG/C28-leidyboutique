@@ -15,6 +15,7 @@ import {
   MessageCircle,
   Copy,
   ChevronRight,
+  ChevronDown,
   AlertCircle,
   Lock,
   Sparkles,
@@ -76,6 +77,7 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState('');
   const [copiedPix, setCopiedPix] = useState(false);
   const [copiedOrder, setCopiedOrder] = useState(false);
+  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
 
   // Sincroniza dados salvos de CEP/Endereço
   useEffect(() => {
@@ -315,7 +317,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300">
+    <div className="relative z-10 min-h-screen flex flex-col bg-[#FAF8F5] dark:bg-[#121110] text-[#1A1918] dark:text-[#FAF8F5] transition-colors duration-300">
       
       {/* 1. HEADER DO CHECKOUT COM NAVEGAÇÃO E RETORNO CLARO */}
       <header className="sticky top-0 z-30 bg-white/98 dark:bg-[#1A1918]/98 backdrop-blur-md border-b border-[#C5A059]/30 shadow-2xs">
@@ -499,6 +501,87 @@ export default function CheckoutPage() {
                   style={{ width: `${progressToFreeShipping}%` }}
                 />
               </div>
+            </div>
+
+            {/* Resumo da Sacola Retrátil / Sanfona Exclusivo para Mobile */}
+            <div className="lg:hidden mb-6 bg-white dark:bg-[#1A1918] border border-[#C5A059]/30 shadow-xs">
+              <button
+                type="button"
+                onClick={() => setMobileSummaryOpen(!mobileSummaryOpen)}
+                className="w-full p-4 flex items-center justify-between text-left cursor-pointer transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+              >
+                <div className="flex items-center gap-2 text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5]">
+                  <ShoppingBag className="w-4 h-4 text-[#C5A059]" />
+                  <span>{mobileSummaryOpen ? 'Ocultar resumo da sacola' : 'Ver resumo da sacola'}</span>
+                  <span className="text-[11px] text-[#78716C] dark:text-[#A8A29E]">
+                    ({cartCount} {cartCount === 1 ? 'peça' : 'peças'})
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-[#C5A059] transition-transform duration-200 ${
+                      mobileSummaryOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </div>
+                <span className="text-sm font-bold text-[#C5A059] dark:text-[#DFBE76]">
+                  R$ {totalAmount.toFixed(2).replace('.', ',')}
+                </span>
+              </button>
+
+              {mobileSummaryOpen && (
+                <div className="px-4 pb-4 pt-1 border-t border-[#C5A059]/15 space-y-3 animate-fadeIn">
+                  <div className="space-y-3 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+                    {cartItems.map((item) => (
+                      <div key={item.id} className="flex gap-3 items-center py-2 border-b border-[#C5A059]/10 last:border-0">
+                        <div className="relative w-12 h-16 bg-[#FAF8F5] dark:bg-[#201D1B] border border-[#C5A059]/20 shrink-0 overflow-hidden">
+                          {item.image ? (
+                            <Image src={item.image} alt={item.name} fill className="object-cover object-top" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-[#C5A059]">
+                              <ShoppingBag className="w-4 h-4" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-xs font-semibold text-[#1A1918] dark:text-[#FAF8F5] truncate">
+                            {item.name}
+                          </h4>
+                          <p className="text-[10px] text-[#78716C] dark:text-[#A8A29E]">
+                            Cor: {item.color} • Tam: {item.size} • Qtd: {item.quantity}
+                          </p>
+                          <p className="text-xs font-bold text-[#C5A059] mt-0.5">
+                            R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-2 border-t border-[#C5A059]/15 space-y-1 text-xs">
+                    <div className="flex justify-between text-[#78716C] dark:text-[#A8A29E]">
+                      <span>Subtotal</span>
+                      <span className="text-[#1A1918] dark:text-[#FAF8F5]">R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div className="flex justify-between text-[#78716C] dark:text-[#A8A29E]">
+                      <span>Frete</span>
+                      <span className="text-[#C5A059]">
+                        {isFreeShipping ? 'Grátis (VIP)' : shippingPrice > 0 ? `R$ ${shippingPrice.toFixed(2).replace('.', ',')}` : 'A calcular'}
+                      </span>
+                    </div>
+                    {couponDiscount > 0 && (
+                      <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                        <span>Cupom ({appliedCoupon?.code})</span>
+                        <span>- R$ {couponDiscount.toFixed(2).replace('.', ',')}</span>
+                      </div>
+                    )}
+                    {pixDiscount > 0 && (
+                      <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                        <span>Desconto PIX (5%)</span>
+                        <span>- R$ {pixDiscount.toFixed(2).replace('.', ',')}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <form onSubmit={handleFinalizeOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

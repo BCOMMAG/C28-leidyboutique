@@ -2,15 +2,16 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { ShoppingBag, ArrowRight, Check } from 'lucide-react';
 import { useStore } from '@/context/StoreContext';
 
 export const BottomCartBar: React.FC = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { cartItems, cartCount, isCartOpen, openCart } = useStore();
 
-  if (cartCount === 0 || isCartOpen) {
+  if (cartCount === 0 || isCartOpen || pathname === '/checkout') {
     return null;
   }
 
